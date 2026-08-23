@@ -32,7 +32,7 @@ priority: 0.6
       </div>
       <div class="project-desc-container">
         <p class="project-year"><b>2024</b></p>
-        <a class="project-in-use" href="https://github.com/anothermimich/k01">Repositório</a>
+        <a class="project-in-use" href="https://github.com/luimmich/k01">Repositório</a>
         <p class="project-state">Protótipo funcional</p>
         <!-- <p class="project-client"></p> -->
       </div>

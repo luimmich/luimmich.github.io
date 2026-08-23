@@ -21,7 +21,7 @@ priority: 0.6
       </p>
       </div>
       <div class="project-desc-container">
-        <a class="project-in-use" href="https://anothermimich.github.io/leiturasqueer/">Site</a>
+        <a class="project-in-use" href="https://luimmich.github.io/leiturasqueer/">Site</a>
         <p class="project-year"><b>2024</b></p>
         <!-- <p class="project-state">Design</p> -->
         <!-- <p class="project-client"></p> -->

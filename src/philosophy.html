@@ -87,7 +87,7 @@ priority: 0.8
         </button>
         <div class="accordion-content">
           <div class="accordion-inner">
-            <p>{{ group.content }}</p>
+            <p>{{ group.content | safe }}</p>
           </div>
         </div>
       </li>

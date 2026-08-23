@@ -369,12 +369,15 @@
 
 .accordion-inner p {
   padding-bottom: 1.5rem;
-  max-width: 55ch;
+  max-width: 70ch;
+  text-wrap: pretty;
   opacity: 0;
   transform: translateY(10px);
   transition:
     opacity 0.3s ease,
     transform 0.3s ease;
+  cursor: text;
+  user-select: text;
 }
 
 /* Estados Ativos */
@@ -419,7 +422,7 @@
 
 @media (max-width: 1000px) {
   .philosophy-page {
-    margin-top: 20svh;
+    margin-top: -5svh;
   }
   /* ==========================================================================
      OVERRIDES DA HERO MOBILE
@@ -428,15 +431,20 @@
     display: flex;
     flex-direction: column;
     gap: 4svh;
-    margin-bottom: 10svh;
+    margin-bottom: 20svh;
   }
 
   .img-philosophy-hero {
-    width: 40vw;
-    aspect-ratio: 5 / 10;
+    width: 100%;
+    aspect-ratio: 16 / 9;
     height: auto;
   }
-
+  .philosophy-intro {
+    flex-direction: column;
+    hyphens: auto;
+    text-wrap: wrap;
+    text-wrap: pretty;
+  }
   .bookshelf-wrapper {
     gap: 2svh;
   }
@@ -473,6 +481,7 @@
     left: 0;
     padding-bottom: 0;
     padding-left: 5vw;
+    padding-right: 5vw;
     align-items: center;
     justify-content: flex-start;
   }
@@ -482,6 +491,15 @@
     transform: none;
     display: flex;
     gap: 0.2rem;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .book-spine-main {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
   }
 
   .book-spine-sub {
@@ -505,6 +523,9 @@
   .philosophy-groups-content,
   .accordion-list {
     grid-column: 1 / -1;
+  }
+  .accordion-title {
+    text-wrap: balance;
   }
 
   .accordion-list {
