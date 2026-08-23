@@ -430,8 +430,12 @@ footer a {
   margin-bottom: 5svh;
 }
 
-.cards-intro {
-  grid-column: 1 / 5;
+.design-card {
+  grid-column: 5 / span 4;
+}
+
+.philosophy-card {
+  grid-column: 9 / span 4;
 }
 
 .cards-title {
@@ -456,7 +460,6 @@ footer a {
 }
 
 .funnel-card {
-  grid-column: span 4;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;

@@ -3,6 +3,73 @@
    ========================================================================== */
 .philosophy-page {
   align-content: end;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.grid-philosophy {
+  margin-top: 15svh;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 2vw;
+  align-items: start;
+}
+
+/* ==========================================================================
+   HERO DA FILOSOFIA (GRID INSPIRADO NA HOME)
+   ========================================================================== */
+.philosophy-hero {
+  grid-template-rows: auto auto 1fr;
+  margin-bottom: 25svh; /* Respiro clássico antes da estante */
+}
+
+/* A Imagem (Mapeada exatamente como a funnel-img-home) */
+.img-philosophy-hero {
+  grid-column: 1 / 5;
+  grid-row: 2 / 4;
+  width: 100%;
+  aspect-ratio: 5 / 10;
+  height: 65svh;
+  overflow: hidden;
+  position: relative;
+  /* filter: saturate(0); Descomente se quiser manter em P&B como na Home */
+}
+
+.img-philosophy-hero picture,
+.img-philosophy-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* O "Chapéu" ou Área (Fica acima da foto) */
+.philosophy-area {
+  grid-column: 1 / 5;
+  grid-row-start: 1;
+  font-size: var(--fs-1);
+  font-weight: 400;
+  margin-top: -0.3rem;
+  text-transform: uppercase;
+}
+
+/* O Manifesto/Introdução (Atua como o Funnel Title) */
+.philosophy-intro {
+  grid-column: 5 / 11;
+  grid-row-start: 2;
+  font-size: var(--fs-2); /* Fonte maior, chamativa */
+  line-height: 1.2;
+  text-wrap: balance;
+  margin-bottom: 1.5rem;
+}
+
+/* O Texto de Apoio (Atua como o Funnel Desc) */
+.philosophy-engajament {
+  grid-column: 5 / 10;
+  grid-row-start: 3;
+  font-size: var(--fs-1);
+  text-wrap: balance;
   margin-top: auto;
 }
 
@@ -134,7 +201,7 @@
   cursor: default;
 }
 
-/* 2. Força o cursor de texto ('I-beam') em todos os textos legíveis */
+/* Força o cursor de texto ('I-beam') em todos os textos legíveis */
 .book-item.is-open .book-title-expanded,
 .book-item.is-open .book-subtitle-expanded,
 .book-item.is-open .book-coauthors,
@@ -237,7 +304,100 @@
 }
 
 /* ==========================================================================
-   OVERRIDES MOBILE E TABLETS (ACORDEÃO VERTICAL)
+   ALÉM DOS TEXTOS (MENU SANFONA)
+   ========================================================================== */
+.philosophy-groups {
+  margin-bottom: 20svh;
+}
+
+.philosophy-groups-content {
+  grid-column: 1 / 5;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.philosophy-groups-title {
+  font-size: var(--fs-3);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.accordion-list {
+  grid-column: 6 / 13;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #000;
+  width: 100%;
+}
+
+.accordion-item {
+  border-bottom: 1px solid #000;
+}
+
+.accordion-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 1.5rem 0;
+  font-family: inherit;
+  font-size: var(--fs-1);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.accordion-title {
+  font-weight: 400;
+}
+
+.accordion-icon {
+  font-size: var(--fs-2);
+  font-weight: 300;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* O Motor da Animação via CSS Grid */
+.accordion-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.accordion-inner {
+  overflow: hidden;
+}
+
+.accordion-inner p {
+  padding-bottom: 1.5rem;
+  max-width: 55ch;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+/* Estados Ativos */
+.accordion-item.is-active .accordion-content {
+  grid-template-rows: 1fr;
+}
+
+.accordion-item.is-active .accordion-icon {
+  transform: rotate(45deg); /* Transforma o + em X */
+}
+
+.accordion-item.is-active .accordion-inner p {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.1s; /* Revela o texto depois que a caixa abre */
+}
+
+/* ==========================================================================
+   OVERRIDES MOBILE E TABLETS 
    ========================================================================== */
 @media (max-width: 1366px) {
   .book-spine-sub {
@@ -256,6 +416,21 @@
 @media (max-width: 1000px) {
   .philosophy-page {
     margin-top: 20svh;
+  }
+  /* ==========================================================================
+     OVERRIDES DA HERO MOBILE
+     ========================================================================== */
+  .philosophy-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 4svh;
+    margin-bottom: 10svh;
+  }
+
+  .img-philosophy-hero {
+    width: 40vw;
+    aspect-ratio: 5 / 10;
+    height: auto;
   }
 
   .bookshelf-wrapper {
@@ -320,5 +495,15 @@
     height: 100%;
     padding: 10vw 6vw;
     overflow-y: auto;
+  }
+
+  /* Overrides Sanfona Mobile */
+  .philosophy-groups-content,
+  .accordion-list {
+    grid-column: 1 / -1;
+  }
+
+  .accordion-list {
+    margin-top: 2rem;
   }
 }

@@ -8,66 +8,78 @@ priority: 0.8
 ---
 
 <main class="philosophy-page">
-  <section class="bookshelf-wrapper">
-    
-    <!-- O 'batch(8)' divide sua lista em grupos de 8 livros automaticamente -->
+
+  <!-- A HERO (Pronta para receber o Grid) -->
+  <section class="philosophy-hero grid-philosophy reveal-element">
+    <div class="img-philosophy-hero">
+      {% image "/project-files/about/lu-immich.jpg", "Lu Immich with a philosophy book", "philosophy-img" %}
+    </div>
+    <p class="philosophy-area">Ontologia Social<br>Filosofia Social</p>
+    <p class="philosophy-intro">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Asperiores hic ut id
+      reiciendis praesentium?</p>
+    <p class="philosophy-engajament">Cupiditate accusamus quae dolor adipisci corrupti eveniet ut. Est nostrum magni
+      fugit accusantium ullam ex aliquid?.</p>
+  </section>
+
+  <!-- A ESTANTE (Voltou a funcionar) -->
+  <section class="bookshelf-wrapper reveal-element">
     {% for shelf in philosophy | batch(8) %}
-      {% set shelfIndex = loop.index0 %}
-      
-      <ul class="bookshelf-row">
-        
-        {% for book in shelf %}
-          
-          <!-- Garante que apenas o primeiro livro da PRIMEIRA prateleira fique aberto -->
-          <li class="book-item {% if shelfIndex == 0 and loop.index0 == 0 %}is-open{% endif %}" 
-              style="--book-color: {{ book.color }}; --book-height: {{ book.height }};">
-            
-            <!-- Lombada (Estante Fechada) -->
-            <div class="book-spine">
-              <span class="book-title-vertical">
-                <span class="book-spine-main">{{ book.title }}</span>
-                {% if book.subtitle %}
-                  <span class="book-spine-sub">{{ book.subtitle }}</span>
-                {% endif %}
-              </span>
-            </div>
+    {% set shelfIndex = loop.index0 %}
+    <ul class="bookshelf-row">
+      {% for book in shelf %}
+      <li class="book-item {% if shelfIndex == 0 and loop.index0 == 0 %}is-open{% endif %}"
+        style="--book-color: {{ book.color }}; --book-height: {{ book.height }};">
 
-            <!-- Conteúdo Expandido (Livro Aberto) -->
-            <div class="book-content">
-              <div class="book-meta">
-                <span class="small-caps">{{ book.type }}</span>
-                {% if book.publication %}
-                  <span class="book-meta-divider">&bull;</span>
-                  <span class="book-publication">{{ book.publication }}</span>
-                {% endif %}
-              </div>
-              
-              <h2 class="book-title-expanded">
-                {{ book.title }}
-                {% if book.subtitle %}
-                  <span class="book-subtitle-expanded">{{ book.subtitle }}</span>
-                {% endif %}
-              </h2>
+        <div class="book-spine">
+          <span class="book-title-vertical">
+            <span class="book-spine-main">{{ book.title }}</span>
+            {% if book.subtitle %}<span class="book-spine-sub">{{ book.subtitle }}</span>{% endif %}
+          </span>
+        </div>
 
-              {% if book.coauthors %}
-                <p class="book-coauthors">Com {{ book.coauthors }}</p>
-              {% endif %}
-              
-              <p class="book-excerpt">{{ book.excerpt }}</p>
-              
-              <a href="{{ book.link }}" target="_blank" rel="noopener noreferrer" class="book-btn">
-                Ler publicação &rarr;
-              </a>
-            </div>
-
-          </li>
-          
-        {% endfor %}
-        
-      </ul>
-      
+        <div class="book-content">
+          <div class="book-meta">
+            <span class="small-caps">{{ book.type }}</span>
+            {% if book.publication %}<span class="book-meta-divider">&bull;</span><span class="book-publication">{{
+              book.publication }}</span>{% endif %}
+          </div>
+          <h2 class="book-title-expanded">
+            {{ book.title }}
+            {% if book.subtitle %}<span class="book-subtitle-expanded">{{ book.subtitle }}</span>{% endif %}
+          </h2>
+          {% if book.coauthors %}<p class="book-coauthors">Com {{ book.coauthors }}</p>{% endif %}
+          <p class="book-excerpt">{{ book.excerpt }}</p>
+          <a href="{{ book.link }}" target="_blank" rel="noopener noreferrer" class="book-btn">Ler publicação &rarr;</a>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
     {% endfor %}
+  </section>
 
+  <!-- A SANFONA -->
+  <section class="philosophy-groups grid-philosophy reveal-element">
+    <div class="philosophy-groups-content">
+      <h2 class="philosophy-groups-title">Além dos textos</h2>
+      <p class="philosophy-intro">A prática filosófica se estende para além da pesquisa solitária. Abaixo, projetos de
+        extensão, grupos de estudo e fomento à escrita que coordeno e organizo.</p>
+    </div>
+
+    <ul class="accordion-list">
+      {% for group in philosophy_groups %}
+      <li class="accordion-item">
+        <button class="accordion-header" aria-expanded="false">
+          <span class="accordion-title">{{ group.title }}</span>
+          <span class="accordion-icon">+</span>
+        </button>
+        <div class="accordion-content">
+          <div class="accordion-inner">
+            <p>{{ group.content }}</p>
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
   </section>
 
 </main>
