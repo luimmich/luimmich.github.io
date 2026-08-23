@@ -1,8 +1,8 @@
 // ==========================================================================
-// ANIMAÇÕES EDITORIAIS (Slide-up & Parallax Globais)
+// MOTOR GLOBAL (ANIMAÇÕES, PARALLAX E NAVEGAÇÃO)
 // ==========================================================================
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. SLIDE-UP (Monitoramento de tela)
+  // 1. REVEAL SLIDE-UP
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -12,18 +12,26 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     },
-    {
-      threshold: 0.1,
-      rootMargin: "0px 0px -50px 0px",
-    },
+    { threshold: 0.1, rootMargin: "0px 0px -50px 0px" },
   );
 
-  document.querySelectorAll(".reveal-element").forEach((el) => {
-    observer.observe(el);
+  document.querySelectorAll(".reveal-element").forEach((el) => observer.observe(el));
+
+  // 2. ANCORAGEM SUAVE DO RODAPÉ (Sem sujar a URL)
+  const contactLinks = document.querySelectorAll('a[href*="#contact"]');
+  contactLinks.forEach((link) => {
+    link.addEventListener("click", function (e) {
+      if (window.location.pathname.includes("/sobre")) {
+        e.preventDefault();
+        const contactSection = document.getElementById("contact");
+        if (contactSection) contactSection.scrollIntoView({ behavior: "smooth" });
+      }
+    });
   });
 
-  const parallaxWrappers = document.querySelectorAll(".funnel-img-wrapper");
-  const fadeElements = document.querySelectorAll(".fade-on-scroll"); // Captura os itens a dissolver
+  // 3. PARALLAX UNIFICADO (Executado livremente no Desktop e Mobile!)
+  const parallaxWrappers = document.querySelectorAll(".funnel-img-wrapper, .img-philosophy-hero");
+  const fadeElements = document.querySelectorAll(".fade-on-scroll");
   let isScrolling = false;
 
   window.addEventListener(
@@ -33,48 +41,33 @@ document.addEventListener("DOMContentLoaded", () => {
         window.requestAnimationFrame(() => {
           const viewportHeight = window.innerHeight;
 
-          // ==========================================
-          // LÓGICA DO PARALLAX (Mantida intacta)
-          // ==========================================
+          // O Motor do Parallax agora lê TODAS as telas
           parallaxWrappers.forEach((wrapper) => {
             const rect = wrapper.getBoundingClientRect();
-
             if (rect.top < viewportHeight && rect.bottom > 0) {
               const scrollProgress = rect.top / viewportHeight - 0.5;
               const yOffset = scrollProgress * (rect.height * 0.15);
-
               const img = wrapper.querySelector("img");
               if (img) img.style.setProperty("--parallax-y", `${yOffset}px`);
             }
           });
 
+          // Lógica de Fade Out do CV mantida...
           const fadeTrigger = document.querySelector(".cv-contact");
-
           if (fadeElements.length > 0 && fadeTrigger) {
-            // Verifica se a tela é mobile (usando a mesma matemática do seu CSS)
             if (window.innerWidth <= 1000) {
               const triggerRect = fadeTrigger.getBoundingClientRect();
-
               const fadeStart = viewportHeight;
               const fadeEnd = viewportHeight * 0.65;
-
               let groupOpacity = 1;
-
               if (triggerRect.top < fadeStart) {
                 groupOpacity = Math.max(0, (triggerRect.top - fadeEnd) / (fadeStart - fadeEnd));
               }
-
-              fadeElements.forEach((el) => {
-                el.style.opacity = groupOpacity;
-              });
+              fadeElements.forEach((el) => (el.style.opacity = groupOpacity));
             } else {
-              // NO DESKTOP: Garante que nada suma e zera qualquer opacidade residual
-              fadeElements.forEach((el) => {
-                el.style.opacity = 1;
-              });
+              fadeElements.forEach((el) => (el.style.opacity = 1));
             }
           }
-
           isScrolling = false;
         });
         isScrolling = true;
@@ -84,37 +77,11 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  // ==========================================================================
-  // NAVEGAÇÃO SILENCIOSA (UX DE URL LIMPA PARA O #CONTACT)
-  // ==========================================================================
-
-  // CENÁRIO 1: O usuário veio de outra página (ex: Home)
-  // Se a URL carregou com um hash (ex: #contact), nós o apagamos da barra
+// 4. LIMPEZA DA URL (Gatilho isolado aguardando carregamento total da rede)
+window.addEventListener("load", () => {
   if (window.location.hash === "#contact") {
-    // Esperamos 100ms para o navegador fazer o salto físico nativo até a seção
     setTimeout(() => {
-      // Reescreve a URL na barra mantendo apenas o caminho (ex: /sobre/)
       history.replaceState(null, null, window.location.pathname + window.location.search);
     }, 100);
   }
-
-  // CENÁRIO 2: O usuário clica no rodapé e JÁ ESTÁ na página Sobre
-  const contactLinks = document.querySelectorAll('a[href*="#contact"]');
-
-  contactLinks.forEach((link) => {
-    link.addEventListener("click", function (e) {
-      // Se a página atual já for a /sobre/
-      if (window.location.pathname.includes("/sobre")) {
-        // Bloqueia a ação nativa do link (que sujaria a URL)
-        e.preventDefault();
-
-        // Pega o elemento e faz o scroll suave via JavaScript
-        const contactSection = document.getElementById("contact");
-        if (contactSection) {
-          contactSection.scrollIntoView({ behavior: "smooth" });
-        }
-      }
-    });
-  });
 });

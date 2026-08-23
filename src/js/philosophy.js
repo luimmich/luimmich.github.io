@@ -125,18 +125,22 @@ document.addEventListener("DOMContentLoaded", () => {
       const item = this.parentElement;
       const isActive = item.classList.contains("is-active");
 
-      // Fecha todos os itens abertos primeiro (mantém o layout limpo)
       document.querySelectorAll(".accordion-item").forEach((accItem) => {
         accItem.classList.remove("is-active");
         accItem.querySelector(".accordion-header").setAttribute("aria-expanded", "false");
       });
 
-      // Se o item não estava ativo, abre ele
       if (!isActive) {
         item.classList.add("is-active");
         this.setAttribute("aria-expanded", "true");
+
+        // Lógica Restaurada: Centralizar no Mobile após o clique!
+        if (window.innerWidth <= 1000) {
+          setTimeout(() => {
+            item.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 300);
+        }
       }
     });
   });
-  d;
 });
