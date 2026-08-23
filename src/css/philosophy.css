@@ -422,7 +422,7 @@
 
 @media (max-width: 1000px) {
   .philosophy-page {
-    margin-top: -5svh;
+    margin-top: 0svh;
   }
   /* ==========================================================================
      OVERRIDES DA HERO MOBILE
