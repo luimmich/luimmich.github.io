@@ -83,3 +83,38 @@ document.addEventListener("DOMContentLoaded", () => {
     { passive: true },
   );
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  // ==========================================================================
+  // NAVEGAÇÃO SILENCIOSA (UX DE URL LIMPA PARA O #CONTACT)
+  // ==========================================================================
+
+  // CENÁRIO 1: O usuário veio de outra página (ex: Home)
+  // Se a URL carregou com um hash (ex: #contact), nós o apagamos da barra
+  if (window.location.hash === "#contact") {
+    // Esperamos 100ms para o navegador fazer o salto físico nativo até a seção
+    setTimeout(() => {
+      // Reescreve a URL na barra mantendo apenas o caminho (ex: /sobre/)
+      history.replaceState(null, null, window.location.pathname + window.location.search);
+    }, 100);
+  }
+
+  // CENÁRIO 2: O usuário clica no rodapé e JÁ ESTÁ na página Sobre
+  const contactLinks = document.querySelectorAll('a[href*="#contact"]');
+
+  contactLinks.forEach((link) => {
+    link.addEventListener("click", function (e) {
+      // Se a página atual já for a /sobre/
+      if (window.location.pathname.includes("/sobre")) {
+        // Bloqueia a ação nativa do link (que sujaria a URL)
+        e.preventDefault();
+
+        // Pega o elemento e faz o scroll suave via JavaScript
+        const contactSection = document.getElementById("contact");
+        if (contactSection) {
+          contactSection.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    });
+  });
+});
