@@ -365,6 +365,7 @@
 
 .accordion-inner {
   overflow: hidden;
+  min-height: 0;
 }
 
 .accordion-inner p {
