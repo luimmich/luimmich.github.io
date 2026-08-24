@@ -1,7 +1,7 @@
 {
-  "intro": "A pesquisa acadêmica de Lu Immich concentra-se na ontologia social, área na qual ela investiga a existência trans em contextos não ideais. Atualmente, Lu é doutoranda em Filosofia pela <a href='https://www.ufsm.br/' target='_blank' rel='noopener noreferrer'>Universidade Federal de Santa Maria (UFSM)</a>, instituição onde também concluiu seu mestrado e bacharelado em Filosofia. Para além do fazer acadêmico, ela possui experiência em design e desenvolvimento web. Essa intersecção entre áreas evidencia uma premissa basilar de seu trabalho: a busca não apenas pela compreensão das estruturas sociais, mas por um meio de transformá-las.",
+  "intro": "Meu trabalho divide-se em duas áreas: Filosofia Social e Política, e Design e Desenvolvimento Web. Essa intersecção evidencia uma premissa central da minha abordagem: busco não apenas analisar estruturas sociais, mas construir meios práticos de transformá-las. Atualmente, sou doutoranda em Filosofia na <a href='https://www.ufsm.br/' target='_blank' rel='noopener noreferrer'>Universidade Federal de Santa Maria (UFSM)</a>, instituição onde também concluí meu Mestrado e meu Bacharelado. Quando não estou imersa na pesquisa acadêmica ou no projetando interações, busco mergulhar em experiências analógicas. Dedico meu tempo livre a investigar métodos para extrair as nuances de cafés especiais e a fazer longos passeios com minha (cão)panheira, Laika.",
   "skills": {
-    "philosophy": ["Ontologia Social", "Filosofia Trans", "Filosofia Social", "Filosofia Política"],
+    "philosophy": ["Filosofia Social", "Filosofia Política", "Ontologia Social", "Filosofia Trans"],
     "design": ["UI/UX Design", "Web Design", "Design Gráfico", "Web Development"]
   },
   "charts": {
