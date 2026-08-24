@@ -787,6 +787,7 @@ footer a {
   cursor: pointer;
   padding: 0.5rem;
   text-transform: capitalize;
+  font-weight: 500;
 }
 
 /* ==========================================================================

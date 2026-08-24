@@ -1,8 +1,8 @@
 {
-  "intro": "De modo geral, em minha <i>práxis</i>, busco investigar a relação entre o social e o pessoal, seja analisando estruturas sociais opressivas ou projetando interações. Atualmente, sou doutoranda em Filosofia na <a href='https://www.ufsm.br/' target='_blank' rel='noopener noreferrer'>Universidade Federal de Santa Maria (UFSM)</a>, instituição onde também concluí meu mestrado e meu bacharelado. Quando não estou imersa no trabalho, busco experiências analógicas. Passo meu tempo livre explorando métodos de extração de cafés especiais e fazendo longos passeios com minha (cão)panheira, Laika.",
+  "intro": "De modo geral, em minha <i>práxis</i>, busco investigar a relação entre o social e o pessoal, seja analisando estruturas sociais opressivas ou projetando interações. Atualmente, sou doutoranda em Filosofia na <a href='https://www.ufsm.br/' target='_blank' rel='noopener noreferrer'>Universidade Federal de Santa Maria (UFSM)</a>, instituição onde também concluí meu mestrado e meu bacharelado. Quando não estou imersa no trabalho, busco experiências analógicas. Passo meu tempo livre explorando métodos de extração de cafés especiais e fazendo longos passeios com minha (cão)panheira, <span class='heart-cursor'>Laika</span>.",
   "skills": {
     "philosophy": ["Filosofia Social", "Filosofia Política", "Ontologia Social", "Filosofia Trans"],
-    "design": ["UI/UX Design", "Web Design", "Design Gráfico", "Web Development"]
+    "design": ["UI/UX Design", "Design Gráfico", "Web Design", "Web Development"]
   },
   "charts": {
     "languages": [
