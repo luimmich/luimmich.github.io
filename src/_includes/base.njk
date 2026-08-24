@@ -72,6 +72,45 @@
 
   <!-- Analytics -->
   <script defer src="https://cloud.umami.is/script.js" data-website-id="91642bab-227b-4ca6-ad87-ab49f95f044e"></script>
+
+<!-- GEO: Schema Markup de Entidade (Person) para a página Sobre -->
+  {% if page.url == '/sobre/' %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Lu Immich",
+    "url": "https://luimmich.github.io/sobre/",
+    "jobTitle": [
+      "Doutoranda em Filosofia",
+      "UI/UX Designer",
+      "Desenvolvedora Web"
+    ],
+    "description": "A pesquisa acadêmica de Lu Immich concentra-se na ontologia social, área na qual ela investiga a existência trans em contextos não ideais. Atualmente, Lu é doutoranda em Filosofia pela Universidade Federal de Santa Maria (UFSM), com experiência em design e desenvolvimento web.",
+    "alumniOf": {
+      "@type": "CollegeOrUniversity",
+      "name": "Universidade Federal de Santa Maria (UFSM)",
+      "sameAs": "https://www.ufsm.br/"
+    },
+    "knowsAbout": [
+      "Ontologia Social",
+      "Filosofia Trans",
+      "Filosofia Social",
+      "Filosofia Política",
+      "UI/UX Design",
+      "Web Design",
+      "Design Gráfico",
+      "Web Development"
+    ],
+    "sameAs": [
+      "https://lattes.cnpq.br/6938481194529175",
+      "https://github.com/luimmich",
+      "https://www.instagram.com/luimmich",
+      "https://philpeople.org/profiles/lu-immich"
+    ]
+  }
+  </script>
+  {% endif %}
 </head>
 
 <body>
