@@ -31,7 +31,8 @@
   <meta name="twitter:description" content="{{ description | default(site.description) }}">
   <meta name="twitter:image" content="{{ site.url }}{{ image | default('/icons/favicon/android-chrome-512x512.png') }}">
 
-  <!-- JSON-LD -->
+  <!-- JSON-LD GLOBAL (Desativado na Sobre e Filosofia para evitar duplicação) -->
+  {% if page.url != '/sobre/' and page.url != '/filosofia/' %}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -52,6 +53,7 @@
     }
   }
   </script>
+  {% endif %}
 
   <!-- Links CSS e Fontes -->
   <link rel="preload" href="/fonts/jost/jost-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -107,6 +109,63 @@
       "https://github.com/luimmich",
       "https://www.instagram.com/luimmich",
       "https://philpeople.org/profiles/lu-immich"
+    ]
+  }
+  </script>
+  {% endif %}
+  <!-- GEO: Schema Markup de Grafo Acadêmico para a página Filosofia -->
+  {% if page.url == '/filosofia/' %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "ProfilePage",
+        "@id": "https://luimmich.github.io/filosofia/#webpage",
+        "url": "https://luimmich.github.io/filosofia/",
+        "name": "Filosofia - Lu Immich",
+        "mainEntity": { "@id": "https://luimmich.github.io/#person" }
+      },
+      {
+        "@type": "Person",
+        "@id": "https://luimmich.github.io/#person",
+        "name": "Lu Immich",
+        "jobTitle": "Doutoranda em Filosofia",
+        "description": "Pesquisadora em Ontologia Social com foco em categorias de gênero trans e estratégias de resistência à opressão em contextos não ideais, utilizando um framework conferista e engenharia conceitual.",
+        "affiliation": {
+          "@type": "CollegeOrUniversity",
+          "name": "Universidade Federal de Santa Maria (UFSM)",
+          "sameAs": "https://www.ufsm.br/"
+        },
+        "knowsAbout": [
+          "Ontologia Social",
+          "Filosofia Trans",
+          "Engenharia Conceitual de Gênero",
+          "Framework Conferista",
+          "Metafísica Feminista"
+        ],
+        "memberOf": [
+          {% for group in philosophy_groups %}
+          {
+            "@type": "Organization",
+            "name": "{{ group.title | safe }}"
+          }{% if not loop.last %},{% endif %}
+          {% endfor %}
+        ]
+      }{% if philosophy.length > 0 %},{% endif %}
+      {% for book in philosophy %}
+      {
+        "@type": "ScholarlyArticle",
+        "headline": "{{ book.title | safe }}{% if book.subtitle %}: {{ book.subtitle | safe }}{% endif %}",
+        "author": { "@id": "https://luimmich.github.io/#person" },
+        "publisher": {
+          "@type": "Organization",
+          "name": "{{ book.publication | safe }}"
+        },
+        "abstract": "{{ book.excerpt | replace('\n', ' ') | replace('\"', '\\\"') | safe }}"{% if book.link %},
+        "url": "{{ book.link | safe }}"{% endif %}
+      }{% if not loop.last %},{% endif %}
+      {% endfor %}
     ]
   }
   </script>
