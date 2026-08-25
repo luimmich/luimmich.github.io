@@ -156,8 +156,11 @@
   font-weight: 250;
 }
 
-.btn-close:hover {
+.btn-close:hover,
+#btn-time-plus,
+#btn-time-minus {
   color: #888;
+  text-decoration: none;
 }
 
 .dot-grid {
