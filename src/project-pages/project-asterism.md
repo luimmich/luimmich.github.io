@@ -34,15 +34,10 @@ priority: 0.6
       <canvas id="skyCanvas"></canvas>
     </div>  
     <div class="constellation-panel-description">
-      <h3>Vamos?</h3>
-      <div class="constellation-panel-btns">
-        <a href="/projects/asterismo/asterismo-instrucoes.pdf" class="btn-action" download>Instruções</a>
-        <a id="btn-open-timer" class="btn-action">Cronômetro</a>
-      </div>
-      <div class="constellation-panel-btns">
-        <a id="btn-generate" class="btn-action">Reorganizar o céu</a>
-        <a id="btn-download" class="btn-action">Baixe o céu</a>
-      </div>
+        <a href="/projects/asterismo/asterismo-instrucoes.pdf" download>Instruções</a>
+        <a id="btn-open-timer">Cronômetro</a>
+        <a id="btn-download">Baixe o tabuleiro</a>
+        <a id="btn-generate">Embaralhar o tabuleiro</a>
     </div>
   </div>
 </section>
@@ -62,5 +57,5 @@ priority: 0.6
 </div>
 
 <!-- Page-Specific Scripts -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="/js/jspdf.umd.min.js"></script>
 <script src="/js/asterism.js"></script>

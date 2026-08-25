@@ -213,7 +213,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // EVENT LISTENERS
   document.getElementById("btn-generate").addEventListener("click", generateSky);
-  document.getElementById("btn-download").addEventListener("click", downloadPDF);
+  document.getElementById("btn-download").addEventListener("click", (e) => {
+    e.preventDefault(); // Impede o link de tentar navegar
+    downloadPDF();
+  });
 
   btnOpen.addEventListener("click", () => {
     modal.classList.remove("hidden");

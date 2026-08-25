@@ -19,28 +19,13 @@
   gap: 0.75rem;
   margin-top: -0.75rem;
   margin-left: 0.75rem;
+  align-self: end;
 }
 
 .constellation-panel-btns {
   display: flex;
   gap: 0.75rem;
   width: 100%;
-}
-
-.btn-action {
-  background: #fff;
-  border: 1px solid #000;
-  padding: 0.5rem 1rem;
-  font-size: var(--fs-1);
-  cursor: pointer;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .btn-action:hover {
-    transform: translateY(-3px);
-    text-decoration: none !important;
-  }
 }
 
 .canvas-wrapper {
