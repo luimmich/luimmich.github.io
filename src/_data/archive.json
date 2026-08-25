@@ -90,6 +90,11 @@
       },
       {
         "url": "/asterismo/",
+        "image": "/project-files/asterismo/asterismo-02.webp",
+        "alt": "Asterismo tabuleiro"
+      },
+      {
+        "url": "/asterismo/",
         "image": "/project-files/asterismo/asterismo-03.webp",
         "alt": "Asterismo cronometro"
       },
