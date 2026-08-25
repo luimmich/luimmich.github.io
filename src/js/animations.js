@@ -32,10 +32,25 @@ document.addEventListener("DOMContentLoaded", () => {
   // 3. MOTOR UNIFICADO: PARALLAX, FADE E SMART NAV
   const parallaxWrappers = document.querySelectorAll(".funnel-img-wrapper, .img-philosophy-hero");
   const fadeElements = document.querySelectorAll(".fade-on-scroll");
-  const nav = document.querySelector(".nav"); // Seleciona a Navbar
+  const nav = document.querySelector(".nav");
 
   let isScrolling = false;
-  let lastScrollY = window.scrollY; // Memória de onde a usuária estava
+  let lastScrollY = window.scrollY;
+
+  // =========================================================
+  // BLINDAGEM CONTRA O BUG DO INSTAGRAM/SAFARI
+  // Medimos a tela do lado de fora do scroll.
+  // =========================================================
+  let cachedViewportHeight = window.innerHeight;
+  let cachedViewportWidth = window.innerWidth;
+
+  // Só recalcula a altura se a largura mudar (ex: virar o celular)
+  window.addEventListener("resize", () => {
+    if (window.innerWidth !== cachedViewportWidth) {
+      cachedViewportHeight = window.innerHeight;
+      cachedViewportWidth = window.innerWidth;
+    }
+  });
 
   window.addEventListener(
     "scroll",
@@ -43,29 +58,26 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!isScrolling) {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
-          const viewportHeight = window.innerHeight;
+          // Usamos a altura 'congelada' para ignorar a barra do Instagram
+          const viewportHeight = cachedViewportHeight;
 
           // =========================================================
           // LÓGICA DA SMART NAV
           // =========================================================
           if (nav) {
-            // Efeito visual: Se saiu do topo, adiciona o fundo translúcido
             if (currentScrollY > 10) {
               nav.classList.add("nav--scrolled");
             } else {
               nav.classList.remove("nav--scrolled");
             }
 
-            // Ocultar: Se rolou para baixo MAIS que 80px (evita bugs no topo)
             if (currentScrollY > lastScrollY && currentScrollY > 80) {
               nav.classList.add("nav--hidden");
-            }
-            // Mostrar: Se rolou para cima (ou se o Safari fizer efeito borracha negativo no topo)
-            else if (currentScrollY < lastScrollY || currentScrollY <= 0) {
+            } else if (currentScrollY < lastScrollY || currentScrollY <= 0) {
               nav.classList.remove("nav--hidden");
             }
           }
-          lastScrollY = currentScrollY; // Atualiza a memória para o próximo frame
+          lastScrollY = currentScrollY;
 
           // =========================================================
           // LÓGICA DO PARALLAX
