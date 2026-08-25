@@ -29,19 +29,47 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 3. PARALLAX UNIFICADO E FADE
+  // 3. MOTOR UNIFICADO: PARALLAX, FADE E SMART NAV
   const parallaxWrappers = document.querySelectorAll(".funnel-img-wrapper, .img-philosophy-hero");
   const fadeElements = document.querySelectorAll(".fade-on-scroll");
+  const nav = document.querySelector(".nav"); // Seleciona a Navbar
+
   let isScrolling = false;
+  let lastScrollY = window.scrollY; // Memória de onde a usuária estava
 
   window.addEventListener(
     "scroll",
     () => {
       if (!isScrolling) {
         window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
           const viewportHeight = window.innerHeight;
 
-          // O Motor do Parallax agora lê TODAS as telas (Sem duplicação!)
+          // =========================================================
+          // LÓGICA DA SMART NAV
+          // =========================================================
+          if (nav) {
+            // Efeito visual: Se saiu do topo, adiciona o fundo translúcido
+            if (currentScrollY > 10) {
+              nav.classList.add("nav--scrolled");
+            } else {
+              nav.classList.remove("nav--scrolled");
+            }
+
+            // Ocultar: Se rolou para baixo MAIS que 80px (evita bugs no topo)
+            if (currentScrollY > lastScrollY && currentScrollY > 80) {
+              nav.classList.add("nav--hidden");
+            }
+            // Mostrar: Se rolou para cima (ou se o Safari fizer efeito borracha negativo no topo)
+            else if (currentScrollY < lastScrollY || currentScrollY <= 0) {
+              nav.classList.remove("nav--hidden");
+            }
+          }
+          lastScrollY = currentScrollY; // Atualiza a memória para o próximo frame
+
+          // =========================================================
+          // LÓGICA DO PARALLAX
+          // =========================================================
           parallaxWrappers.forEach((wrapper) => {
             const rect = wrapper.getBoundingClientRect();
             if (rect.top < viewportHeight && rect.bottom > 0) {
@@ -52,28 +80,26 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           });
 
-          // NOVA LÓGICA DE FADE: Baseada no fim matemático da página
+          // =========================================================
+          // LÓGICA DE FADE (Fim de página)
+          // =========================================================
           if (fadeElements.length > 0) {
             if (window.innerWidth <= 1000) {
-              // Descobre o fim absoluto da página
               const scrollBottom = window.scrollY + viewportHeight;
               const docHeight = document.documentElement.scrollHeight;
               const distanceToBottom = docHeight - scrollBottom;
-
-              // Define que o fade começa a acontecer nos últimos 40% da tela (ajustável)
               const fadeThreshold = viewportHeight * 0.4;
 
               let groupOpacity = 1;
               if (distanceToBottom < fadeThreshold) {
-                // Calcula a opacidade de 1 até 0 de forma proporcional e suave
                 groupOpacity = Math.max(0, distanceToBottom / fadeThreshold);
               }
-
               fadeElements.forEach((el) => (el.style.opacity = groupOpacity));
             } else {
               fadeElements.forEach((el) => (el.style.opacity = 1));
             }
           }
+
           isScrolling = false;
         });
         isScrolling = true;
