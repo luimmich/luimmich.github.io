@@ -762,6 +762,8 @@ footer a {
 .accordion-inner {
   overflow: hidden;
   min-height: 0;
+  min-width: fit-content;
+  max-width: 20vw;
 }
 
 .accordion-inner p {
@@ -834,6 +836,13 @@ footer a {
   }
   .accordion-title {
     text-wrap: balance;
+  }
+  .accordion-inner {
+    min-width: fit-content;
+    max-width: 100%;
+  }
+  .accordion-inner p {
+    hyphens: auto;
   }
 
   .accordion-list {
