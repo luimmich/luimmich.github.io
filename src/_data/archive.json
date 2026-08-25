@@ -6,14 +6,24 @@
     "offsetMobile": "2vw",
     "items": [
       {
-        "url": "/asterismo/",
-        "image": "/project-files/asterismo/asterismo-06.webp",
-        "alt": "Asterismo manual"
+        "url": "/leituras-queer/",
+        "image": "/project-files/leituras-queer/Cartaz-gravidade.webp",
+        "alt": "Cartaz Leituras Queer gravidade"
       },
       {
-        "url": "/asterismo/",
-        "image": "/project-files/asterismo/asterismo-03.webp",
-        "alt": "Asterismo cronometro"
+        "url": "/leituras-queer/",
+        "image": "/project-files/leituras-queer/Cartaz-encontro.webp",
+        "alt": "Cartaz Leituras Queer encontro"
+      },
+      {
+        "url": "/leituras-queer/",
+        "image": "/project-files/leituras-queer/Cartaz-caca-pal.webp",
+        "alt": "Cartaz Leituras Queer caçapalavras"
+      },
+      {
+        "url": "/leituras-queer/",
+        "image": "/project-files/leituras-queer/Ecobag-Mockup.webp",
+        "alt": "Ecobag Leituras Queer"
       },
       {
         "url": "#",
@@ -46,55 +56,43 @@
         "border": true
       },
       {
-        "url": "#",
-        "image": "/project-files/gefop/Workshop de escrita 2025.webp",
-        "alt": "Cartaz workshop de escrita do GEFOP",
-        "border": true
-      },
-      {
-        "url": "#",
-        "image": "/project-files/gefop/conversa de corredor Milena.webp",
-        "alt": "Cartaz conversa de corredor para o GEFOP",
-        "border": true
-      },
-      {
-        "url": "#",
-        "image": "/project-files/gefop/logo-gefop-black.webp",
-        "alt": "Adeviso Grupo de Estudos em Filosofia Social e Opressão"
-      },
-      {
-        "url": "#",
-        "image": "/project-files/gefop/logo-gefop-white.webp",
-        "alt": "Logo Grupo de Estudos em Filosofia Social e Opressão"
-      },
-      {
         "image": "/project-files/primeiro-workshop-interseccionalidade/Cartaz-primeiro-workshop-fil-inter.webp",
-        "alt": "1 workshop filosofia e interseccionalidade divulgação"
+        "alt": "1 workshop filosofia e interseccionalidade divulgação",
+        "border": true
       },
       {
         "image": "/project-files/primeiro-workshop-interseccionalidade/Cartaz-adesivos.webp",
-        "alt": "1 workshop filosofia e interseccionalidade adesivos"
+        "alt": "1 workshop filosofia e interseccionalidade adesivos",
+        "border": true
       },
       {
         "image": "/project-files/primeiro-workshop-interseccionalidade/Cartaz-pronomes.webp",
-        "alt": "1 workshop filosofia e interseccionalidade pronomes"
+        "alt": "1 workshop filosofia e interseccionalidade pronomes",
+        "border": true
       },
       {
         "image": "/project-files/primeiro-workshop-interseccionalidade/Cartaz-programacao.webp",
-        "alt": "1 workshop filosofia e interseccionalidade programação"
-      },
-      {
-        "image": "/project-files/theseus/Adesivo-theseus.webp",
-        "alt": "Adesivo do projeto Bicicleta de Theseus"
+        "alt": "1 workshop filosofia e interseccionalidade programação",
+        "border": true
       }
     ]
   },
   {
     "category": "Interação",
-    "id": "produto-01",
+    "id": "interacao-01",
     "offsetDesktop": "6vw",
     "offsetMobile": "10vw",
     "items": [
+      {
+        "url": "/asterismo/",
+        "image": "/project-files/asterismo/asterismo-06.webp",
+        "alt": "Asterismo manual"
+      },
+      {
+        "url": "/asterismo/",
+        "image": "/project-files/asterismo/asterismo-03.webp",
+        "alt": "Asterismo cronometro"
+      },
       { "url": "/k02/", "image": "/project-files/k02/k02-01.webp", "alt": "Teclado K02 01" },
       { "url": "/k02/", "image": "/project-files/k02/k02-03.webp", "alt": "Teclado K02 03" },
       { "url": "/k02/", "image": "/project-files/k02/k02-04.webp", "alt": "Teclado K02 04" },
@@ -130,24 +128,26 @@
       },
       { "url": "/desan/", "image": "/project-files/desan/desan2.webp", "alt": "Logo Desan" },
       {
-        "url": "/leituras-queer/",
-        "image": "/project-files/leituras-queer/Cartaz-gravidade.webp",
-        "alt": "Cartaz Leituras Queer gravidade"
+        "url": "#",
+        "image": "/project-files/gefop/Workshop de escrita 2025.webp",
+        "alt": "Cartaz workshop de escrita do GEFOP",
+        "border": true
       },
       {
-        "url": "/leituras-queer/",
-        "image": "/project-files/leituras-queer/Cartaz-encontro.webp",
-        "alt": "Cartaz Leituras Queer encontro"
+        "url": "#",
+        "image": "/project-files/gefop/conversa de corredor Milena.webp",
+        "alt": "Cartaz conversa de corredor para o GEFOP",
+        "border": true
       },
       {
-        "url": "/leituras-queer/",
-        "image": "/project-files/leituras-queer/Cartaz-caca-pal.webp",
-        "alt": "Cartaz Leituras Queer caçapalavras"
+        "url": "#",
+        "image": "/project-files/gefop/logo-gefop-black.webp",
+        "alt": "Adeviso Grupo de Estudos em Filosofia Social e Opressão"
       },
       {
-        "url": "/leituras-queer/",
-        "image": "/project-files/leituras-queer/Ecobag-Mockup.webp",
-        "alt": "Ecobag Leituras Queer"
+        "url": "#",
+        "image": "/project-files/gefop/logo-gefop-white.webp",
+        "alt": "Logo Grupo de Estudos em Filosofia Social e Opressão"
       }
     ]
   }
