@@ -11,13 +11,8 @@
       "title": "Áreas de atuação no Design",
       "type": "list",
       "items": ["UI/UX Design", "Design Gráfico", "Web Design", "Web Development"],
-      "hideOnMobile": false
-    },
-    {
-      "title": "Como a filosofia influencia o design?",
-      "type": "text",
-      "content": "A filosofia treina a capacidade de analisar sistemas complexos, mapear categorias e organizar estruturas de pensamento. No UI/UX Design, essa base analítica permite projetar interfaces lógicas que respeitam a carga cognitiva do usuário.",
-      "hideOnMobile": false
+      "hideOnMobile": false,
+      "hideOnDesktop": false
     },
     {
       "title": "Proficiência em Idiomas",
@@ -27,18 +22,19 @@
         { "name": "Português", "level": 100 },
         { "name": "Espanhol", "level": 40 }
       ],
-      "hideOnMobile": true
+      "hideOnMobile": false,
+      "hideOnDesktop": false
     },
     {
-      "title": "Métodos de Extração de Café",
+      "title": "Extração de Cafés",
       "type": "chart",
       "items": [
         { "name": "V60", "level": 50 },
         { "name": "Prensa Francesa", "level": 90 },
         { "name": "Mugen", "level": 70 }
       ],
-      "hideOnMobile": true,
-      "hideOnDesktop": true
+      "hideOnMobile": false,
+      "hideOnDesktop": false
     }
   ]
 }
