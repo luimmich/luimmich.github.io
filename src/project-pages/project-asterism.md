@@ -25,7 +25,7 @@ priority: 0.6
 
 <section class="project-img-container">
   {% image "project-files/asterismo/asterismo-06.webp", "Manual", "project-img" %}
-  {% image "project-files/asterismo/asterismo-02.webp", "Ceu estrelado", "project-img" %}
+  {% image "project-files/asterismo/asterismo-02.webp", "Tabuleiro imitando um céu estrelado", "project-img" %}
   {% image "project-files/asterismo/asterismo-03.webp", "Cronometro", "project-img" %}
 
   <div class="constellation-panel-container">
