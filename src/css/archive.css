@@ -248,15 +248,18 @@ button.archive-tag-container {
 }
 
 /* ==========================================================================
-   6. BOTÃO DE RETORNO (FLOAT BRUTALISTA)
+   6. BOTÃO DE RETORNO (GLASSMORPHISM)
    ========================================================================== */
 .close-folder-btn {
   position: fixed;
   bottom: 8svh;
   right: 10vw;
-  background-color: #000;
-  color: #fff;
-  border: 1px solid #000;
+
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  color: #000;
   padding: 1rem 1.5rem;
   font-size: var(--fs-0);
   text-transform: uppercase;
@@ -264,14 +267,15 @@ button.archive-tag-container {
   letter-spacing: 1px;
   cursor: pointer;
   z-index: 1000;
-  box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.05);
   opacity: 0;
   transform: translateY(20px);
   pointer-events: none;
   transition:
     opacity 0.4s ease,
     transform 0.4s ease,
-    background-color 0.2s ease;
+    background-color 0.2s ease,
+    backdrop-filter 0.2s ease;
 }
 
 .close-folder-btn.is-visible {
@@ -282,9 +286,10 @@ button.archive-tag-container {
 
 @media (hover: hover) and (pointer: fine) {
   .close-folder-btn:hover {
-    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.95);
     color: #000;
-    text-decoration: none;
+
+    text-decoration: line-through;
   }
 }
 
