@@ -115,32 +115,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
     lastRow.appendChild(tiltedLi);
   }
-  // ==========================================================================
-  // 4. MENU SANFONA (ALÉM DOS TEXTOS)
-  // ==========================================================================
-  const accordionHeaders = document.querySelectorAll(".accordion-header");
-
-  accordionHeaders.forEach((header) => {
-    header.addEventListener("click", function () {
-      const item = this.parentElement;
-      const isActive = item.classList.contains("is-active");
-
-      document.querySelectorAll(".accordion-item").forEach((accItem) => {
-        accItem.classList.remove("is-active");
-        accItem.querySelector(".accordion-header").setAttribute("aria-expanded", "false");
-      });
-
-      if (!isActive) {
-        item.classList.add("is-active");
-        this.setAttribute("aria-expanded", "true");
-
-        // Lógica Restaurada: Centralizar no Mobile após o clique!
-        if (window.innerWidth <= 1000) {
-          setTimeout(() => {
-            item.scrollIntoView({ behavior: "smooth", block: "center" });
-          }, 300);
-        }
-      }
-    });
-  });
 });

@@ -1,19 +1,44 @@
 {
   "intro": "De modo geral, em minha <i>práxis</i>, busco investigar a relação entre o social e o pessoal, seja analisando estruturas sociais opressivas ou projetando interações. Atualmente, sou doutoranda em Filosofia na <a href='https://www.ufsm.br/' target='_blank' rel='noopener noreferrer'>Universidade Federal de Santa Maria (UFSM)</a>, instituição onde também concluí meu mestrado e meu bacharelado. Quando não estou imersa no trabalho, busco experiências analógicas. Passo meu tempo livre explorando métodos de extração de cafés especiais e fazendo longos passeios com minha (cão)panheira, <span class='heart-cursor'>Laika</span>.",
-  "skills": {
-    "philosophy": ["Filosofia Social", "Filosofia Política", "Ontologia Social", "Filosofia Trans"],
-    "design": ["UI/UX Design", "Design Gráfico", "Web Design", "Web Development"]
-  },
-  "charts": {
-    "languages": [
-      { "name": "Inglês", "level": 80 },
-      { "name": "Português", "level": 100 },
-      { "name": "Espanhol", "level": 40 }
-    ],
-    "coffee": [
-      { "name": "V60", "level": 50 },
-      { "name": "Prensa Francesa", "level": 90 },
-      { "name": "Mugen", "level": 70 }
-    ]
-  }
+  "accordion": [
+    {
+      "title": "Áreas de atuação na Filosofia",
+      "type": "list",
+      "items": ["Filosofia Social", "Filosofia Política", "Ontologia Social", "Filosofia Trans"],
+      "hideOnMobile": false
+    },
+    {
+      "title": "Áreas de atuação no Design",
+      "type": "list",
+      "items": ["UI/UX Design", "Design Gráfico", "Web Design", "Web Development"],
+      "hideOnMobile": false
+    },
+    {
+      "title": "Como a filosofia influencia o design?",
+      "type": "text",
+      "content": "A filosofia treina a capacidade de analisar sistemas complexos, mapear categorias e organizar estruturas de pensamento. No UI/UX Design, essa base analítica permite projetar interfaces lógicas que respeitam a carga cognitiva do usuário.",
+      "hideOnMobile": false
+    },
+    {
+      "title": "Proficiência em Idiomas",
+      "type": "chart",
+      "items": [
+        { "name": "Inglês", "level": 80 },
+        { "name": "Português", "level": 100 },
+        { "name": "Espanhol", "level": 40 }
+      ],
+      "hideOnMobile": true
+    },
+    {
+      "title": "Métodos de Extração de Café",
+      "type": "chart",
+      "items": [
+        { "name": "V60", "level": 50 },
+        { "name": "Prensa Francesa", "level": 90 },
+        { "name": "Mugen", "level": 70 }
+      ],
+      "hideOnMobile": true,
+      "hideOnDesktop": true
+    }
+  ]
 }

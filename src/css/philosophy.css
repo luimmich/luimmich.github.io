@@ -15,6 +15,9 @@
   gap: 2vw;
   align-items: start;
 }
+.philosophy-groups-content {
+  margin-bottom: 0;
+}
 
 /* ==========================================================================
    HERO DA FILOSOFIA
@@ -297,117 +300,6 @@
 }
 
 /* ==========================================================================
-   ALÉM DOS TEXTOS (MENU SANFONA)
-   ========================================================================== */
-.philosophy-groups {
-  margin-bottom: 10svh;
-}
-
-.philosophy-groups-content {
-  grid-column: 1 / 13;
-  grid-row: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  height: 100%;
-}
-
-.philosophy-groups-title {
-  font-size: var(--fs-1);
-  line-height: 1.2;
-  font-weight: 500;
-  text-transform: uppercase;
-  width: 100%;
-  text-align: end;
-}
-
-.accordion-list {
-  grid-column: 1 / 13;
-  grid-row: 2;
-  display: flex;
-  flex-direction: column;
-  border-top: 1px solid #000;
-  width: 100%;
-}
-
-.accordion-item {
-  border-bottom: 1px solid #000;
-}
-
-.accordion-header {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: transparent;
-  border: none;
-  padding: 1.5rem 0;
-  font-family: inherit;
-  font-size: var(--fs-1);
-  color: inherit;
-  cursor: pointer;
-  text-align: left;
-}
-
-.accordion-title {
-  font-weight: 400;
-}
-
-.accordion-icon {
-  font-size: var(--fs-2);
-  font-weight: 300;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* O Motor da Animação via CSS Grid */
-.accordion-content {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.accordion-inner {
-  overflow: hidden;
-  min-height: 0;
-}
-
-.accordion-inner p {
-  padding-bottom: 1.5rem;
-  max-width: 70ch;
-  text-wrap: pretty;
-  opacity: 0;
-  transform: translateY(10px);
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
-  cursor: text;
-  user-select: text;
-}
-
-/* Estados Ativos */
-.accordion-item.is-active .accordion-content {
-  grid-template-rows: 1fr;
-}
-
-.accordion-item.is-active .accordion-icon {
-  transform: rotate(45deg); /* Transforma o + em X */
-}
-
-.accordion-item.is-active .accordion-inner p {
-  opacity: 1;
-  transform: translateY(0);
-  transition-delay: 0.1s; /* Revela o texto depois que a caixa abre */
-}
-@media (hover: hover) and (pointer: fine) {
-  button.accordion-header:hover {
-    text-decoration: none;
-  }
-  button.accordion-header:hover .accordion-title {
-    text-decoration: line-through;
-  }
-}
-
-/* ==========================================================================
    OVERRIDES MOBILE E TABLETS 
    ========================================================================== */
 @media (max-width: 1366px) {
@@ -538,18 +430,5 @@
     height: 100%;
     padding: 10vw 6vw;
     overflow-y: auto;
-  }
-
-  /* Overrides Sanfona Mobile */
-  .philosophy-groups-content,
-  .accordion-list {
-    grid-column: 1 / -1;
-  }
-  .accordion-title {
-    text-wrap: balance;
-  }
-
-  .accordion-list {
-    margin-top: 2rem;
   }
 }

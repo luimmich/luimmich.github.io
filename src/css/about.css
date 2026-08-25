@@ -38,16 +38,10 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-
-  /* A MÁGICA DO ENQUADRAMENTO: 
-     50% = centro horizontal. 
-     25% = foca nos 25% superiores da foto (preservando o seu rosto/cabeça) */
   object-position: 50% 35%;
-
   display: block;
   --parallax-y: 0px;
   --zoom: 1.1;
-
   transform: translateY(var(--parallax-y)) scale(var(--zoom));
   transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
   will-change: transform;
@@ -76,6 +70,7 @@
   text-wrap: balance;
   align-self: end;
 }
+
 @media (max-width: 1280px) and (min-width: 1000px) {
   .cv-intro-text {
     hyphens: auto;
@@ -83,48 +78,16 @@
 }
 
 /* ==========================================================================
-   CONTEÚDO
+   CONTEÚDO INTERNO DA SANFONA
    ========================================================================== */
-.cv-data-grid {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  grid-row: auto auto auto;
-  column-gap: 4vw;
-  row-gap: 5svh;
-  align-items: start;
+.accordion-inner .cv-list,
+.accordion-inner .cv-chart-list {
+  padding-bottom: 2rem;
+  margin-top: 0;
 }
 
-.cv-divide {
-  grid-column: 1 / 7;
-  grid-row: 1;
-  border-top: 1px solid rgba(0, 0, 0, 0.3);
-  margin-top: 5svh;
-  display: none;
-}
-
-.col-filosofia {
-  grid-column: 1 / 4;
-  grid-row: 2;
-}
-
-.col-design {
-  grid-column: 4 / 7;
-  grid-row: 2;
-}
-
-.col-idiomas {
-  grid-column: 1 / 4;
-  grid-row: 3;
-}
-
-.col-cafe {
-  grid-column: 4 / 7;
-  grid-row: 3;
-  margin-bottom: 5svh;
-}
-
-.cv-sub-title {
-  font-weight: 400;
+.accordion-inner .cv-list li:last-child {
+  border-bottom: none;
 }
 
 .cv-list {
@@ -174,93 +137,71 @@
 }
 
 /* ==========================================================================
-   RESPONSIVIDADE (O EXORCISMO DO DOM NO MOBILE)
+   CONTROLE DE VISIBILIDADE (DESKTOP)
+   ========================================================================== */
+@media (min-width: 1001px) {
+  .hidden-desktop {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE (MOBILE BLINDADO COM FLEXBOX)
    ========================================================================== */
 @media (max-width: 1000px) {
   .about-cv {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* As 2 colunas do celular */
-    gap: 6svh 5vw; /* Espaço vertical e horizontal */
+    display: flex;
+    flex-direction: column;
     margin: 5svh 0;
+    gap: 10svh;
   }
 
-  .cv-header,
-  .cv-content,
-  .cv-data-grid {
+  .cv-header {
     display: contents;
   }
 
-  /* 1º - O Manifesto (Tela toda) */
+  /* Controle de Visibilidade Mobile */
+  .hidden-mobile {
+    display: none !important;
+  }
+
+  /* 1º - Texto de Introdução */
   .cv-intro-text {
     order: 1;
-    grid-column: 1 / -1;
-    grid-row: auto;
     text-align: start;
     text-wrap: pretty;
-    /* height: 85svh; */
-    margin: 25svh 0;
+    margin: 10svh 0 8svh 0;
+    max-width: 100%;
+    min-height: 60vh;
     align-content: center;
-    max-width: 35ch;
   }
 
-  /* 2º - A Linha Divisória (Logo após o texto) */
-  .cv-divide {
+  /* 2º - A Sanfona (Largura total no meio da página) */
+  .cv-content {
     order: 2;
-    grid-column: 1 / -1;
-    grid-row: auto;
-    margin: 0;
-    display: none;
+    width: 100%;
+    margin-bottom: 12svh;
   }
 
-  /* 3º - Filosofia e Design (Dividem as 2 colunas) */
-  .col-filosofia {
-    order: 3;
-    grid-column: 1 / 2;
-    grid-row: auto;
-  }
-
-  .col-design {
-    order: 4;
-    grid-column: 2 / 3;
-    grid-row: auto;
-  }
-
-  /* 4º - Idiomas e Café (Dividem as 2 colunas) */
-  .col-idiomas {
-    order: 5;
-    grid-column: 1 / 2;
-    grid-row: auto;
-  }
-
-  .col-cafe {
-    order: 6;
-    grid-column: 2 / 3;
-    grid-row: auto;
-    margin-bottom: 25svh;
-  }
-
-  /* 5º - Os Contatos (Final) */
+  /* 3º - Os Contatos */
   .cv-contact {
-    order: 7;
-    grid-column: 1 / -1;
-    grid-row: auto;
-    align-self: start;
-    margin-top: 10svh;
+    order: 3;
+    margin-bottom: -5svh;
+    align-self: flex-start;
   }
 
   #contact {
-    position: unset;
-    order: 9;
+    order: 4;
   }
-  /* 6º - A Foto (Proporção Cinematográfica) */
+
+  /* 4º - A Foto no Final (Corte 16:10 para celular) */
   .cv-img-header {
-    order: 8;
-    grid-column: 1 / -1;
-    grid-row: auto;
+    order: 5;
+    width: 100%;
     aspect-ratio: 16 / 10;
     height: auto;
     max-height: none;
-    margin-top: -2svh;
+    margin-top: 0;
   }
 
   .cv-img-header picture img,
@@ -268,10 +209,11 @@
     object-position: center;
     --zoom: 1;
     --parallax-y: 0px !important;
+    transform: none;
   }
 
   /* ==========================================================================
-   ANIMAÇÕES EDITORIAIS (SLIDE-UP)
+   ANIMAÇÕES EDITORIAIS (MOBILE)
    ========================================================================== */
   .reveal-element {
     opacity: 0;
@@ -286,11 +228,9 @@
     transform: translateY(0);
   }
 
-  .cv-skills-col.reveal-element,
-  .cv-chart-col.reveal-element {
-    /* O !important bloqueia os 60px de movimento do eixo Y */
+  /* Congela o movimento de Y no celular para componentes largos como a sanfona */
+  .cv-content.reveal-element {
     transform: none !important;
-    /* Mantém apenas a transição de opacidade ativa e macia */
     transition: opacity 0.8s ease-out;
   }
 }

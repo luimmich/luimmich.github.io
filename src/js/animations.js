@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 3. PARALLAX UNIFICADO (Executado livremente no Desktop e Mobile!)
+  // 3. PARALLAX UNIFICADO E FADE
   const parallaxWrappers = document.querySelectorAll(".funnel-img-wrapper, .img-philosophy-hero");
   const fadeElements = document.querySelectorAll(".fade-on-scroll");
   let isScrolling = false;
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
         window.requestAnimationFrame(() => {
           const viewportHeight = window.innerHeight;
 
-          // O Motor do Parallax agora lê TODAS as telas
+          // O Motor do Parallax agora lê TODAS as telas (Sem duplicação!)
           parallaxWrappers.forEach((wrapper) => {
             const rect = wrapper.getBoundingClientRect();
             if (rect.top < viewportHeight && rect.bottom > 0) {
@@ -52,17 +52,23 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           });
 
-          // Lógica de Fade Out do CV mantida...
-          const fadeTrigger = document.querySelector(".cv-contact");
-          if (fadeElements.length > 0 && fadeTrigger) {
+          // NOVA LÓGICA DE FADE: Baseada no fim matemático da página
+          if (fadeElements.length > 0) {
             if (window.innerWidth <= 1000) {
-              const triggerRect = fadeTrigger.getBoundingClientRect();
-              const fadeStart = viewportHeight;
-              const fadeEnd = viewportHeight * 0.65;
+              // Descobre o fim absoluto da página
+              const scrollBottom = window.scrollY + viewportHeight;
+              const docHeight = document.documentElement.scrollHeight;
+              const distanceToBottom = docHeight - scrollBottom;
+
+              // Define que o fade começa a acontecer nos últimos 40% da tela (ajustável)
+              const fadeThreshold = viewportHeight * 0.4;
+
               let groupOpacity = 1;
-              if (triggerRect.top < fadeStart) {
-                groupOpacity = Math.max(0, (triggerRect.top - fadeEnd) / (fadeStart - fadeEnd));
+              if (distanceToBottom < fadeThreshold) {
+                // Calcula a opacidade de 1 até 0 de forma proporcional e suave
+                groupOpacity = Math.max(0, distanceToBottom / fadeThreshold);
               }
+
               fadeElements.forEach((el) => (el.style.opacity = groupOpacity));
             } else {
               fadeElements.forEach((el) => (el.style.opacity = 1));
@@ -75,6 +81,35 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     { passive: true },
   );
+
+  // ==========================================================================
+  // MENU SANFONA GLOBAL
+  // ==========================================================================
+  const accordionHeaders = document.querySelectorAll(".accordion-header");
+
+  accordionHeaders.forEach((header) => {
+    header.addEventListener("click", function () {
+      const item = this.parentElement;
+      const isActive = item.classList.contains("is-active");
+
+      document.querySelectorAll(".accordion-item").forEach((accItem) => {
+        accItem.classList.remove("is-active");
+        accItem.querySelector(".accordion-header").setAttribute("aria-expanded", "false");
+      });
+
+      if (!isActive) {
+        item.classList.add("is-active");
+        this.setAttribute("aria-expanded", "true");
+
+        // Centralizar no Mobile após o clique!
+        if (window.innerWidth <= 1000) {
+          setTimeout(() => {
+            item.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 300);
+        }
+      }
+    });
+  });
 });
 
 // 4. LIMPEZA DA URL (Gatilho isolado aguardando carregamento total da rede)

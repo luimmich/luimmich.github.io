@@ -9,84 +9,67 @@ changefreq: "weekly"
 
 <main class="about-cv">
   
-  <!-- CABEÇALHO (12 Colunas) -->
+  <!-- CABEÇALHO -->
   <div class="cv-grid cv-header">
-    
-    <!-- 1. Gatilho na Foto -->
     <div class="cv-img-header cv-img-wrapper reveal-element">
       {% image "/project-files/about/lu-immich.jpg", "Lu Immich", "funnel-img" %}
     </div>
-    <!-- 2. Gatilho nos Contatos -->
     <div id="contact"></div>
     <div class="cv-contact reveal-element">
-
       <a href="https://lattes.cnpq.br/6938481194529175" target="_blank" rel="noopener">Lattes</a>
       <a href="https://github.com/luimmich" target="_blank" rel="noopener">GitHub</a>
       <a href="https://www.instagram.com/luimmich" target="_blank" rel="noopener">Instagram</a>
       <a href="https://philpeople.org/profiles/lu-immich" target="_blank" rel="noopener">PhilPeople</a>
       <a href="mailto:lu.immich@gmail.com">lu.immich@gmail.com</a>
     </div>
-
-    <!-- 3. Gatilho no Texto de Introdução -->
     <p class="cv-intro-text reveal-element">{{ about.intro | safe }}</p>
   </div>
 
-  <div class="cv-content">
-    <div class="cv-grid cv-data-grid">
-      
-      <div class="cv-divide"></div>
-      
-      <!-- 4. Gatilho na Filosofia -->
-      <div class="cv-skills-col col-filosofia reveal-element fade-on-scroll">
-        <h2 class="cv-sub-title">Filosofia</h2>
-        <ul class="cv-list">
-          {% for skill in about.skills.philosophy %}
-            <li>{{ skill }}</li>
-          {% endfor %}
-        </ul>
-      </div>
-
-      <!-- 5. Gatilho no Design -->
-      <div class="cv-skills-col col-design reveal-element fade-on-scroll">
-        <h2 class="cv-sub-title">Design</h2>
-        <ul class="cv-list">
-          {% for skill in about.skills.design %}
-            <li>{{ skill }}</li>
-          {% endfor %}
-        </ul>
-      </div>
-
-      <!-- 6. Gatilho nos Idiomas -->
-      <div class="cv-chart-col col-idiomas reveal-element fade-on-scroll">
-        <h2 class="cv-sub-title">Idiomas</h2>
-        <div class="cv-chart-list">
-          {% for item in about.charts.languages %}
-          <div class="cv-chart-item">
-            <span class="cv-chart-label">{{ item.name }}</span>
-            <div class="cv-chart-track">
-              <div class="cv-chart-fill" style="width: {{ item.level }}%;"></div>
-            </div>
-          </div>
-       {% endfor %}
-        </div>
-      </div>
-
-      <!-- 7. Gatilho no Café -->
-      <div class="cv-chart-col col-cafe reveal-element fade-on-scroll">
-        <h2 class="cv-sub-title">Café</h2>
-        <div class="cv-chart-list">
-          {% for item in about.charts.coffee %}
-          <div class="cv-chart-item">
-            <span class="cv-chart-label">{{ item.name }}</span>
-            <div class="cv-chart-track">
-              <div class="cv-chart-fill" style="width: {{ item.level }}%;"></div>
-            </div>
-          </div>
-       {% endfor %}
-        </div>
-      </div>
-
+  <!-- A NOVA SANFONA DINÂMICA -->
+  <div class="cv-content reveal-element fade-on-scroll">
+    <div class="philosophy-groups-content">
+      <p class="philosophy-groups-title">Saiba mais</p>
     </div>
+    <ul class="accordion-list reveal-element">
+      {% for item in about.accordion %}
+      <li class="accordion-item{% if item.hideOnMobile %} hidden-mobile{% endif %}{% if item.hideOnDesktop %} hidden-desktop{% endif %}">
+        <button type="button" class="accordion-header" aria-expanded="false">
+          <span class="accordion-title">{{ item.title }}</span>
+          <span class="accordion-icon">+</span>
+        </button>
+        <div class="accordion-content">
+          <div class="accordion-inner">
+            
+            <!-- Renderiza Texto -->
+            {% if item.type == 'text' %}
+              <p>{{ item.content | safe }}</p>
+            
+            <!-- Renderiza Listas -->
+            {% elif item.type == 'list' %}
+              <ul class="cv-list">
+                {% for listItem in item.items %}
+                  <li>{{ listItem }}</li>
+                {% endfor %}
+              </ul>
+            
+            <!-- Renderiza Gráficos/Tabelas -->
+            {% elif item.type == 'chart' %}
+              <div class="cv-chart-list">
+                {% for chartItem in item.items %}
+                <div class="cv-chart-item">
+                  <span class="cv-chart-label">{{ chartItem.name }}</span>
+                  <div class="cv-chart-track">
+                    <div class="cv-chart-fill" style="width: {{ chartItem.level }}%;"></div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
   </div>
 </main>
-<script src="/js/about.js" defer></script>
