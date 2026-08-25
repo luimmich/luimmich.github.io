@@ -75,7 +75,7 @@
   <!-- Analytics -->
   <script defer src="https://cloud.umami.is/script.js" data-website-id="91642bab-227b-4ca6-ad87-ab49f95f044e"></script>
 
-<!-- GEO: Schema Markup de Entidade (Person) para a página Sobre -->
+<!-- GEO: Schema Markup de Entidade (Person) e FAQ para a página Sobre -->
   {% if page.url == '/sobre/' %}
   <script type="application/ld+json">
   {
@@ -108,11 +108,36 @@
       "https://lattes.cnpq.br/6938481194529175",
       "https://github.com/luimmich",
       "https://www.instagram.com/luimmich",
-      "https://philpeople.org/profiles/lu-immich"
+      "https://philpeople.org/profiles/lu-immich",
+      "https://scholar.google.com/citations?user=c6EDyWMAAAAJ"
+    ]
+  }
+  </script>
+
+  <!-- GEO: Schema Markup de FAQPage Dinâmico (Lê a tag isFaq do about.json) -->
+  {% set faqs = about.accordion | selectattr("isFaq") %}
+  {% if faqs | length > 0 %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {% for faq in faqs %}
+      {
+        "@type": "Question",
+        "name": "{{ faq.title | replace('\"', '\\\"') | safe }}",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "{{ faq.content | replace('\"', '\\\"') | replace('\n', ' ') | safe }}"
+        }
+      }{% if not loop.last %},{% endif %}
+      {% endfor %}
     ]
   }
   </script>
   {% endif %}
+  {% endif %}
+
   <!-- GEO: Schema Markup de Grafo Acadêmico para a página Filosofia -->
   {% if page.url == '/filosofia/' %}
   <script type="application/ld+json">

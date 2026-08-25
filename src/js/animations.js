@@ -120,3 +120,43 @@ window.addEventListener("load", () => {
     }, 100);
   }
 });
+
+// ==========================================================================
+// CÓPIA DE E-MAIL GLOBAL (DELEGAÇÃO DE EVENTOS)
+// ==========================================================================
+document.addEventListener("DOMContentLoaded", () => {
+  document.body.addEventListener("click", (e) => {
+    // Verifica se o clique foi em um link mailto: (ou dentro dele)
+    const emailLink = e.target.closest('a[href^="mailto:"]');
+
+    if (emailLink) {
+      // A sua regra original que funcionava perfeitamente
+      const isDesktop = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+      if (isDesktop) {
+        e.preventDefault(); // Bloqueia o Outlook/Mail
+
+        const email = emailLink
+          .getAttribute("href")
+          .replace(/^mailto:/i, "")
+          .split("?")[0];
+        const originalText = emailLink.textContent;
+
+        navigator.clipboard
+          .writeText(email)
+          .then(() => {
+            emailLink.textContent = "E-mail copiado :)";
+
+            setTimeout(() => {
+              emailLink.textContent = originalText;
+            }, 2000);
+          })
+          .catch((err) => {
+            console.error("Erro ao copiar e-mail: ", err);
+            // Fallback caso a API do Clipboard seja bloqueada
+            window.location.href = `mailto:${email}`;
+          });
+      }
+    }
+  });
+});

@@ -777,6 +777,7 @@ footer a {
     transform 0.3s ease;
   cursor: text;
   user-select: text;
+  text-wrap: balance;
 }
 
 /* Estados Ativos */

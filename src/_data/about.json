@@ -33,8 +33,15 @@
         { "name": "Prensa Francesa", "level": 90 },
         { "name": "Mugen", "level": 70 }
       ],
-      "hideOnMobile": false,
+      "hideOnMobile": true,
       "hideOnDesktop": false
+    },
+    {
+      "title": "Você atua como parecerista?",
+      "type": "text",
+      "content": "Sim, sempre que possível busco engajar-me em pareceres. Para mais detalhes entrar em contato: <a href='mailto:lu.immich@gmail.com'>lu.immich@gmail.com</a>",
+      "hideOnMobile": false,
+      "isFaq": true
     }
   ]
 }
