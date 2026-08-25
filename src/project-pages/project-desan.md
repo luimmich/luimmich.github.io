@@ -13,11 +13,8 @@ priority: 0.6
       <h1 class="project-title">DESAN</h1>
       <p class="project-team"><b>Lu Immich </b>(Design)</p>
       <div class="project-description">
-        <p>Este projeto de Identidade Visual foi elaborado para o Grupo de estudos sobre
-        Determinantes Sociais da
-        Alimentação, Nutrição e Saúde da UFRGS. Busquei nesse projeto aliar a solidez de um grupo de estudos
-        universitário a abertura para dialogar com o público. Para tanto adotei principios da gestalt para compor o logo principal junto ao observador. 
-        </p>
+        <p>O projeto de identidade visual elaborado para o <a href="https://www.instagram.com/desan.ufrgs/">Grupo de Estudos Determinantes Sociais da Alimentação, Nutrição e Saúde</a> (<span class="small-caps">DESAN</span>), vinculado à <a href="https://www.ufrgs.br/site/">UFRGS</a>, busca aliar a solidez da pesquisa universitária à abertura para o diálogo com o público. Para isso, foram mobilizados princípios da Gestalt, convidando o observador a participar ativamente da composição visual da marca.</p>
+        <p> A robustez do logo é equilibrada por elementos gráficos leves, enquanto a paleta de cores e a tipografia foram cuidadosamente definidss para refletir o caráter humano e acolhedor inerente à nutrição. Em suma, a identidade construída traduz dois pilares inegociáveis do grupo: o rigor acadêmico e o compromisso com o impacto social.</p>
       </div>
       <div class="project-desc-container">
         <p class="project-year"><b>2025</b></p>
