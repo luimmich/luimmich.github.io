@@ -11,7 +11,7 @@ priority: 0.6
   <main class="project">
     <div class="project-container">
       <h1 class="project-title">Teclado<br> K02</h1>
-      <p class="project-team"><b>Lu Immich </b>(Design de produto) <br> <b> Aline Dal Pont </b>(Fotografia e Arte)
+      <p class="project-team"><b>Lu Immich </b><br class="project-team-line-break">(Design) <br> <b> Aline Dal Pont </b><br class="project-team-line-break">(Fotografia e Arte)
       </p>
       <div class="project-description">
       <p>
@@ -34,7 +34,7 @@ priority: 0.6
       <div class="project-desc-container">
         <p class="project-year"><b>2025</b></p>
         <a class="project-in-use" href="https://github.com/luimmich/k02">Repositório</a>
-        <p class="project-state">Protudo open-source</p>
+        <p class="project-state">Open-source</p>
         <!-- <p class="project-client"></p> -->
       </div>
     </div>

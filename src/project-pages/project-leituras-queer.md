@@ -11,7 +11,7 @@ priority: 0.6
   <main class="project">
     <div class="project-container">
       <h1 class="project-title">Leituras<br>Queer</h1>
-      <p class="project-team"><b>Lu Immich </b>(Design)
+      <p class="project-team"><b>Lu Immich </b><br class="project-team-line-break">(Design)
       </p>
       <div class="project-description">
 <p>

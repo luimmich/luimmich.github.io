@@ -607,7 +607,7 @@ footer a {
 .project-container {
   display: grid;
   width: 80vw;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(12, 1fr);
   grid-template-rows: auto 10svh auto;
   column-gap: 2.5vw;
   align-content: space-between;
@@ -626,7 +626,7 @@ footer a {
 }
 
 .project-desc-container {
-  grid-column: 3;
+  grid-column: 9 / span 4;
   grid-row: 3;
   display: flex;
   flex-direction: column;
@@ -635,13 +635,17 @@ footer a {
 }
 
 .project-team {
-  grid-column: 3;
+  grid-column: 9 / span 4;
   text-align: end;
+}
+
+.project-team-line-break {
+  display: none;
 }
 
 .project-description {
   grid-row: 3;
-  grid-column: 1 / 3;
+  grid-column: 1 / 11;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2.5vw;
@@ -655,7 +659,6 @@ footer a {
    ESTRUTURA DE IMAGENS COM CSS GRID (RESOLUÇÃO DO ASPECT RATIO)
    ========================================================================== */
 .project-img-container {
-  /* Mantemos o flex apenas no contêiner-pai para empilhar as blocos verticais */
   display: flex;
   flex-direction: column;
   gap: 10svh;
@@ -809,11 +812,18 @@ footer a {
 /* ==========================================================================
    OVERRIDES MOBILE
    ========================================================================== */
+
+@media (max-width: 1368px) {
+  .project-description {
+    grid-column: 1 / 10;
+  }
+}
 @media (max-width: 1000px) {
   .project-container {
     padding: 0;
     border: none;
     margin-top: 40svh;
+    grid-template-columns: repeat(3, 1fr);
   }
   .project-title {
     font-size: 15vw;
@@ -822,10 +832,17 @@ footer a {
     display: none;
   }
   .project-team {
-    grid-column: 1;
+    grid-column: 1 / span 2;
     grid-row: 3;
     text-align: start;
     align-self: end;
+    text-wrap: pretty;
+  }
+  .project-team-line-break {
+    display: block;
+  }
+  .project-desc-container {
+    grid-column: 3;
   }
 
   /* No Mobile, o Grid de 2 colunas se transforma em 1 coluna empilhada */

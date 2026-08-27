@@ -12,7 +12,7 @@ priority: 0.6
 <main class="project">
   <div class="project-container">
     <h1 class="project-title">Asterismo</h1>
-    <p class="project-team"><b>Lu Immich </b>(Design e Idealização)</p>
+    <p class="project-team"><b>Lu Immich </b><br class="project-team-line-break">(Design)</p>
 <div class="project-description">
       <p><b>ÁSTER (estrela) + ISMO (ação)</b><br>Asterismo é uma ferramenta conceitual para criar sentido coletivamente. Sua proposta central é contra-intuitiva, em vez de impor sentido ao que emerge, deve-se deixar o sentido aparecer na inter(ação). O terreno desta ação é um céu estrelado. Sobre ele as participantes conectam estrelas traçando linhas em um gesto contínuo.</p>
       <p>O que emerge dos traços é uma configuração que não teria surgido de nenhuma intenção isolada. O sentido desta configuração encontra-se suspenso. É nesse estado de suspensão que as participantes agem coletivamente atribuindo sentido ao que emergiu. Ao final, o Céu Noturno é um registro único do que aconteceu naquele encontro específico.</p>
