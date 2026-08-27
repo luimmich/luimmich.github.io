@@ -4,20 +4,28 @@ document.addEventListener("DOMContentLoaded", () => {
   const overlay = document.querySelector(".mobile-overlay");
   const body = document.body;
 
-  // 1. Captura todos os links de dentro do menu
   const navLinks = document.querySelectorAll(".mobile-nav-list a");
 
-  // Isolamos a função de fechar para podermos reutilizá-la
+  const getScrollbarWidth = () => {
+    return window.innerWidth - document.documentElement.clientWidth;
+  };
+
   const closeMenu = () => {
     overlay.classList.remove("is-active");
     body.classList.remove("modal-open");
     menuBtn.setAttribute("aria-expanded", "false");
+
+    // Remove a compensação e restaura a página
+    body.style.paddingRight = "";
   };
 
   const toggleMenu = () => {
     const isOpen = overlay.classList.contains("is-active");
 
     if (!isOpen) {
+      const scrollbarWidth = getScrollbarWidth();
+      body.style.paddingRight = `${scrollbarWidth}px`;
+
       overlay.classList.add("is-active");
       body.classList.add("modal-open");
       menuBtn.setAttribute("aria-expanded", "true");
