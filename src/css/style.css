@@ -71,6 +71,13 @@ h2,
 h3 {
   font-size: var(--fs-2);
 }
+.indirect-h1,
+.indirect-h2 {
+  font-weight: unset;
+  line-height: 1.4;
+  display: inline;
+  font-size: var(--fs-1);
+}
 p {
   line-height: 1.4;
 }
