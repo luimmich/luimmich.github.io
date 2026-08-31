@@ -227,6 +227,13 @@ section:last-of-type {
   font-weight: 400;
 }
 
+.language-switcher-wrapper {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  font-size: var(--fs-1);
+}
+
 @media (max-width: 1000px) {
   .nav div a {
     padding: 0.3rem;

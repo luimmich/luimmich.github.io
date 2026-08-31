@@ -35,5 +35,40 @@
       "link": "https://philpapers.org/go.pl?id=IMMOSA&proxyId=&u=https%3A%2F%2Fdx.doi.org%2F10.4013%2Fcon.2025.212.10"
     }
   ],
-  "en": []
+  "en": [
+    {
+      "id": "bettcher-ontologia-01",
+      "title": "Beyond Gender",
+      "subtitle": "Decoloniality and interpersonal spatiality in Bettcher's theory",
+      "type": "Paper",
+      "publication": "Revista de Filosofia Paranaense",
+      "coauthors": "",
+      "color": "#C4D0FF",
+      "height": "60vh",
+      "excerpt": "In  the  work  Beyond  Personhood,  Talia  Mae  Bettcher  adopts  ontological  pluralism  and Lugones's decolonial critique to develop her theory of interpersonal spatiality. Bettcher advocates for the elimination of the modern/colonial gender system, which has shaped the notions of sex, gender, personhood, subject, and self. For Bettcher, this system is incapable of accounting for trans oppression and phoria, thereby contributing to the perpetuation of violence against trans people. In response to this problem, her work proposes an understanding of interpersonal relations centered on systems of boundaries  that  regulate  relations  of  proximity,  distance,  and  intimacy.  This  understanding,  termed interpersonal  spatiality,  replaces  the  modernity-founded  notion  of  personhood  with  interpersonal objects, which are, in turn, inherently relational and constructed by boundaries of access manifested through self-presentation. By prioritizing the relational aspect of social experience, this theory reveals how the systematic violation of boundaries of access structures trans oppression.",
+      "link": "https://philpapers.org/go.pl?id=IMMPAD&proxyId=&u=https%3A%2F%2Fdoi.org%2F10.33871%2F27639657.2026.6.1.11909"
+    },
+    {
+      "id": "anpof-coluna-01",
+      "title": "Beyond caritative inclusion",
+      "subtitle": "Trans ilegibility as a social mechanism",
+      "type": "Column",
+      "publication": "ANPOF",
+      "color": "#FFCE99",
+      "height": "55vh",
+      "excerpt": "Cara leitora, aqui quem vos fala é alguém ilegível. Essa condição não se deve ao mero acaso; ela é sintomática de uma gramática social que visa traduzir existências em termos binários derivados de um biologismo mal fundamentado. Recentemente, essa condição – ser trans – tem motivado debates vigorosos na filosofia feminista voltados à inclusão, seja para endereçar urgências sociais ou para analisar hipóteses radicais não ancoradas na realidade. Dentre as perspectivas engajadas com problemas sociais, destaco neste texto abordagens centradas na melhoria conceitual (ameliorative approach).",
+      "link": "https://anpof.org.br/comunicacoes/coluna-anpof/para-alem-da-inclusao-caritativa-a-ilegibilidade-trans-como-mecanismo-social"
+    },
+    {
+      "id": "controversia-01",
+      "title": "Social ontology applied to the closet",
+      "subtitle": "Andler's objection to the conferralism of Ásta",
+      "type": "Paper",
+      "publication": "Controvérsia",
+      "color": "#AED09B",
+      "height": "58vh",
+      "excerpt": "In analytical philosophy, specifically in feminist metaphysics, issues regarding the definition and foundation of social categories are subject to debate. Within this subfield, a debate has emerged between theories of social position and theories based on identity. Theories of social position understand social categories through limitations and freedoms that are associated with an individual through a particular category. On the other hand, identity-based theories focus on subjective experiences to answer this question. This paper focuses on a critique of the social position theory developed by Ásta. The critique points out an incapacity in categorizing queer sexual identities of individuals in the closet, which implies their systematic exclusion from queer spaces. According to Ásta's theory, social categories are conceived as being variable depending on the context in which their conferral occurs. However, according to Andler, this way of conceiving social categories leads to the exclusion of individuals with queer sexual identities, because it presupposes that the individual must present a certain sexual orientation for the conferment of a specific sexual identity. But, as this paper explains, Ásta's theory does not posit the relationship between sexual orientation and sexual identity as an inherent part of the conferment process.",
+      "link": "https://philpapers.org/go.pl?id=IMMOSA&proxyId=&u=https%3A%2F%2Fdx.doi.org%2F10.4013%2Fcon.2025.212.10"
+    }
+  ]
 }

@@ -195,11 +195,22 @@
   <nav class="nav">
     <a class="nav-title" href="{{ locales.nav.home.url[locale] }}">Lu Immich</a>
     
-    <div style="display: flex; gap: 1rem; align-items: center;">
-      <!-- Language Switcher -->
-      <a href="{% if locale == 'en' %}/{% else %}/en/{% endif %}" class="language-switcher small-caps" aria-label="Mudar idioma">
+    <div class="language-switcher-wrapper">
+      
+      <!-- INÍCIO: Language Switcher Inteligente -->
+      {% set switchUrl = translatedUrl %}
+      {% if not switchUrl %}
+        {% if locale == 'pt' %}
+          {% set switchUrl = "/en" ~ page.url %}
+        {% else %}
+          {% set switchUrl = page.url | replace("/en/", "/") %}
+        {% endif %}
+      {% endif %}
+
+      <a href="{{ switchUrl }}" class="small-caps language-switcher aria-label="{{ 'Change language' if locale == 'en' else 'Mudar idioma' }}">
         {{ 'PT' if locale == 'en' else 'EN' }}
       </a>
+      <!-- FIM: Language Switcher Inteligente -->
       
       <button class="mobile-menu-btn small-caps" aria-label="{{ locales.nav.menu[locale] }}" aria-expanded="false">
         {{ locales.nav.menu[locale] }}
