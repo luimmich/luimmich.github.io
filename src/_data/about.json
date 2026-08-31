@@ -1,14 +1,14 @@
 {
-  "intro": "De modo geral, em minha <i>práxis</i>, busco investigar a relação entre o social e o pessoal, seja analisando estruturas sociais opressivas ou projetando interações. Atualmente, sou doutoranda em Filosofia na <a href='https://www.ufsm.br/' target='_blank' rel='noopener noreferrer'>Universidade Federal de Santa Maria (UFSM)</a>, instituição onde também concluí meu mestrado e meu bacharelado. Quando não estou imersa no trabalho, busco experiências analógicas. Passo meu tempo livre explorando métodos de extração de cafés especiais e fazendo longos passeios com minha (cão)panheira, <span class='heart-cursor'>Laika</span>.",
+  "intro": "Me chamo <h1 class='indirect-title'>Lu Immich</h1>. De modo geral, em minha <i>práxis</i>, busco investigar a relação entre o social e o pessoal, seja <h2 class='indirect-title'>analisando estruturas sociais opressivas</h2> ou <h2 class='indirect-title'>projetando interações</h2>. Atualmente, sou doutoranda em Filosofia na <a href='https://www.ufsm.br/' target='_blank' rel='noopener noreferrer'>Universidade Federal de Santa Maria (UFSM)</a>, instituição onde também concluí meu mestrado e meu bacharelado. Quando não estou imersa no trabalho, busco experiências analógicas. Passo meu tempo livre explorando métodos de extração de cafés especiais e fazendo longos passeios com minha (cão)panheira, <span class='heart-cursor'>Laika</span>.",
   "accordion": [
     {
-      "title": "Áreas de atuação na Filosofia",
+      "title": "<h3 class='indirect-title'>Áreas de atuação na Filosofia</h3>",
       "type": "list",
       "items": ["Filosofia Social", "Filosofia Política", "Ontologia Social", "Filosofia Trans"],
       "hideOnMobile": false
     },
     {
-      "title": "Áreas de atuação no Design",
+      "title": "<h3 class='indirect-title'>Áreas de atuação no Design</h3>",
       "type": "list",
       "items": ["UI/UX Design", "Design Gráfico", "Web Design", "Web Development"],
       "hideOnMobile": false,

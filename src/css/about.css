@@ -47,7 +47,11 @@
   will-change: transform;
 }
 
-#contact {
+.contact-anchor {
+  display: block;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
   position: absolute;
   top: 0;
 }
@@ -190,18 +194,23 @@
     align-self: flex-start;
   }
 
-  #contact {
-    order: 4;
+  .contact-anchor {
+    position: static;
+    order: 5;
+    height: 0;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   /* 4º - A Foto no Final (Corte 16:10 para celular) */
   .cv-img-header {
-    order: 5;
+    order: 4;
     width: 100%;
     aspect-ratio: 16 / 10;
     height: auto;
     max-height: none;
     margin-top: 0;
+    margin-bottom: -10svh;
   }
 
   .cv-img-header picture img,

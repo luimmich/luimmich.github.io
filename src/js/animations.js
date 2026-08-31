@@ -169,12 +169,20 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================================================
-// LIMPEZA DA URL (Gatilho isolado aguardando rede)
+// LIMPEZA DA URL E SCROLL CROSS-PAGE
 // ==========================================================================
 window.addEventListener("load", () => {
   if (window.location.hash === "#contact") {
+    const contactSection = document.getElementById("contact");
+
+    if (contactSection) {
+      setTimeout(() => {
+        contactSection.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+
     setTimeout(() => {
       history.replaceState(null, null, window.location.pathname + window.location.search);
-    }, 100);
+    }, 600);
   }
 });

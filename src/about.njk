@@ -14,7 +14,7 @@ changefreq: "weekly"
     <div class="cv-img-header cv-img-wrapper reveal-element">
       {% image "/project-files/about/lu-immich.jpg", "Lu Immich", "funnel-img" %}
     </div>
-    <div id="contact"></div>
+    <div id="contact" class="contact-anchor"></div>
     <div class="cv-contact reveal-element">
       <a href="https://lattes.cnpq.br/6938481194529175" target="_blank" rel="noopener">Lattes</a>
       <a href="https://github.com/luimmich" target="_blank" rel="noopener">GitHub</a>
@@ -23,7 +23,7 @@ changefreq: "weekly"
       <a href="https://scholar.google.com/citations?user=c6EDyWMAAAAJ" target="_blank" rel="noopener">Google Scholar</a>
       <a href="mailto:lu.immich@gmail.com">lu.immich@gmail.com</a>
     </div>
-    <p class="cv-intro-text reveal-element">{{ about.intro | safe }}</p>
+    <div class="cv-intro-text reveal-element">{{ about.intro | safe }}</div>
   </div>
 
   <!-- A NOVA SANFONA DINÂMICA -->
@@ -35,7 +35,7 @@ changefreq: "weekly"
       {% for item in about.accordion %}
       <li class="accordion-item{% if item.hideOnMobile %} hidden-mobile{% endif %}{% if item.hideOnDesktop %} hidden-desktop{% endif %}">
         <button type="button" class="accordion-header" aria-expanded="false">
-          <span class="accordion-title">{{ item.title }}</span>
+          <span class="accordion-title">{{ item.title | safe }}</span>
           <span class="accordion-icon">+</span>
         </button>
         <div class="accordion-content">
