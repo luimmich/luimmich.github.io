@@ -29,7 +29,7 @@
       "title": "Extração de Cafés",
       "type": "chart",
       "items": [
-        { "name": "V60", "level": 50 },
+        { "name": "V60", "level": 70 },
         { "name": "Prensa Francesa", "level": 90 },
         { "name": "Mugen", "level": 70 }
       ],
