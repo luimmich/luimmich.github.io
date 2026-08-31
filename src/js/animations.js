@@ -121,12 +121,22 @@ document.addEventListener("DOMContentLoaded", () => {
             if (currentScrollY > 10) nav.classList.add("nav--scrolled");
             else nav.classList.remove("nav--scrolled");
 
-            if (currentScrollY > lastScrollY && currentScrollY > 80)
-              nav.classList.add("nav--hidden");
-            else if (currentScrollY < lastScrollY || currentScrollY <= 0)
-              nav.classList.remove("nav--hidden");
+            // Define a tolerância de pixels para evitar acionamentos acidentais
+            const scrollDifference = Math.abs(currentScrollY - lastScrollY);
+            const scrollThreshold = 80;
+
+            if (scrollDifference > scrollThreshold || currentScrollY <= 0) {
+              if (currentScrollY > lastScrollY && currentScrollY > 80) {
+                // Rolando para baixo
+                nav.classList.add("nav--hidden");
+              } else if (currentScrollY < lastScrollY || currentScrollY <= 0) {
+                // Rolando para cima
+                nav.classList.remove("nav--hidden");
+              }
+              // Atualiza a posição de referência apenas quando quebra o threshold
+              lastScrollY = currentScrollY;
+            }
           }
-          lastScrollY = currentScrollY;
 
           // PARALLAX (Agora lê direto da memória, sem querySelector)
           parallaxItems.forEach(({ wrapper, img }) => {
