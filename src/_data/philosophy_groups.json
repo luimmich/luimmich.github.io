@@ -1,14 +1,30 @@
-[
-  {
-    "title": "Grupo de Leituras Queer",
-    "content": "Sou fundadora e coordenadora deste <a href=\"/leituras-queer/\" rel=\"noopener noreferrer\">grupo de leitura e debate</a>, este, por sua vez, aborda a interseção entre ontologia social e gênero. Sua fundação surgiu da constatação que os currículos dos cursos de graduação em Filosofia não abarcam adequadamente temáticas de gênero. Posto isso, essa iniciativa, busca auxiliar estudantes a formar um léxico básico para engajar-se criticamente com o tema. Atualmente, o grupo encontra-se vinculado institucionalmente à <a href=\"https://www.ufsm.br\" target=\"_blank\" rel=\"noopener noreferrer\">Universidade Federal de Santa Maria (UFSM)</a>. Em encontros quinzenais, reúnem-se participantes de diversas universidades para estudar e debater."
-  },
-  {
-    "title": "Mulheres Também Sabem Filosofia",
-    "content": "Este projeto busca consolidar um <a href=\"https://mtsf.com.br\" target=\"_blank\" rel=\"noopener noreferrer\">diretório aberto de mulheres filósofas brasileiras</a>. Por meio dessa ação, espera-se estimular uma transformação na participação e permanencia de mulheres no cenário nacional da Filosofia acadêmica, cenário esse historicamente dominado por homens. O projeto conta com o apoio da FAPERGS e da <a href=\"https://www.ufsm.br\" target=\"_blank\" rel=\"noopener noreferrer\">UFSM</a>, atuo neste como desenvolvedora da <a href=\"https://mtsf.com.br\" target=\"_blank\" rel=\"noopener noreferrer\">plataforma online</a> e integrante da equipe de organização."
-  },
-  {
-    "title": "Grupo de Estudos em Filosofia Social e Opressão",
-    "content": "Este projeto busca consolidar um núcleo de estudos filosóficos voltado ao combate à opressão em contextos sociais. Nesse grupo, atuo como pesquisadora e designer."
-  }
-]
+{
+  "pt": [
+    {
+      "title": "Grupo de Leituras Queer",
+      "content": "Sou fundadora e coordenadora deste <a href=\"/leituras-queer/\" rel=\"noopener noreferrer\">grupo de leitura e debate</a>, este, por sua vez, aborda a interseção entre ontologia social e gênero. Sua fundação surgiu da constatação que os currículos dos cursos de graduação em Filosofia não abarcam adequadamente temáticas de gênero. Posto isso, essa iniciativa, busca auxiliar estudantes a formar um léxico básico para engajar-se criticamente com o tema. Atualmente, o grupo encontra-se vinculado institucionalmente à <a href=\"https://www.ufsm.br\" target=\"_blank\" rel=\"noopener noreferrer\">Universidade Federal de Santa Maria (UFSM)</a>. Em encontros quinzenais, reúnem-se participantes de diversas universidades para estudar e debater."
+    },
+    {
+      "title": "Mulheres Também Sabem Filosofia",
+      "content": "Este projeto busca consolidar um <a href=\"https://mtsf.com.br\" target=\"_blank\" rel=\"noopener noreferrer\">diretório aberto de mulheres filósofas brasileiras</a>. Por meio dessa ação, espera-se estimular uma transformação na participação e permanencia de mulheres no cenário nacional da Filosofia acadêmica, cenário esse historicamente dominado por homens. O projeto conta com o apoio da FAPERGS e da <a href=\"https://www.ufsm.br\" target=\"_blank\" rel=\"noopener noreferrer\">UFSM</a>, atuo neste como desenvolvedora da <a href=\"https://mtsf.com.br\" target=\"_blank\" rel=\"noopener noreferrer\">plataforma online</a> e integrante da equipe de organização."
+    },
+    {
+      "title": "Grupo de Estudos em Filosofia Social e Opressão",
+      "content": "Este projeto busca consolidar um núcleo de estudos filosóficos voltado ao combate à opressão em contextos sociais. Nesse grupo, atuo como pesquisadora e designer."
+    }
+  ],
+  "en": [
+    {
+      "title": "Queer Reading Group",
+      "content": "I am the founder and coordinator of this <a href=\"/leituras-queer/\" rel=\"noopener noreferrer\">reading and discussion group</a>, which addresses the intersection of social ontology and gender. It was founded upon the realization that undergraduate philosophy curricula do not adequately cover gender-related themes. Therefore, this initiative seeks to assist students in developing a foundational lexicon for critical engagement with the subject. Currently, the group is institutionally affiliated with the <a href=\"https://www.ufsm.br\" target=\"_blank\" rel=\"noopener noreferrer\">Federal University of Santa Maria (UFSM)</a>. Participants from various universities gather in biweekly meetings to study and debate."
+    },
+    {
+      "title": "Women Also Know Philosophy",
+      "content": "This project seeks to consolidate an <a href=\"https://mtsf.com.br\" target=\"_blank\" rel=\"noopener noreferrer\">open directory of Brazilian women philosophers</a>. Through this initiative, we hope to foster a transformation regarding the participation and retention of women within the national landscape of academic philosophy, a field historically dominated by men. The project is supported by FAPERGS and <a href=\"https://www.ufsm.br\" target=\"_blank\" rel=\"noopener noreferrer\">UFSM</a>; I serve as the developer of its <a href=\"https://mtsf.com.br\" target=\"_blank\" rel=\"noopener noreferrer\">online platform</a> and as a member of the organizing team."
+    },
+    {
+      "title": "Study Group on Social Philosophy and Oppression",
+      "content": "This project aims to consolidate a center for philosophical studies dedicated to combating oppression in social contexts. Within this group, I work as a researcher and designer."
+    }
+  ]
+}

@@ -7,71 +7,71 @@
     "items": [
       {
         "url": "/leituras-queer/",
-        "image": "/project-files/leituras-queer/Cartaz-gravidade.webp",
+        "image": "/assets/project-files/leituras-queer/Cartaz-gravidade.webp",
         "alt": "Cartaz Leituras Queer gravidade"
       },
       {
         "url": "/leituras-queer/",
-        "image": "/project-files/leituras-queer/Cartaz-encontro.webp",
+        "image": "/assets/project-files/leituras-queer/Cartaz-encontro.webp",
         "alt": "Cartaz Leituras Queer encontro"
       },
       {
         "url": "/leituras-queer/",
-        "image": "/project-files/leituras-queer/Cartaz-caca-pal.webp",
+        "image": "/assets/project-files/leituras-queer/Cartaz-caca-pal.webp",
         "alt": "Cartaz Leituras Queer caçapalavras"
       },
       {
         "url": "/leituras-queer/",
-        "image": "/project-files/leituras-queer/Ecobag-Mockup.webp",
+        "image": "/assets/project-files/leituras-queer/Ecobag-Mockup.webp",
         "alt": "Ecobag Leituras Queer"
       },
       {
         "url": "#",
-        "image": "/project-files/entremundos/P0-Entremundos.webp",
+        "image": "/assets/project-files/entremundos/P0-Entremundos.webp",
         "alt": "Cartaz evento EntreMundos",
         "border": true
       },
       {
         "url": "#",
-        "image": "/project-files/entremundos/P4-Entremundos.webp",
+        "image": "/assets/project-files/entremundos/P4-Entremundos.webp",
         "alt": "Cartaz evento EntreMundos",
         "border": true
       },
       {
         "url": "#",
-        "image": "/project-files/entremundos/P1-Entremundos.webp",
+        "image": "/assets/project-files/entremundos/P1-Entremundos.webp",
         "alt": "Cartaz evento EntreMundos",
         "border": true
       },
       {
         "url": "#",
-        "image": "/project-files/entremundos/P2-Entremundos.webp",
+        "image": "/assets/project-files/entremundos/P2-Entremundos.webp",
         "alt": "Cartaz evento EntreMundos",
         "border": true
       },
       {
         "url": "#",
-        "image": "/project-files/entremundos/P3-Entremundos.webp",
+        "image": "/assets/project-files/entremundos/P3-Entremundos.webp",
         "alt": "Cartaz evento EntreMundos",
         "border": true
       },
       {
-        "image": "/project-files/primeiro-workshop-interseccionalidade/Cartaz-primeiro-workshop-fil-inter.webp",
+        "image": "/assets/project-files/primeiro-workshop-interseccionalidade/Cartaz-primeiro-workshop-fil-inter.webp",
         "alt": "1 workshop filosofia e interseccionalidade divulgação",
         "border": true
       },
       {
-        "image": "/project-files/primeiro-workshop-interseccionalidade/Cartaz-adesivos.webp",
+        "image": "/assets/project-files/primeiro-workshop-interseccionalidade/Cartaz-adesivos.webp",
         "alt": "1 workshop filosofia e interseccionalidade adesivos",
         "border": true
       },
       {
-        "image": "/project-files/primeiro-workshop-interseccionalidade/Cartaz-pronomes.webp",
+        "image": "/assets/project-files/primeiro-workshop-interseccionalidade/Cartaz-pronomes.webp",
         "alt": "1 workshop filosofia e interseccionalidade pronomes",
         "border": true
       },
       {
-        "image": "/project-files/primeiro-workshop-interseccionalidade/Cartaz-programacao.webp",
+        "image": "/assets/project-files/primeiro-workshop-interseccionalidade/Cartaz-programacao.webp",
         "alt": "1 workshop filosofia e interseccionalidade programação",
         "border": true
       }
@@ -85,30 +85,30 @@
     "items": [
       {
         "url": "/asterismo/",
-        "image": "/project-files/asterismo/asterismo-06.webp",
+        "image": "/assets/project-files/asterismo/asterismo-06.webp",
         "alt": "Asterismo manual"
       },
       {
         "url": "/asterismo/",
-        "image": "/project-files/asterismo/asterismo-02.webp",
+        "image": "/assets/project-files/asterismo/asterismo-02.webp",
         "alt": "Asterismo tabuleiro"
       },
       {
         "url": "/asterismo/",
-        "image": "/project-files/asterismo/asterismo-03.webp",
+        "image": "/assets/project-files/asterismo/asterismo-03.webp",
         "alt": "Asterismo cronometro"
       },
-      { "url": "/k02/", "image": "/project-files/k02/k02-01.webp", "alt": "Teclado K02 01" },
-      { "url": "/k02/", "image": "/project-files/k02/k02-03.webp", "alt": "Teclado K02 03" },
-      { "url": "/k02/", "image": "/project-files/k02/k02-04.webp", "alt": "Teclado K02 04" },
-      { "url": "/k02/", "image": "/project-files/k02/k02-05.webp", "alt": "Teclado K02 05" },
-      { "url": "/k02/", "image": "/project-files/k02/k02-06.webp", "alt": "Teclado K02 06" },
-      { "url": "/k01/", "image": "/project-files/k01/k01-01.webp", "alt": "Teclado K01 01" },
-      { "url": "/k01/", "image": "/project-files/k01/k01-02.webp", "alt": "Teclado K01 02" },
-      { "url": "/k01/", "image": "/project-files/k01/k01-03.webp", "alt": "Teclado K01 03" },
-      { "url": "/k01/", "image": "/project-files/k01/k01-04.webp", "alt": "Teclado K01 04" },
-      { "url": "/k01/", "image": "/project-files/k01/k01-05.webp", "alt": "Teclado K01 05" },
-      { "url": "/k01/", "image": "/project-files/k01/k01-06.webp", "alt": "Teclado K01 06" }
+      { "url": "/k02/", "image": "/assets/project-files/k02/k02-01.webp", "alt": "Teclado K02 01" },
+      { "url": "/k02/", "image": "/assets/project-files/k02/k02-03.webp", "alt": "Teclado K02 03" },
+      { "url": "/k02/", "image": "/assets/project-files/k02/k02-04.webp", "alt": "Teclado K02 04" },
+      { "url": "/k02/", "image": "/assets/project-files/k02/k02-05.webp", "alt": "Teclado K02 05" },
+      { "url": "/k02/", "image": "/assets/project-files/k02/k02-06.webp", "alt": "Teclado K02 06" },
+      { "url": "/k01/", "image": "/assets/project-files/k01/k01-01.webp", "alt": "Teclado K01 01" },
+      { "url": "/k01/", "image": "/assets/project-files/k01/k01-02.webp", "alt": "Teclado K01 02" },
+      { "url": "/k01/", "image": "/assets/project-files/k01/k01-03.webp", "alt": "Teclado K01 03" },
+      { "url": "/k01/", "image": "/assets/project-files/k01/k01-04.webp", "alt": "Teclado K01 04" },
+      { "url": "/k01/", "image": "/assets/project-files/k01/k01-05.webp", "alt": "Teclado K01 05" },
+      { "url": "/k01/", "image": "/assets/project-files/k01/k01-06.webp", "alt": "Teclado K01 06" }
     ]
   },
   {
@@ -117,41 +117,53 @@
     "offsetDesktop": "10vw",
     "offsetMobile": "18vw",
     "items": [
-      { "url": "/desan/", "image": "/project-files/desan/desan1.webp", "alt": "Ecobag Desan" },
       {
         "url": "/desan/",
-        "image": "/project-files/desan/desan5.webp",
+        "image": "/assets/project-files/desan/desan1.webp",
+        "alt": "Ecobag Desan"
+      },
+      {
+        "url": "/desan/",
+        "image": "/assets/project-files/desan/desan5.webp",
         "alt": "Marca Página Desan"
       },
-      { "url": "/desan/", "image": "/project-files/desan/desan3.webp", "alt": "Canecas Desan" },
-      { "url": "/desan/", "image": "/project-files/desan/desan4.webp", "alt": "Instagram Desan" },
       {
         "url": "/desan/",
-        "image": "/project-files/desan/desan6.webp",
+        "image": "/assets/project-files/desan/desan3.webp",
+        "alt": "Canecas Desan"
+      },
+      {
+        "url": "/desan/",
+        "image": "/assets/project-files/desan/desan4.webp",
+        "alt": "Instagram Desan"
+      },
+      {
+        "url": "/desan/",
+        "image": "/assets/project-files/desan/desan6.webp",
         "alt": "Cartaz Desan",
         "border": true
       },
-      { "url": "/desan/", "image": "/project-files/desan/desan2.webp", "alt": "Logo Desan" },
+      { "url": "/desan/", "image": "/assets/project-files/desan/desan2.webp", "alt": "Logo Desan" },
       {
         "url": "#",
-        "image": "/project-files/gefop/Workshop de escrita 2025.webp",
+        "image": "/assets/project-files/gefop/Workshop de escrita 2025.webp",
         "alt": "Cartaz workshop de escrita do GEFOP",
         "border": true
       },
       {
         "url": "#",
-        "image": "/project-files/gefop/conversa de corredor Milena.webp",
+        "image": "/assets/project-files/gefop/conversa de corredor Milena.webp",
         "alt": "Cartaz conversa de corredor para o GEFOP",
         "border": true
       },
       {
         "url": "#",
-        "image": "/project-files/gefop/logo-gefop-black.webp",
+        "image": "/assets/project-files/gefop/logo-gefop-black.webp",
         "alt": "Adeviso Grupo de Estudos em Filosofia Social e Opressão"
       },
       {
         "url": "#",
-        "image": "/project-files/gefop/logo-gefop-white.webp",
+        "image": "/assets/project-files/gefop/logo-gefop-white.webp",
         "alt": "Logo Grupo de Estudos em Filosofia Social e Opressão"
       }
     ]

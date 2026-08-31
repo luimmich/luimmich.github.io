@@ -1,7 +1,16 @@
 {
-  "name": "Lu Immich",
-  "description": "Portfólio de Filosofia e Design",
-  "url": "https://luimmich.github.io",
-  "author": "Lu Immich",
-  "language": "pt-BR"
+  "pt": {
+    "name": "Lu Immich",
+    "description": "Portfólio de Filosofia e Design",
+    "url": "https://luimmich.github.io",
+    "author": "Lu Immich",
+    "language": "pt-BR"
+  },
+  "en": {
+    "name": "Lu Immich",
+    "description": "Philosophy and Design Portfolio",
+    "url": "https://luimmich.github.io",
+    "author": "Lu Immich",
+    "language": "en"
+  }
 }

@@ -1,36 +1,39 @@
-[
-  {
-    "id": "bettcher-ontologia-01",
-    "title": "Para Além do Gênero",
-    "subtitle": "Decolonialidade e Espacialidade Interpessoal na Teoria de Bettcher",
-    "type": "Artigo",
-    "publication": "Revista de Filosofia Paranaense",
-    "coauthors": "",
-    "color": "#C4D0FF",
-    "height": "60vh",
-    "excerpt": "Na obra Beyond Personhood, Talia Mae Bettcher adota o pluralismo ontológico e a crítica decolonial de Lugones para desenvolver sua teoria da espacialidade interpessoal. Bettcher advoga a eliminação do sistema moderno colonial de gênero, que moldou as noções de sexo, gênero, pessoa, sujeito e self. Para Bettcher esse sistema é incapaz de explicar a opressão e phoria trans, colaborando assim com à perpetuação da violência a pessoas trans. Frente a esse problema, sua obra propõe uma compreensão de relações interpessoais centrada em sistemas de fronteiras que regulam as relações de proximidade, distância e intimidade. Essa compreensão denominada espacialidade interpessoal, substitui a noção de pessoa fundada na modernidade, por objetos interpessoais, que por sua vez são inerentemente relacionais e construídos por fronteiras de acesso manifestas através da auto apresentação. Ao priorizar o aspecto relacional da experiência social, esta teoria revela como a violação sistemática das fronteiras de acesso estrutura a opressão trans.",
-    "link": "https://philpapers.org/go.pl?id=IMMPAD&proxyId=&u=https%3A%2F%2Fdoi.org%2F10.33871%2F27639657.2026.6.1.11909"
-  },
-  {
-    "id": "anpof-coluna-01",
-    "title": "Para além da Inclusão Caritativa",
-    "subtitle": "A Ilegibilidade Trans como Mecanismo Social",
-    "type": "Coluna",
-    "publication": "ANPOF",
-    "color": "#FFCE99",
-    "height": "55vh",
-    "excerpt": "Cara leitora, aqui quem vos fala é alguém ilegível. Essa condição não se deve ao mero acaso; ela é sintomática de uma gramática social que visa traduzir existências em termos binários derivados de um biologismo mal fundamentado. Recentemente, essa condição – ser trans – tem motivado debates vigorosos na filosofia feminista voltados à inclusão, seja para endereçar urgências sociais ou para analisar hipóteses radicais não ancoradas na realidade. Dentre as perspectivas engajadas com problemas sociais, destaco neste texto abordagens centradas na melhoria conceitual (ameliorative approach).",
-    "link": "https://anpof.org.br/comunicacoes/coluna-anpof/para-alem-da-inclusao-caritativa-a-ilegibilidade-trans-como-mecanismo-social"
-  },
-  {
-    "id": "controversia-01",
-    "title": "Ontologia Social Aplicada ao Armário",
-    "subtitle": "A Objeção de Andler à Teoria Conferista de Ásta",
-    "type": "Artigo",
-    "publication": "Controvérsia",
-    "color": "#AED09B",
-    "height": "58vh",
-    "excerpt": "Na filosofia analítica, precisamente na metafísica feminista, questões sobre a definição e fundação de categorias sociais são alvo de debate. Nessa subárea, formou-se um debate dividido entre teorias de posição social e teorias baseadas em identidade. Teorias de posição social entendem categorias sociais por meio de limitações e liberdades que são socialmente atreladas a um indivíduo. Por outro lado, teorias baseadas em identidade focam em experiências inerentes ao sujeito para responder essa questão. O presente texto centra-se em uma crítica realizada à teoria de posição social desenvolvida por Ásta. A crítica sugere uma incapacidade na categorização de identidades sexuais queer de indivíduos no armário, o que implica na sua exclusão sistemática de espaços queer. Na teoria de Ásta, categorias sociais são concebidas como sendo variáveis de acordo com o contexto onde a conferência delas ocorre. De acordo com Andler, esse modo de conceber categorias sociais leva a exclusão de pessoas com identidade sexual queer, pois pressupõe que o indivíduo apresente determinada orientação sexual para a conferência de determinada identidade sexual. Porém, como demonstrado neste texto, Ásta não postula a relação entre orientação sexual e identidade sexual como inerente ao processo de conferência.",
-    "link": "https://philpapers.org/go.pl?id=IMMOSA&proxyId=&u=https%3A%2F%2Fdx.doi.org%2F10.4013%2Fcon.2025.212.10"
-  }
-]
+{
+  "pt": [
+    {
+      "id": "bettcher-ontologia-01",
+      "title": "Para Além do Gênero",
+      "subtitle": "Decolonialidade e Espacialidade Interpessoal na Teoria de Bettcher",
+      "type": "Artigo",
+      "publication": "Revista de Filosofia Paranaense",
+      "coauthors": "",
+      "color": "#C4D0FF",
+      "height": "60vh",
+      "excerpt": "Na obra Beyond Personhood, Talia Mae Bettcher adota o pluralismo ontológico e a crítica decolonial de Lugones para desenvolver sua teoria da espacialidade interpessoal. Bettcher advoga a eliminação do sistema moderno colonial de gênero, que moldou as noções de sexo, gênero, pessoa, sujeito e self. Para Bettcher esse sistema é incapaz de explicar a opressão e phoria trans, colaborando assim com à perpetuação da violência a pessoas trans. Frente a esse problema, sua obra propõe uma compreensão de relações interpessoais centrada em sistemas de fronteiras que regulam as relações de proximidade, distância e intimidade. Essa compreensão denominada espacialidade interpessoal, substitui a noção de pessoa fundada na modernidade, por objetos interpessoais, que por sua vez são inerentemente relacionais e construídos por fronteiras de acesso manifestas através da auto apresentação. Ao priorizar o aspecto relacional da experiência social, esta teoria revela como a violação sistemática das fronteiras de acesso estrutura a opressão trans.",
+      "link": "https://philpapers.org/go.pl?id=IMMPAD&proxyId=&u=https%3A%2F%2Fdoi.org%2F10.33871%2F27639657.2026.6.1.11909"
+    },
+    {
+      "id": "anpof-coluna-01",
+      "title": "Para além da Inclusão Caritativa",
+      "subtitle": "A Ilegibilidade Trans como Mecanismo Social",
+      "type": "Coluna",
+      "publication": "ANPOF",
+      "color": "#FFCE99",
+      "height": "55vh",
+      "excerpt": "Cara leitora, aqui quem vos fala é alguém ilegível. Essa condição não se deve ao mero acaso; ela é sintomática de uma gramática social que visa traduzir existências em termos binários derivados de um biologismo mal fundamentado. Recentemente, essa condição – ser trans – tem motivado debates vigorosos na filosofia feminista voltados à inclusão, seja para endereçar urgências sociais ou para analisar hipóteses radicais não ancoradas na realidade. Dentre as perspectivas engajadas com problemas sociais, destaco neste texto abordagens centradas na melhoria conceitual (ameliorative approach).",
+      "link": "https://anpof.org.br/comunicacoes/coluna-anpof/para-alem-da-inclusao-caritativa-a-ilegibilidade-trans-como-mecanismo-social"
+    },
+    {
+      "id": "controversia-01",
+      "title": "Ontologia Social Aplicada ao Armário",
+      "subtitle": "A Objeção de Andler à Teoria Conferista de Ásta",
+      "type": "Artigo",
+      "publication": "Controvérsia",
+      "color": "#AED09B",
+      "height": "58vh",
+      "excerpt": "Na filosofia analítica, precisamente na metafísica feminista, questões sobre a definição e fundação de categorias sociais são alvo de debate. Nessa subárea, formou-se um debate dividido entre teorias de posição social e teorias baseadas em identidade. Teorias de posição social entendem categorias sociais por meio de limitações e liberdades que são socialmente atreladas a um indivíduo. Por outro lado, teorias baseadas em identidade focam em experiências inerentes ao sujeito para responder essa questão. O presente texto centra-se em uma crítica realizada à teoria de posição social desenvolvida por Ásta. A crítica sugere uma incapacidade na categorização de identidades sexuais queer de indivíduos no armário, o que implica na sua exclusão sistemática de espaços queer. Na teoria de Ásta, categorias sociais são concebidas como sendo variáveis de acordo com o contexto onde a conferência delas ocorre. De acordo com Andler, esse modo de conceber categorias sociais leva a exclusão de pessoas com identidade sexual queer, pois pressupõe que o indivíduo apresente determinada orientação sexual para a conferência de determinada identidade sexual. Porém, como demonstrado neste texto, Ásta não postula a relação entre orientação sexual e identidade sexual como inerente ao processo de conferência.",
+      "link": "https://philpapers.org/go.pl?id=IMMOSA&proxyId=&u=https%3A%2F%2Fdx.doi.org%2F10.4013%2Fcon.2025.212.10"
+    }
+  ],
+  "en": []
+}

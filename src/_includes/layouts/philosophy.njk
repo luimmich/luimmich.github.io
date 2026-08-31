@@ -1,0 +1,85 @@
+---
+layout: base.njk
+custom_css: "philosophy.css"
+priority: 0.8
+---
+
+<main class="philosophy-page">
+
+  <!-- A HERO -->
+  <section class="philosophy-hero grid-philosophy reveal-element">
+    <div class="img-philosophy-hero">
+      {% image "/imgs/philosophy/lu-with-books.jpg", "Lu Immich with a philosophy book", "philosophy-img" %}
+    </div>
+    <p class="philosophy-area">{{ locales.philosophyPage.areas[locale] | safe }}</p>
+    
+    <div class="philosophy-intro">
+      <!-- O TEXTO MÁGICO ENTRA AQUI -->
+      {{ content | safe }}
+    </div>
+  </section>
+
+  <!-- A ESTANTE (Puxando do philosophy.json) -->
+  <section class="bookshelf-wrapper reveal-element">
+    {% for shelf in philosophy[locale] | batch(8) %}
+    {% set shelfIndex = loop.index0 %}
+    <ul class="bookshelf-row">
+      {% for book in shelf %}
+      <li class="book-item {% if shelfIndex == 0 and loop.index0 == 0 %}is-open{% endif %}"
+        style="--book-color: {{ book.color }}; --book-height: {{ book.height }};">
+
+        <div class="book-spine">
+          <span class="book-title-vertical">
+            <span class="book-spine-main">{{ book.title }}</span>
+            {% if book.subtitle %}<span class="book-spine-sub">{{ book.subtitle }}</span>{% endif %}
+          </span>
+        </div>
+
+        <div class="book-content">
+          <div class="book-meta">
+            <span class="small-caps">{{ book.type }}</span>
+            {% if book.publication %}<span class="book-meta-divider">&bull;</span><span class="book-publication">{{ book.publication }}</span>{% endif %}
+          </div>
+          <h2 class="book-title-expanded">
+            {{ book.title }}
+            {% if book.subtitle %}<span class="book-subtitle-expanded">{{ book.subtitle }}</span>{% endif %}
+          </h2>
+          {% if book.coauthors %}<p class="book-coauthors">{{ locales.philosophyPage.with[locale] }} {{ book.coauthors }}</p>{% endif %}
+          <p class="book-excerpt">{{ book.excerpt }}</p>
+          <a href="{{ book.link }}" target="_blank" rel="noopener noreferrer" class="book-btn">{{ locales.philosophyPage.readButton[locale] | safe }}</a>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+  </section>
+
+  <!-- A SANFONA (Puxando do philosophy_groups.json) -->
+  <section class="philosophy-groups grid-philosophy reveal-element">
+    <div class="philosophy-groups-content">
+      <p class="philosophy-groups-title">{{ locales.philosophyPage.beyondWriting[locale] }}</p>
+    </div>
+
+    <ul class="accordion-list">
+      {% for group in philosophy_groups[locale] %}
+      <li class="accordion-item">
+        <button type="button" class="accordion-header" aria-expanded="false">
+          <span class="accordion-title">{{ group.title }}</span>
+          <span class="accordion-icon">+</span>
+        </button>
+        <div class="accordion-content">
+          <div class="accordion-inner">
+            <p>{{ group.content | safe }}</p>
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+</main>
+<script id="tilted-books-data" type="application/json">
+  {{ philosophy_easter[locale] | dump | safe }}
+</script>
+
+<script src="/js/philosophy.js"></script>

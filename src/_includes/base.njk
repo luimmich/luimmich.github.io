@@ -115,7 +115,7 @@
   </script>
 
   <!-- GEO: Schema Markup de FAQPage Dinâmico (Lê a tag isFaq do about.json) -->
-  {% set faqs = about.accordion | selectattr("isFaq") %}
+  {% set faqs = about[locale].accordion | selectattr("isFaq") %}
   {% if faqs | length > 0 %}
   <script type="application/ld+json">
   {
@@ -170,7 +170,7 @@
           "Metafísica Feminista"
         ],
         "memberOf": [
-          {% for group in philosophy_groups %}
+          {% for group in philosophy_groups[locale] %}
           {
             "@type": "Organization",
             "name": "{{ group.title | safe }}"
@@ -178,7 +178,7 @@
           {% endfor %}
         ]
       }{% if philosophy.length > 0 %},{% endif %}
-      {% for book in philosophy %}
+      {% for book in philosophy[locale] %}
       {
         "@type": "ScholarlyArticle",
         "headline": "{{ book.title | safe }}{% if book.subtitle %}: {{ book.subtitle | safe }}{% endif %}",

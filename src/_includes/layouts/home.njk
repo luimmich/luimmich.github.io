@@ -1,9 +1,5 @@
 ---
 layout: base.njk
-title: Home
-permalink: "/"
-priority: 1.0
-changefreq: "weekly"
 ---
 
 <main class="hero">
@@ -14,41 +10,38 @@ changefreq: "weekly"
 
 <section class="home-container">
   
-
   <div class="grid-home home-funnel-cards">
-
-
-<!-- CARD 1: DESIGN -->
-    <a href="/design/" class="design-card funnel-card reveal-element"> <!-- Adicionado aqui -->
+    <!-- CARD 1: DESIGN -->
+    <a href="{{ locales.homePage.designUrl[locale] }}" class="design-card funnel-card reveal-element">
       <div class="funnel-img-wrapper">
-        {% image "/project-files/desan/desan1.webp", "Design", "funnel-img" %}
+        {% image "/project-files/desan/desan1.webp", locales.homePage.designTitle[locale], "funnel-img" %}
       </div>
       <div class="funnel-meta">
-        <p class="small-caps">Design</p>
+        <p class="small-caps">{{ locales.homePage.designTitle[locale] }}</p>
       </div>
     </a>
 
     <!-- CARD 2: FILOSOFIA -->
-    <a href="/filosofia/" class="philosophy-card funnel-card reveal-element"> 
+    <a href="{{ locales.homePage.philosophyUrl[locale] }}" class="philosophy-card funnel-card reveal-element"> 
       <div class="funnel-img-wrapper">
-        {% image "/project-files/home/home-philosophy.jpg", "Filosofia", "funnel-img" %}
+        {% image "/imgs/home/home-philosophy.jpg", locales.homePage.philosophyTitle[locale], "funnel-img" %}
       </div>
       <div class="funnel-meta">
-        <p class="small-caps">Filosofia</p>
+        <p class="small-caps">{{ locales.homePage.philosophyTitle[locale] }}</p>
       </div>
     </a>
-
   </div>
   
   <!-- CABEÇALHO SOBRE MIM -->
-  <div class="grid-home home-funnel-header reveal-element"> <!-- Adicionado aqui -->
+  <div class="grid-home home-funnel-header reveal-element">
     <div class="funnel-img-home funnel-img-wrapper">
-      {% image "/project-files/about/lu-immich.jpg", "Lu Immich", "funnel-img" %}
+      {% image "/imgs/about/lu-immich.jpg", "Lu Immich", "funnel-img" %}
     </div>
-    <div class="funnel-sub-title"><h1 class="indirect-title">Designer<br>Coffee Nerd<br>Doutoranda em Filosofia</h1></div>
-    <p class="funnel-desc">Entre ideias e interfaces, eu investigo o pensamento enquanto forma. Na Filosofia, busco combater a opressão a pessoas trans. No design, atuo projetando 
-    interações.</p>
-    <a class="funnel-link" href="/sobre/#contact">Entre em contato</a>
+    <div class="funnel-sub-title">
+      <h1 class="indirect-title">{{ locales.homePage.subtitle[locale] | safe }}</h1>
+    </div>
+    <p class="funnel-desc">{{ locales.homePage.description[locale] }}</p>
+    <a class="funnel-link" href="{{ locales.homePage.contactUrl[locale] }}">{{ locales.homePage.contactBtn[locale] }}</a>
   </div>
 </section>
 
@@ -56,7 +49,6 @@ changefreq: "weekly"
 <template id="optimized-images">
   {% for proj in home %}
   <div data-project-url="{{ proj.url }}">
-    <!-- Chama o shortcode passando a classe hero-img -->
     {% image proj.img, proj.title, "hero-img", "(max-width: 768px) 100vw, 800px" %}
   </div>
   {% endfor %}
@@ -92,16 +84,13 @@ changefreq: "weekly"
   const selectedProjects = getWeightedRandom(allProjects, maxToDraw);
 
   const ul = document.getElementById('hero-list');
-  // Captura o contêiner com as imagens processadas pelo Eleventy
   const templateImages = document.getElementById('optimized-images').content;
   let html = '';
 
   selectedProjects.forEach((proj, index) => {
     const num = String(index + 1).padStart(2, '0');
-
     const pictureTag = templateImages.querySelector(`[data-project-url="${proj.url}"]`).innerHTML;
 
-    // variavel substituida <p>[&nbsp${num}&nbsp]</p>
     html += `
         <li>
           <a href="${proj.url}">
@@ -113,7 +102,6 @@ changefreq: "weekly"
             </div>
           </a>
         </li>
-        <!-- Envolve a tag picture gerada no wrapper -->
         <div class="hero-picture-wrapper">
           ${pictureTag}
         </div>

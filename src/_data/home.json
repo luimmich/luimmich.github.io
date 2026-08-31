@@ -4,7 +4,7 @@
     "type": "Performance participativa",
     "year": "2026",
     "url": "/asterismo/",
-    "img": "/project-files/asterismo/asterismo-02.webp",
+    "img": "/assets/project-files/asterismo/asterismo-02.webp",
     "weight": 10
   },
   {
@@ -12,7 +12,7 @@
     "type": "Produto",
     "year": "2025",
     "url": "/k02/",
-    "img": "/project-files/k02/k02-04.webp",
+    "img": "/assets/project-files/k02/k02-04.webp",
     "weight": 15
   },
   {
@@ -20,7 +20,7 @@
     "type": "Identidade",
     "year": "2025",
     "url": "/desan/",
-    "img": "/project-files/desan/desan1.webp",
+    "img": "/assets/project-files/desan/desan1.webp",
     "weight": 15
   },
   {
@@ -28,7 +28,7 @@
     "type": "Produto",
     "year": "2024",
     "url": "/k01/",
-    "img": "/project-files/k01/k01-06.webp",
+    "img": "/assets/project-files/k01/k01-06.webp",
     "weight": 5
   },
   {
@@ -36,7 +36,7 @@
     "type": "Gráfico",
     "year": "2024",
     "url": "/leituras-queer/",
-    "img": "/project-files/leituras-queer/Cartaz-gravidade.webp",
+    "img": "/assets/project-files/leituras-queer/Cartaz-gravidade.webp",
     "weight": 3
   }
 ]

@@ -1,47 +1,119 @@
 {
-  "intro": "Me chamo <h1 class='indirect-title'>Lu Immich</h1>. De modo geral, em minha <i>práxis</i>, busco investigar a relação entre o social e o pessoal, seja <h2 class='indirect-title'>analisando estruturas sociais opressivas</h2> ou <h2 class='indirect-title'>projetando interações</h2>. Atualmente, sou doutoranda em Filosofia na <a href='https://www.ufsm.br/' target='_blank' rel='noopener noreferrer'>Universidade Federal de Santa Maria (UFSM)</a>, instituição onde também concluí meu mestrado e meu bacharelado. Quando não estou imersa no trabalho, busco experiências analógicas. Passo meu tempo livre explorando métodos de extração de cafés especiais e fazendo longos passeios com minha (cão)panheira, <span class='heart-cursor'>Laika</span>.",
-  "accordion": [
-    {
-      "title": "<h3 class='indirect-title'>Áreas de atuação na Filosofia</h3>",
-      "type": "list",
-      "items": ["Filosofia Social", "Filosofia Política", "Ontologia Social", "Filosofia Trans"],
-      "hideOnMobile": false
-    },
-    {
-      "title": "<h3 class='indirect-title'>Áreas de atuação no Design</h3>",
-      "type": "list",
-      "items": ["UI/UX Design", "Design Gráfico", "Web Design", "Web Development"],
-      "hideOnMobile": false,
-      "hideOnDesktop": false
-    },
-    {
-      "title": "Proficiência em Idiomas",
-      "type": "chart",
-      "items": [
-        { "name": "Inglês", "level": 80 },
-        { "name": "Português", "level": 100 },
-        { "name": "Espanhol", "level": 40 }
-      ],
-      "hideOnMobile": false,
-      "hideOnDesktop": false
-    },
-    {
-      "title": "Extração de Cafés",
-      "type": "chart",
-      "items": [
-        { "name": "Hario V60", "level": 70 },
-        { "name": "Prensa Francesa", "level": 90 },
-        { "name": "Hario Mugen", "level": 80 }
-      ],
-      "hideOnMobile": true,
-      "hideOnDesktop": false
-    },
-    {
-      "title": "Você atua como parecerista?",
-      "type": "text",
-      "content": "Sim, sempre que possível busco engajar-me em pareceres. Para mais detalhes entrar em contato: <a href='mailto:lu.immich@gmail.com'>lu.immich@gmail.com</a>",
-      "hideOnMobile": false,
-      "isFaq": true
-    }
-  ]
+  "pt": {
+    "intro": "Me chamo <h1 class='indirect-title'>Lu Immich</h1>. De modo geral, em minha <i>práxis</i>, busco investigar a relação entre o social e o pessoal, seja <h2 class='indirect-title'>analisando estruturas sociais opressivas</h2> ou <h2 class='indirect-title'>projetando interações</h2>. Atualmente, sou doutoranda em Filosofia na <a href='https://www.ufsm.br/' target='_blank' rel='noopener noreferrer'>Universidade Federal de Santa Maria (UFSM)</a>, instituição onde também concluí meu mestrado e meu bacharelado. Quando não estou imersa no trabalho, busco experiências analógicas. Passo meu tempo livre explorando métodos de extração de cafés especiais e fazendo longos passeios com minha (cão)panheira, <span class='heart-cursor'>Laika</span>.",
+    "accordion": [
+      {
+        "title": "<h3 class='indirect-title'>Áreas de atuação na Filosofia</h3>",
+        "type": "list",
+        "items": ["Filosofia Social", "Filosofia Política", "Ontologia Social", "Filosofia Trans"],
+        "hideOnMobile": false
+      },
+      {
+        "title": "<h3 class='indirect-title'>Áreas de atuação no Design</h3>",
+        "type": "list",
+        "items": ["UI/UX Design", "Design Gráfico", "Web Design", "Web Development"],
+        "hideOnMobile": false,
+        "hideOnDesktop": false
+      },
+      {
+        "title": "Proficiência em Idiomas",
+        "type": "chart",
+        "items": [
+          { "name": "Inglês", "level": 80 },
+          { "name": "Português", "level": 100 },
+          { "name": "Espanhol", "level": 40 }
+        ],
+        "hideOnMobile": false,
+        "hideOnDesktop": false
+      },
+      {
+        "title": "Extração de Cafés",
+        "type": "chart",
+        "items": [
+          { "name": "Hario V60", "level": 70 },
+          { "name": "Prensa Francesa", "level": 90 },
+          { "name": "Hario Mugen", "level": 80 }
+        ],
+        "hideOnMobile": true,
+        "hideOnDesktop": false
+      },
+      {
+        "title": "Você atua como parecerista?",
+        "type": "text",
+        "content": "Sim, sempre que possível busco engajar-me em pareceres. Para mais detalhes entrar em contato: <a href='mailto:lu.immich@gmail.com'>lu.immich@gmail.com</a>",
+        "hideOnMobile": false,
+        "isFaq": true
+      }
+    ]
+  },
+  "en": {
+    "intro": "My name is <h1 class='indirect-title'>Lu Immich</h1>. Generally speaking, in my <i>praxis</i>, I seek to investigate the relationship between the social and the personal, whether by <h2 class='indirect-title'>analyzing oppressive social structures</h2> or <h2 class='indirect-title'>designing interactions</h2>. I am currently a doctoral candidate in Philosophy at the <a href='https://www.ufsm.br/' target='_blank' rel='noopener noreferrer'>Federal University of Santa Maria (UFSM)</a>, the institution where I also completed my master's and bachelor's degrees. When I am not immersed in work, I seek out analog experiences. I spend my free time exploring specialty coffee extraction methods and taking long walks with my canine companion, <span class='heart-cursor'>Laika</span>.",
+    "accordion": [
+      {
+        "title": "<h3 class='indirect-title'>Areas of Expertise in Philosophy</h3>",
+        "type": "list",
+        "items": [
+          "Social Philosophy",
+          "Political Philosophy",
+          "Social Ontology",
+          "Trans Philosophy"
+        ],
+        "hideOnMobile": false
+      },
+      {
+        "title": "<h3 class='indirect-title'>Areas of Expertise in Design</h3>",
+        "type": "list",
+        "items": ["UI/UX Design", "Graphic Design", "Web Design", "Web Development"],
+        "hideOnMobile": false,
+        "hideOnDesktop": false
+      },
+      {
+        "title": "Language Proficiency",
+        "type": "chart",
+        "items": [
+          {
+            "name": "English",
+            "level": 80
+          },
+          {
+            "name": "Portuguese",
+            "level": 100
+          },
+          {
+            "name": "Spanish",
+            "level": 40
+          }
+        ],
+        "hideOnMobile": false,
+        "hideOnDesktop": false
+      },
+      {
+        "title": "Coffee Extraction",
+        "type": "chart",
+        "items": [
+          {
+            "name": "Hario V60",
+            "level": 70
+          },
+          {
+            "name": "French Press",
+            "level": 90
+          },
+          {
+            "name": "Hario Mugen",
+            "level": 80
+          }
+        ],
+        "hideOnMobile": true,
+        "hideOnDesktop": false
+      },
+      {
+        "title": "Do you act as a peer reviewer?",
+        "type": "text",
+        "content": "Yes, whenever possible I seek to engage in peer review. For more details, please contact: <a href='mailto:lu.immich@gmail.com'>lu.immich@gmail.com</a>",
+        "hideOnMobile": false,
+        "isFaq": true
+      }
+    ]
+  }
 }

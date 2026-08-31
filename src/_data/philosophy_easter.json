@@ -1,16 +1,34 @@
-[
-  {
-    "id": "empty-01",
-    "title": "ÉTICA",
-    "subtitle": "Espinosa",
-    "height": "38vh",
-    "color": "#ff996a"
-  },
-  {
-    "id": "empty-02",
-    "title": "FICCIONES",
-    "subtitle": "Jorge Luís Borges",
-    "height": "38vh",
-    "color": "#ff796a"
-  }
-]
+{
+  "pt": [
+    {
+      "id": "empty-01",
+      "title": "Ética",
+      "subtitle": "Espinosa",
+      "height": "38vh",
+      "color": "#ff996a"
+    },
+    {
+      "id": "empty-02",
+      "title": "Ficções",
+      "subtitle": "Jorge Luís Borges",
+      "height": "38vh",
+      "color": "#ff796a"
+    }
+  ],
+  "en": [
+    {
+      "id": "empty-01",
+      "title": "Ethics",
+      "subtitle": "Spinoza",
+      "height": "38vh",
+      "color": "#ff996a"
+    },
+    {
+      "id": "empty-02",
+      "title": "Fictions",
+      "subtitle": "Jorge Luís Borges",
+      "height": "38vh",
+      "color": "#ff796a"
+    }
+  ]
+}

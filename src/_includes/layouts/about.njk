@@ -1,18 +1,12 @@
 ---
 layout: base.njk
-title: Sobre
-permalink: "/sobre/"
 custom_css: "about.css"
-priority: 0.9
-changefreq: "weekly"
 ---
 
 <main class="about-cv">
-  
-  <!-- CABEÇALHO -->
   <div class="cv-grid cv-header">
     <div class="cv-img-header cv-img-wrapper reveal-element">
-      {% image "/project-files/about/lu-immich.jpg", "Lu Immich", "funnel-img" %}
+      {% image "/imgs/about/lu-immich.jpg", "Lu Immich", "funnel-img" %}
     </div>
     <div id="contact" class="contact-anchor"></div>
     <div class="cv-contact reveal-element">
@@ -23,16 +17,15 @@ changefreq: "weekly"
       <a href="https://scholar.google.com/citations?user=c6EDyWMAAAAJ" target="_blank" rel="noopener">Google Scholar</a>
       <a href="mailto:lu.immich@gmail.com">lu.immich@gmail.com</a>
     </div>
-    <div class="cv-intro-text reveal-element">{{ about.intro | safe }}</div>
+    <div class="cv-intro-text reveal-element">{{ about[locale].intro | safe }}</div>
   </div>
 
-  <!-- A NOVA SANFONA DINÂMICA -->
   <div class="cv-content reveal-element fade-on-scroll">
     <div class="philosophy-groups-content">
-      <p class="philosophy-groups-title">Saiba mais</p>
+      <p class="philosophy-groups-title">{{ locales.aboutPage.learnMore[locale] }}</p>
     </div>
     <ul class="accordion-list reveal-element">
-      {% for item in about.accordion %}
+      {% for item in about[locale].accordion %}
       <li class="accordion-item{% if item.hideOnMobile %} hidden-mobile{% endif %}{% if item.hideOnDesktop %} hidden-desktop{% endif %}">
         <button type="button" class="accordion-header" aria-expanded="false">
           <span class="accordion-title">{{ item.title | safe }}</span>
@@ -40,20 +33,14 @@ changefreq: "weekly"
         </button>
         <div class="accordion-content">
           <div class="accordion-inner">
-            
-            <!-- Renderiza Texto -->
             {% if item.type == 'text' %}
               <p>{{ item.content | safe }}</p>
-            
-            <!-- Renderiza Listas -->
             {% elif item.type == 'list' %}
               <ul class="cv-list">
                 {% for listItem in item.items %}
                   <li>{{ listItem }}</li>
                 {% endfor %}
               </ul>
-            
-            <!-- Renderiza Gráficos/Tabelas -->
             {% elif item.type == 'chart' %}
               <div class="cv-chart-list">
                 {% for chartItem in item.items %}
@@ -66,11 +53,12 @@ changefreq: "weekly"
                 {% endfor %}
               </div>
             {% endif %}
-
           </div>
         </div>
       </li>
       {% endfor %}
     </ul>
   </div>
+  
+  {{ content | safe }}
 </main>
