@@ -1,0 +1,17 @@
+---
+layout: base.njk
+excludeFromSitemap: true
+---
+
+<main class="not-found">
+  <p class="not-found-title">404</p>
+  <div class="not-found-container">
+    <p class="not-found-text">
+      {{ locales.notFound.message[locale] }}
+    </p>
+    
+    <!-- Define se volta para "/" ou "/en/" dependendo de onde o usuário se perdeu -->
+    {% set rootPath = "/" if locale == "pt" else "/" ~ locale ~ "/" %}
+    <a class="not-found-text" href="{{ rootPath }}">{{ locales.notFound.backHome[locale] }}</a>
+  </div>
+</main>

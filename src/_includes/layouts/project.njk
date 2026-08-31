@@ -1,0 +1,33 @@
+---
+layout: base.njk
+---
+<main class="project">
+  <div class="project-container">
+    <h1 class="project-title">{{ title | safe }}</h1>
+    <p class="project-team">{{ team | safe }}</p>
+
+    <div class="project-description">
+      <!-- Injeta o texto vindo do frontmatter -->
+      {{ description_html | safe }}
+    </div>
+
+    <div class="project-desc-container">
+      <p class="project-year"><b>{{ year }}</b></p>
+      
+      {% if link_url %}
+        <a class="project-in-use" href="{{ link_url }}" target="_blank" rel="noopener">{{ link_label }}</a>
+      {% endif %}
+      
+      {% if client %}
+        <p class="project-client">{{ client | safe }}</p>
+      {% endif %}
+      
+      {% if state %}
+        <p class="project-state">{{ state }}</p>
+      {% endif %}
+    </div>
+  </div>
+</main>
+
+<!-- O corpo do arquivo (imagens, modals do Asterismo e scripts) será renderizado aqui -->
+{{ content | safe }}

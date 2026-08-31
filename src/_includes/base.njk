@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="{{ 'en-US' if locale == 'en' else 'pt-BR' }}">
 <head>
   <meta charset="UTF-8">
 
@@ -8,40 +8,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="google-site-verification" content="o2YMMty1BEuB8c6x55yYYqjvDjgNujVhYwkxwE9V5Gg" />
 
-  <!-- SEO BÁSICO -->
-  <title>{% if page.url == '/' %}{{ site.name }} | Portfólio de Filosofia e Design{% elif title %}{{ site.name }} | {{ title }}{% else %}{{ site.name }}{% endif %}</title>
-  <meta name="description" content="{{ description | default(site.description) }}">
-  <meta name="author" content="{{ site.author }}">
-  <meta name="keywords" content="{{ keywords | default('Lu Immich, design, filosofia, ontologia social, desenho industrial, ui/ux') }}">
+ <!-- SEO BÁSICO -->
+  <title>{% if page.url == '/' or page.url == '/en/' %}{{ site[locale].name }} | {{ site[locale].description }}{% elif title %}{{ title | safe }} | {{ site[locale].name }}{% else %}{{ site[locale].name }}{% endif %}</title>
+  <meta name="description" content="{{ description | default(site[locale].description) }}">
+  <meta name="author" content="{{ site[locale].author }}">
+  <meta name="keywords" content="{{ keywords | default(locales.seo.keywords[locale]) }}">
   <meta name="theme-color" content="#ffffff" />
 
   <!-- Canonical URL -->
-  <link rel="canonical" href="{{ site.url }}{{ page.url }}">
+  <link rel="canonical" href="{{ site[locale].url }}{{ page.url }}">
   
   <!-- OPEN GRAPH / REDES SOCIAIS -->
   <meta property="og:type" content="{% if isProject %}article{% else %}website{% endif %}">
-  <meta property="og:url" content="{{ site.url }}{{ page.url }}">
-  <meta property="og:title" content="{% if page.url == '/' %}{{ site.name }} | Portfólio de Filosofia e Design{% elif title %}{{ title }} | {{ site.name }}{% else %}{{ site.name }}{% endif %}">
-  <meta property="og:description" content="{{ description | default(site.description) }}">
-  <meta property="og:image" content="{{ site.url }}{{ image | default('/icons/favicon/android-chrome-512x512.png') }}">
+  <meta property="og:url" content="{{ site[locale].url }}{{ page.url }}">
+  <meta property="og:title" content="{% if page.url == '/' or page.url == '/en/' %}{{ site[locale].name }} | {{ site[locale].description }}{% elif title %}{{ title | safe }} | {{ site[locale].name }}{% else %}{{ site[locale].name }}{% endif %}">
+  <meta property="og:description" content="{{ description | default(site[locale].description) }}">
+  <meta property="og:image" content="{{ site[locale].url }}{{ image | default('/icons/favicon/android-chrome-512x512.png') }}">
   
   <!-- TWITTER CARDS -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="{% if page.url == '/' %}{{ site.name }} | Portfólio de Filosofia e Design{% elif title %}{{ title }} | {{ site.name }}{% else %}{{ site.name }}{% endif %}">
-  <meta name="twitter:description" content="{{ description | default(site.description) }}">
-  <meta name="twitter:image" content="{{ site.url }}{{ image | default('/icons/favicon/android-chrome-512x512.png') }}">
+  <meta name="twitter:title" content="{% if page.url == '/' or page.url == '/en/' %}{{ site[locale].name }} | {{ site[locale].description }}{% elif title %}{{ title | safe }} | {{ site[locale].name }}{% else %}{{ site[locale].name }}{% endif %}">
+  <meta name="twitter:description" content="{{ description | default(site[locale].description) }}">
+  <meta name="twitter:image" content="{{ site[locale].url }}{{ image | default('/icons/favicon/android-chrome-512x512.png') }}">
 
-  <!-- JSON-LD GLOBAL (Desativado na Sobre e Filosofia para evitar duplicação) -->
-  {% if page.url != '/sobre/' and page.url != '/filosofia/' %}
+  <!-- JSON-LD GLOBAL -->
+  {% if page.url != '/sobre/' and page.url != '/en/about/' and page.url != '/filosofia/' and page.url != '/en/philosophy/' %}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "{% if isProject %}CreativeWork{% else %}Person{% endif %}",
-    "name": "{% if title %}{{ title }}{% else %}{{ site.name }}{% endif %}",
-    "description": "{{ description | default(site.description) }}",
-    "url": "{{ site.url }}{{ page.url }}",
+    "name": "{% if title %}{{ title | safe }}{% else %}{{ site[locale].name }}{% endif %}",
+    "description": "{{ description | default(site[locale].description) }}",
+    "url": "{{ site[locale].url }}{{ page.url }}",
     {% if not isProject %}
-    "jobTitle": "Filósofa e Designer",
+    "jobTitle": "{{ locales.seo.jobTitleGlobal[locale] }}",
     "affiliation": {
       "@type": "Organization",
       "name": "Universidade Federal de Santa Maria"
@@ -49,7 +49,7 @@
     {% endif %}
     "author": {
       "@type": "Person",
-      "name": "{{ site.author }}"
+      "name": "{{ site[locale].author }}"
     }
   }
   </script>
@@ -59,7 +59,6 @@
   <link rel="preload" href="/fonts/jost/jost-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/css/style.css" type="text/css" charset="utf-8" />
   
-  <!-- CSS Dinâmico -->
   {% if custom_css %}
   <link rel="stylesheet" href="/css/{{ custom_css }}" type="text/css" charset="utf-8" />
   {% endif %}
@@ -75,20 +74,16 @@
   <!-- Analytics -->
   <script defer src="https://cloud.umami.is/script.js" data-website-id="91642bab-227b-4ca6-ad87-ab49f95f044e"></script>
 
-<!-- GEO: Schema Markup de Entidade (Person) e FAQ para a página Sobre -->
-  {% if page.url == '/sobre/' %}
+  <!-- GEO: Schema Markup da página Sobre -->
+  {% if page.url == '/sobre/' or page.url == '/en/about/' %}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "Person",
     "name": "Lu Immich",
-    "url": "https://luimmich.github.io/sobre/",
-    "jobTitle": [
-      "Doutoranda em Filosofia",
-      "UI/UX Designer",
-      "Desenvolvedora Web"
-    ],
-    "description": "A pesquisa acadêmica de Lu Immich concentra-se na ontologia social, área na qual ela investiga a existência trans em contextos não ideais. Atualmente, Lu é doutoranda em Filosofia pela Universidade Federal de Santa Maria (UFSM), com experiência em design e desenvolvimento web.",
+    "url": "{{ site.url }}{{ page.url }}",
+    "jobTitle": {{ locales.seo.jobTitleAbout[locale] | dump | safe }},
+    "description": "{{ locales.seo.aboutDescription[locale] }}",
     "alumniOf": {
       "@type": "CollegeOrUniversity",
       "name": "Universidade Federal de Santa Maria (UFSM)",
@@ -114,7 +109,6 @@
   }
   </script>
 
-  <!-- GEO: Schema Markup de FAQPage Dinâmico (Lê a tag isFaq do about.json) -->
   {% set faqs = about[locale].accordion | selectattr("isFaq") %}
   {% if faqs | length > 0 %}
   <script type="application/ld+json">
@@ -125,10 +119,10 @@
       {% for faq in faqs %}
       {
         "@type": "Question",
-        "name": "{{ faq.title | replace('\"', '\\\"') | safe }}",
+        "name": "{{ faq.title | striptags | replace('\"', '\\\"') | safe }}",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "{{ faq.content | replace('\"', '\\\"') | replace('\n', ' ') | safe }}"
+          "text": "{{ faq.content | striptags | replace('\"', '\\\"') | replace('\n', ' ') | safe }}"
         }
       }{% if not loop.last %},{% endif %}
       {% endfor %}
@@ -138,25 +132,25 @@
   {% endif %}
   {% endif %}
 
-  <!-- GEO: Schema Markup de Grafo Acadêmico para a página Filosofia -->
-  {% if page.url == '/filosofia/' %}
+  <!-- GEO: Schema Markup da página Filosofia -->
+  {% if page.url == '/filosofia/' or page.url == '/en/philosophy/' %}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "ProfilePage",
-        "@id": "https://luimmich.github.io/filosofia/#webpage",
-        "url": "https://luimmich.github.io/filosofia/",
-        "name": "Filosofia - Lu Immich",
-        "mainEntity": { "@id": "https://luimmich.github.io/#person" }
+        "@id": "{{ site.url }}{{ page.url }}#webpage",
+        "url": "{{ site.url }}{{ page.url }}",
+        "name": "{{ title | safe }} - Lu Immich",
+        "mainEntity": { "@id": "{{ site.url }}/#person" }
       },
       {
         "@type": "Person",
-        "@id": "https://luimmich.github.io/#person",
+        "@id": "{{ site.url }}/#person",
         "name": "Lu Immich",
-        "jobTitle": "Doutoranda em Filosofia",
-        "description": "Pesquisadora em Ontologia Social com foco em categorias de gênero trans e estratégias de resistência à opressão em contextos não ideais, utilizando um framework conferista e engenharia conceitual.",
+        "jobTitle": "{{ locales.seo.jobTitleAbout[locale][0] }}",
+        "description": "{{ locales.seo.philosophyDescription[locale] }}",
         "affiliation": {
           "@type": "CollegeOrUniversity",
           "name": "Universidade Federal de Santa Maria (UFSM)",
@@ -173,16 +167,16 @@
           {% for group in philosophy_groups[locale] %}
           {
             "@type": "Organization",
-            "name": "{{ group.title | safe }}"
+            "name": "{{ group.title | striptags | safe }}"
           }{% if not loop.last %},{% endif %}
           {% endfor %}
         ]
-      }{% if philosophy.length > 0 %},{% endif %}
+      }{% if philosophy[locale].length > 0 %},{% endif %}
       {% for book in philosophy[locale] %}
       {
         "@type": "ScholarlyArticle",
         "headline": "{{ book.title | safe }}{% if book.subtitle %}: {{ book.subtitle | safe }}{% endif %}",
-        "author": { "@id": "https://luimmich.github.io/#person" },
+        "author": { "@id": "{{ site.url }}/#person" },
         "publisher": {
           "@type": "Organization",
           "name": "{{ book.publication | safe }}"
@@ -199,25 +193,33 @@
 
 <body>
   <nav class="nav">
-    <a class="nav-title" href="/">Lu Immich</a>
-    <button class="mobile-menu-btn small-caps" aria-label="Abrir menu" aria-expanded="false">
-      Menu
-    </button>
+    <a class="nav-title" href="{{ locales.nav.home.url[locale] }}">Lu Immich</a>
+    
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <!-- Language Switcher -->
+      <a href="{% if locale == 'en' %}/{% else %}/en/{% endif %}" class="language-switcher small-caps" aria-label="Mudar idioma">
+        {{ 'PT' if locale == 'en' else 'EN' }}
+      </a>
+      
+      <button class="mobile-menu-btn small-caps" aria-label="{{ locales.nav.menu[locale] }}" aria-expanded="false">
+        {{ locales.nav.menu[locale] }}
+      </button>
+    </div>
   </nav>
 
   <!-- Menu Overlay -->
   <div class="mobile-overlay">
     <div class="mobile-overlay-header">
       <span class="mobile-overlay-title">Lu Immich</span>
-      <button class="mobile-close-btn small-caps" aria-label="Fechar menu">Fechar</button>
+      <button class="mobile-close-btn small-caps" aria-label="{{ locales.nav.close[locale] }}">{{ locales.nav.close[locale] }}</button>
     </div>
 
     <div class="mobile-overlay-content">
       <ul class="mobile-nav-list">
-        <li><a href="/"><span class="nav-number">[&nbsp&nbsp]</span> Home</a></li>
-        <li><a href="/filosofia/"><span class="nav-number">[&nbsp&nbsp]</span> Filosofia</a></li>
-        <li><a href="/design/"><span class="nav-number">[&nbsp&nbsp]</span> Design</a></li>
-        <li><a href="/sobre/"><span class="nav-number">[&nbsp&nbsp]</span> Sobre</a></li>
+        <li><a href="{{ locales.nav.home.url[locale] }}"><span class="nav-number">[&nbsp&nbsp]</span> {{ locales.nav.home[locale] }}</a></li>
+        <li><a href="{{ locales.nav.philosophy.url[locale] }}"><span class="nav-number">[&nbsp&nbsp]</span> {{ locales.nav.philosophy[locale] }}</a></li>
+        <li><a href="{{ locales.nav.design.url[locale] }}"><span class="nav-number">[&nbsp&nbsp]</span> {{ locales.nav.design[locale] }}</a></li>
+        <li><a href="{{ locales.nav.about.url[locale] }}"><span class="nav-number">[&nbsp&nbsp]</span> {{ locales.nav.about[locale] }}</a></li>
       </ul>
     </div>
   </div>
@@ -226,9 +228,9 @@
 
   <footer class="flex--column">
     <div class="footer-license">
-      <a class="made-with-love heart-cursor" href="/sobre/#contact">Feito com amor por Lu Immich</a>
+      <a class="made-with-love heart-cursor" href="{{ locales.nav.about.url[locale] }}#contact">{{ locales.footer.madeWithLove[locale] }}</a>
       
-      <a class="license-icons" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
+      <a class="license-icons" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noopener">
         <img src="/icons/license/cc.svg" alt="CC">
         <img src="/icons/license/by.svg" alt="BY">
         <img src="/icons/license/nc.svg" alt="NC">

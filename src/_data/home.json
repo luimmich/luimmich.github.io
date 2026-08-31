@@ -1,42 +1,86 @@
-[
-  {
-    "title": "Asterismo",
-    "type": "Performance participativa",
-    "year": "2026",
-    "url": "/asterismo/",
-    "img": "/assets/project-files/asterismo/asterismo-02.webp",
-    "weight": 10
-  },
-  {
-    "title": "Teclado K02",
-    "type": "Produto",
-    "year": "2025",
-    "url": "/k02/",
-    "img": "/assets/project-files/k02/k02-04.webp",
-    "weight": 15
-  },
-  {
-    "title": "DESAN",
-    "type": "Identidade",
-    "year": "2025",
-    "url": "/desan/",
-    "img": "/assets/project-files/desan/desan1.webp",
-    "weight": 15
-  },
-  {
-    "title": "Teclado K01",
-    "type": "Produto",
-    "year": "2024",
-    "url": "/k01/",
-    "img": "/assets/project-files/k01/k01-06.webp",
-    "weight": 5
-  },
-  {
-    "title": "Leituras Queer",
-    "type": "Gráfico",
-    "year": "2024",
-    "url": "/leituras-queer/",
-    "img": "/assets/project-files/leituras-queer/Cartaz-gravidade.webp",
-    "weight": 3
-  }
-]
+{
+  "pt": [
+    {
+      "title": "Asterismo",
+      "type": "Performance participativa",
+      "year": "2026",
+      "url": "/asterismo/",
+      "img": "/assets/project-files/asterismo/asterismo-02.webp",
+      "weight": 10
+    },
+    {
+      "title": "Teclado K02",
+      "type": "Produto",
+      "year": "2025",
+      "url": "/k02/",
+      "img": "/assets/project-files/k02/k02-04.webp",
+      "weight": 15
+    },
+    {
+      "title": "DESAN",
+      "type": "Identidade",
+      "year": "2025",
+      "url": "/desan/",
+      "img": "/assets/project-files/desan/desan1.webp",
+      "weight": 15
+    },
+    {
+      "title": "Teclado K01",
+      "type": "Produto",
+      "year": "2024",
+      "url": "/k01/",
+      "img": "/assets/project-files/k01/k01-06.webp",
+      "weight": 5
+    },
+    {
+      "title": "Leituras Queer",
+      "type": "Gráfico",
+      "year": "2024",
+      "url": "/leituras-queer/",
+      "img": "/assets/project-files/leituras-queer/Cartaz-gravidade.webp",
+      "weight": 3
+    }
+  ],
+  "en": [
+    {
+      "title": "Asterism",
+      "type": "Participatory performance",
+      "year": "2026",
+      "url": "/en/asterismo/",
+      "img": "/assets/project-files/asterismo/asterismo-02.webp",
+      "weight": 10
+    },
+    {
+      "title": "K02 Keyboard",
+      "type": "Product",
+      "year": "2025",
+      "url": "/en/k02/",
+      "img": "/assets/project-files/k02/k02-04.webp",
+      "weight": 15
+    },
+    {
+      "title": "DESAN",
+      "type": "Identity",
+      "year": "2025",
+      "url": "/en/desan/",
+      "img": "/assets/project-files/desan/desan1.webp",
+      "weight": 15
+    },
+    {
+      "title": "K01 Keyboard",
+      "type": "Product",
+      "year": "2024",
+      "url": "/en/k01/",
+      "img": "/assets/project-files/k01/k01-06.webp",
+      "weight": 5
+    },
+    {
+      "title": "Queer Readings",
+      "type": "Graphic",
+      "year": "2024",
+      "url": "/en/leituras-queer/",
+      "img": "/assets/project-files/leituras-queer/Cartaz-gravidade.webp",
+      "weight": 3
+    }
+  ]
+}

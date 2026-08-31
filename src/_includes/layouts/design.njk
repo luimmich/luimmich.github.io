@@ -1,7 +1,5 @@
 ---
 layout: base.njk
-title: Design
-permalink: "/design/"
 custom_css: "archive.css"
 priority: 0.8
 ---
@@ -10,9 +8,9 @@ priority: 0.8
   <section class="archive-hero">
     <div class="archive-links-container">
       
-      {% for sheet in archive %}
+      <!-- Lendo do idioma correto -->
+      {% for sheet in archive[locale] %}
       <div class="archive-link">
-        <!-- 1. O botão com a injeção do style está no lugar certo agora (dentro do arquivo 3D) -->
         <button class="archive-tag-container" 
                 data-target="{{ sheet.id }}" 
                 aria-expanded="false"
@@ -46,18 +44,16 @@ priority: 0.8
 
   <section class="archive-sheets-container">
     
-    {% for sheet in archive %}
-    <!-- 2. A div principal da pasta (e o ID dela) foram restaurados para o JS poder abri-la -->
+    <!-- Lendo do idioma correto -->
+    {% for sheet in archive[locale] %}
     <div class="archive-sheet" id="archive-sheet-{{ sheet.id }}">
       
-      <!-- O cabeçalho estático da pasta aberta -->
       <div class="archive-tag-container">
         <div class="archive-tag"></div>
         <div class="archive-tag-small"></div>
         <p class="archive-tag-year">{{ sheet.category }}</p>
       </div>
       
-      <!-- As imagens -->
       <div class="archive-item-container">
         {% for item in sheet.items %}
         <div class="archive-item">
@@ -74,9 +70,9 @@ priority: 0.8
     
   </section>
 
-  <!-- 3. Botão brutalista para fechar a pasta e voltar -->
-  <button id="close-folder-btn" class="close-folder-btn" aria-label="Guardar pasta no arquivo">
-    Guardar Pasta
+  <!-- Botão Traduzido Dinamicamente -->
+  <button id="close-folder-btn" class="close-folder-btn" aria-label="{{ locales.designPage.closeFolderAria[locale] }}">
+    {{ locales.designPage.closeFolder[locale] }}
   </button>
 
 </main>

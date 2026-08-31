@@ -1,5 +1,5 @@
 ---
-layout: base.njk
+layout: layouts/project.njk
 title: Asterismo
 permalink: "/asterismo/"
 isProject: true
@@ -7,26 +7,17 @@ description: "Asterismo é uma ferramenta conceitual e performance participativa
 image: "/project-files/asterismo/asterismo-06.webp"
 custom_css: "asterismo.css"
 priority: 0.6
+year: "2026"
+team: "<b>Lu Immich </b><br class='project-team-line-break'>(Design)"
+description_html: |
+  <p><b>ÁSTER (estrela) + ISMO (ação)</b><br>Asterismo é uma ferramenta conceitual para criar sentido coletivamente. Sua proposta central é contra-intuitiva, em vez de impor sentido ao que emerge, deve-se deixar o sentido aparecer na inter(ação). O terreno desta ação é um céu estrelado. Sobre ele as participantes conectam estrelas traçando linhas em um gesto contínuo.</p>
+  <p>O que emerge dos traços é uma configuração que não teria surgido de nenhuma intenção isolada. O sentido desta configuração encontra-se suspenso. É nesse estado de suspensão que as participantes agem coletivamente atribuindo sentido ao que emergiu. Ao final, o Céu Noturno é um registro único do que aconteceu naquele encontro específico.</p>
 ---
-
-<main class="project">
-  <div class="project-container">
-    <h1 class="project-title">Asterismo</h1>
-    <p class="project-team"><b>Lu Immich </b><br class="project-team-line-break">(Design)</p>
-<div class="project-description">
-      <p><b>ÁSTER (estrela) + ISMO (ação)</b><br>Asterismo é uma ferramenta conceitual para criar sentido coletivamente. Sua proposta central é contra-intuitiva, em vez de impor sentido ao que emerge, deve-se deixar o sentido aparecer na inter(ação). O terreno desta ação é um céu estrelado. Sobre ele as participantes conectam estrelas traçando linhas em um gesto contínuo.</p>
-      <p>O que emerge dos traços é uma configuração que não teria surgido de nenhuma intenção isolada. O sentido desta configuração encontra-se suspenso. É nesse estado de suspensão que as participantes agem coletivamente atribuindo sentido ao que emergiu. Ao final, o Céu Noturno é um registro único do que aconteceu naquele encontro específico.</p>
-    </div>
-    <div class="project-desc-container">
-      <p class="project-year"><b>2026</b></p>
-    </div>
-  </div>
-</main>
 
 <section class="project-img-container">
   {% image "project-files/asterismo/asterismo-06.webp", "Manual", "project-img" %}
   {% image "project-files/asterismo/asterismo-02.webp", "Tabuleiro imitando um céu estrelado", "project-img" %}
-  {% image "project-files/asterismo/asterismo-03.webp", "Cronometro", "project-img" %}
+  {% image "project-files/asterismo/asterismo-03.webp", "Cronômetro", "project-img" %}
 
   <div class="constellation-panel-container">
     <h3>Vamos?</h3>
@@ -34,7 +25,8 @@ priority: 0.6
       <canvas id="skyCanvas"></canvas>
     </div>  
     <div class="constellation-panel-description">
-        <a href="/projects/asterismo/asterismo-instrucoes.pdf" download>Instruções</a>
+        <!-- Rota de download corrigida -->
+        <a href="/project-files/asterismo/asterismo-instrucoes.pdf" download>Instruções</a>
         <a id="btn-open-timer">Cronômetro</a>
         <a id="btn-download">Baixe o tabuleiro</a>
         <a id="btn-generate">Embaralhar o tabuleiro</a>

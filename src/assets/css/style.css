@@ -226,6 +226,7 @@ section:last-of-type {
 .nav-title {
   font-weight: 400;
 }
+
 @media (max-width: 1000px) {
   .nav div a {
     padding: 0.3rem;

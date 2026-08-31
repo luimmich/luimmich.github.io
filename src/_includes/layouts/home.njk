@@ -47,7 +47,7 @@ layout: base.njk
 
 <!-- Pré-renderiza todas as imagens otimizadas no build -->
 <template id="optimized-images">
-  {% for proj in home %}
+  {% for proj in home[locale] %}
   <div data-project-url="{{ proj.url }}">
     {% image proj.img, proj.title, "hero-img", "(max-width: 768px) 100vw, 800px" %}
   </div>
@@ -55,7 +55,7 @@ layout: base.njk
 </template>
 
 <script>
-  const allProjects = {{ home | dump | safe }};
+  const allProjects = {{ home[locale] | dump | safe }};
 
   function getWeightedRandom(projects, count) {
     let result = [];

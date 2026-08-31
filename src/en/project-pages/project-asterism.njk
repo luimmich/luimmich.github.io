@@ -1,0 +1,52 @@
+---
+layout: layouts/project.njk
+title: Asterism
+permalink: "/en/asterism/"
+isProject: true
+description: "Asterism is a conceptual tool and participatory performance to collectively create meaning through a starry sky."
+image: "/project-files/asterismo/asterismo-06.webp"
+custom_css: "asterismo.css"
+priority: 0.6
+year: "2026"
+team: "<b>Lu Immich </b><br class='project-team-line-break'>(Design)"
+description_html: |
+  <p><b>ASTER (star) + ISM (action)</b><br>Asterism is a conceptual tool to collectively create meaning. Its central proposal is counter-intuitive: instead of imposing meaning on what emerges, one must let meaning appear in the inter(action). The terrain for this action is a starry sky. On it, the participants connect stars by drawing lines in a continuous gesture.</p>
+  <p>What emerges from the traces is a configuration that would not have arisen from any isolated intention. The meaning of this configuration is suspended. It is in this state of suspension that the participants act collectively, attributing meaning to what has emerged. In the end, the Night Sky is a unique record of what happened in that specific encounter.</p>
+---
+
+<section class="project-img-container">
+  {% image "project-files/asterismo/asterismo-06.webp", "Manual", "project-img" %}
+  {% image "project-files/asterismo/asterismo-02.webp", "Board imitating a starry sky", "project-img" %}
+  {% image "project-files/asterismo/asterismo-03.webp", "Timer", "project-img" %}
+
+  <div class="constellation-panel-container">
+    <h3>Shall we?</h3>
+    <div class="canvas-wrapper">
+      <canvas id="skyCanvas"></canvas>
+    </div>  
+    <div class="constellation-panel-description">
+        <a href="/project-files/asterismo/asterismo-instrucoes.pdf" download>Instructions</a>
+        <a id="btn-open-timer">Timer</a>
+        <a id="btn-download">Download board</a>
+        <a id="btn-generate">Shuffle board</a>
+    </div>
+  </div>
+</section>
+
+<!-- O Modal do Timer -->
+<div id="timer-modal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <button id="btn-close-timer" class="btn-close">&times;</button>
+    <div id="dot-grid" class="dot-grid"></div>
+    <div class="timer-controls">
+      <button id="btn-time-minus" class="time-adjust">-</button>
+      <span id="time-display">02:00</span>
+      <button id="btn-time-plus" class="time-adjust">+</button>
+    </div>
+    <button id="btn-start-timer" class="btn-start">START</button>
+  </div>
+</div>
+
+<!-- Page-Specific Scripts -->
+<script src="/js/jspdf.umd.min.js"></script>
+<script src="/js/asterism.js"></script>
