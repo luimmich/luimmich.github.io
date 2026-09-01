@@ -7,7 +7,7 @@ eleventyExcludeFromCollections: true
 {%- for page in collections.all %}
   {%- if page.url and page.fileSlug != "404" and not page.data.excludeFromSitemap %}
   <url>
-    <loc>{{ site.url }}{{ page.url }}</loc>
+    <loc>{{ site.pt.url }}{{ page.url }}</loc>
     <lastmod>{{ page.date.toISOString() }}</lastmod>
     <changefreq>{{ page.data.changefreq | default("monthly") }}</changefreq>
     <priority>{{ page.data.priority | default("0.8") }}</priority>

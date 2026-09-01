@@ -1,3 +1,11 @@
+{% set switchUrl = translatedUrl %}
+{% if not switchUrl %}
+  {% if locale == 'pt' %}
+    {% set switchUrl = "/en" ~ page.url %}
+  {% else %}
+    {% set switchUrl = page.url | replace("/en/", "/") %}
+  {% endif %}
+{% endif %}
 <!DOCTYPE html>
 <html lang="{{ 'en-US' if locale == 'en' else 'pt-BR' }}">
 <head>
@@ -8,7 +16,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="google-site-verification" content="o2YMMty1BEuB8c6x55yYYqjvDjgNujVhYwkxwE9V5Gg" />
 
- <!-- SEO BÁSICO -->
+  <!-- SEO BÁSICO -->
   <title>{% if page.url == '/' or page.url == '/en/' %}{{ site[locale].name }} | {{ site[locale].description }}{% elif title %}{{ site[locale].name }} | {{ title | safe }}{% else %}{{ site[locale].name }}{% endif %}</title>
   <meta name="description" content="{{ description | default(site[locale].description) }}">
   <meta name="author" content="{{ site[locale].author }}">
@@ -17,6 +25,12 @@
 
   <!-- Canonical URL -->
   <link rel="canonical" href="{{ site[locale].url }}{{ page.url }}">
+
+  <!-- Interligação de Idiomas para Google (Hreflang) -->
+  <link rel="alternate" hreflang="{{ 'en' if locale == 'pt' else 'pt-BR' }}" href="{{ site.pt.url }}{{ switchUrl }}" />
+  <link rel="alternate" hreflang="{{ 'pt-BR' if locale == 'pt' else 'en' }}" href="{{ site.pt.url }}{{ page.url }}" />
+  <!-- O x-default agora usa a lógica blindada do switchUrl para achar a raiz PT exata -->
+  <link rel="alternate" hreflang="x-default" href="{{ site.pt.url }}{% if locale == 'pt' %}{{ page.url }}{% else %}{{ switchUrl }}{% endif %}" />
   
   <!-- OPEN GRAPH / REDES SOCIAIS -->
   <meta property="og:type" content="{% if isProject %}article{% else %}website{% endif %}">
@@ -81,7 +95,7 @@
     "@context": "https://schema.org",
     "@type": "Person",
     "name": "Lu Immich",
-    "url": "{{ site.url }}{{ page.url }}",
+    "url": "{{ site[locale].url }}{{ page.url }}",
     "jobTitle": {{ locales.seo.jobTitleAbout[locale] | dump | safe }},
     "description": "{{ locales.seo.aboutDescription[locale] }}",
     "alumniOf": {
@@ -140,14 +154,14 @@
     "@graph": [
       {
         "@type": "ProfilePage",
-        "@id": "{{ site.url }}{{ page.url }}#webpage",
-        "url": "{{ site.url }}{{ page.url }}",
+        "@id": "{{ site[locale].url }}{{ page.url }}#webpage",
+        "url": "{{ site[locale].url }}{{ page.url }}",
         "name": "{{ title | safe }} - Lu Immich",
-        "mainEntity": { "@id": "{{ site.url }}/#person" }
+        "mainEntity": { "@id": "{{ site[locale].url }}/#person" }
       },
       {
         "@type": "Person",
-        "@id": "{{ site.url }}/#person",
+        "@id": "{{ site[locale].url }}/#person",
         "name": "Lu Immich",
         "jobTitle": "{{ locales.seo.jobTitleAbout[locale][0] }}",
         "description": "{{ locales.seo.philosophyDescription[locale] }}",
@@ -176,7 +190,7 @@
       {
         "@type": "ScholarlyArticle",
         "headline": "{{ book.title | safe }}{% if book.subtitle %}: {{ book.subtitle | safe }}{% endif %}",
-        "author": { "@id": "{{ site.url }}/#person" },
+        "author": { "@id": "{{ site[locale].url }}/#person" },
         "publisher": {
           "@type": "Organization",
           "name": "{{ book.publication | safe }}"
@@ -190,24 +204,19 @@
   </script>
   {% endif %}
 
-<!-- INÍCIO: Interceptador de Idioma (Roda antes da tela pintar) -->
+  <!-- INÍCIO: Interceptador de Idioma (Roda antes da tela pintar) -->
   <script>
     (function() {
       try {
         var path = window.location.pathname;
-        // 1. Só intercepta quem entra pela porta da frente (Home PT ou Home EN)
         if (path === '/' || path === '/en' || path === '/en/') {
-          
-          // 2. Lê a vontade do usuário, ou o idioma do sistema
           var savedLang = localStorage.getItem('userPreferredLang');
           var browserLang = navigator.language || navigator.userLanguage;
           var isPtBrowser = browserLang.toLowerCase().startsWith('pt');
           
-          // 3. Define qual deveria ser o idioma alvo
           var targetLang = savedLang ? savedLang : (isPtBrowser ? 'pt' : 'en');
           var currentLang = (path === '/en' || path === '/en/') ? 'en' : 'pt';
           
-          // 4. Redireciona de forma silenciosa e sem sujar o histórico
           if (targetLang !== currentLang) {
             window.location.replace(targetLang === 'en' ? '/en/' : '/');
           }
@@ -224,23 +233,12 @@
     
     <div class="language-switcher-wrapper">
       
-      <!-- INÍCIO: Language Switcher Inteligente -->
-      {% set switchUrl = translatedUrl %}
-      {% if not switchUrl %}
-        {% if locale == 'pt' %}
-          {% set switchUrl = "/en" ~ page.url %}
-        {% else %}
-          {% set switchUrl = page.url | replace("/en/", "/") %}
-        {% endif %}
-      {% endif %}
-
       <a href="{{ switchUrl }}" 
          onclick="localStorage.setItem('userPreferredLang', '{{ 'pt' if locale == 'en' else 'en' }}'); sessionStorage.setItem('langSwitchScroll', window.scrollY);"
          class="small-caps language-switcher" 
          aria-label="{{ 'Change language' if locale == 'en' else 'Mudar idioma' }}">
         {{ 'PT' if locale == 'en' else 'EN' }}
       </a>
-      <!-- FIM: Language Switcher Inteligente -->
       
       <button class="mobile-menu-btn small-caps" aria-label="{{ locales.nav.menu[locale] }}" aria-expanded="false">
         {{ locales.nav.menu[locale] }}
