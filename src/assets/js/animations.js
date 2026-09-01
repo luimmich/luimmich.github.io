@@ -7,9 +7,24 @@
   if (savedScroll !== null) {
     sessionStorage.removeItem("langSwitchScroll");
 
-    // setTimeout(0) garante que o navegador calcule a altura das imagens antes de rolar.
+    // 1. Avisa o sistema e salva a coordenada alvo globalmente
+    window.isLanguageSwitchJump = true;
+    window.targetLangScroll = parseInt(savedScroll, 10);
+
     setTimeout(() => {
-      window.scrollTo({ top: parseInt(savedScroll, 10), behavior: "auto" });
+      window.scrollTo({ top: window.targetLangScroll, behavior: "auto" });
+
+      // 2. Garante que a barra apareça
+      const nav = document.querySelector(".nav");
+      if (nav) {
+        nav.classList.remove("nav--hidden");
+        if (window.targetLangScroll > 10) nav.classList.add("nav--scrolled");
+      }
+
+      // 3. Aumenta a trava para 800ms (Ignora eventos de scroll fantasmas do carregamento)
+      setTimeout(() => {
+        window.isLanguageSwitchJump = false;
+      }, 800);
     }, 0);
   }
 })();
@@ -36,7 +51,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const contactLinks = document.querySelectorAll('a[href*="#contact"]');
   contactLinks.forEach((link) => {
     link.addEventListener("click", function (e) {
-      if (window.location.pathname.includes("/sobre")) {
+      const path = window.location.pathname;
+      // Valida ambas as rotas
+      if (path.includes("/sobre") || path.includes("/about")) {
         e.preventDefault();
         const contactSection = document.getElementById("contact");
         if (contactSection) contactSection.scrollIntoView({ behavior: "smooth" });
@@ -113,7 +130,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const nav = document.querySelector(".nav");
 
   let isScrolling = false;
-  let lastScrollY = window.scrollY;
+  let lastScrollY =
+    window.targetLangScroll !== undefined ? window.targetLangScroll : window.scrollY;
   let cachedViewportHeight = window.innerHeight;
   let cachedViewportWidth = window.innerWidth;
 
@@ -137,31 +155,44 @@ document.addEventListener("DOMContentLoaded", () => {
             if (currentScrollY > 10) nav.classList.add("nav--scrolled");
             else nav.classList.remove("nav--scrolled");
 
-            // Define a tolerância de pixels para evitar acionamentos acidentais
-            const scrollDifference = Math.abs(currentScrollY - lastScrollY);
-            const scrollThreshold = 80;
+            // SE FOI UM PULO DE IDIOMA: Mantém a barra e recalibra a referência
+            if (window.isLanguageSwitchJump) {
+              nav.classList.remove("nav--hidden");
+              lastScrollY = currentScrollY; // Zera a régua a partir daqui
+            } else {
+              // LÓGICA NORMAL DE SCROLL
+              const scrollDifference = Math.abs(currentScrollY - lastScrollY);
+              const scrollThreshold = 80;
 
-            if (scrollDifference > scrollThreshold || currentScrollY <= 0) {
-              if (currentScrollY > lastScrollY && currentScrollY > 80) {
-                // Rolando para baixo
-                nav.classList.add("nav--hidden");
-              } else if (currentScrollY < lastScrollY || currentScrollY <= 0) {
-                // Rolando para cima
-                nav.classList.remove("nav--hidden");
+              if (scrollDifference > scrollThreshold || currentScrollY <= 0) {
+                if (currentScrollY > lastScrollY && currentScrollY > 80) {
+                  // Rolando para baixo
+                  nav.classList.add("nav--hidden");
+                } else if (currentScrollY < lastScrollY || currentScrollY <= 0) {
+                  // Rolando para cima
+                  nav.classList.remove("nav--hidden");
+                }
+                lastScrollY = currentScrollY;
               }
-              // Atualiza a posição de referência apenas quando quebra o threshold
-              lastScrollY = currentScrollY;
             }
           }
 
-          // PARALLAX (Agora lê direto da memória, sem querySelector)
+          // PARALLAX (Prevenção de Layout Thrashing: Ler -> Escrever)
+          const parallaxUpdates = [];
+
+          // PASSO 1: Apenas leitura (Rápido)
           parallaxItems.forEach(({ wrapper, img }) => {
             const rect = wrapper.getBoundingClientRect();
             if (rect.top < viewportHeight && rect.bottom > 0) {
               const scrollProgress = rect.top / viewportHeight - 0.5;
               const yOffset = scrollProgress * (rect.height * 0.15);
-              if (img) img.style.setProperty("--parallax-y", `${yOffset}px`);
+              parallaxUpdates.push({ img, yOffset });
             }
+          });
+
+          // PASSO 2: Apenas escrita em lote (Sem recalcular layout)
+          parallaxUpdates.forEach(({ img, yOffset }) => {
+            if (img) img.style.setProperty("--parallax-y", `${yOffset}px`);
           });
 
           // FADE BLINDADO (Usa a largura no cache)

@@ -16,8 +16,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="google-site-verification" content="o2YMMty1BEuB8c6x55yYYqjvDjgNujVhYwkxwE9V5Gg" />
 
-  <!-- SEO BÁSICO -->
-  <title>{% if page.url == '/' or page.url == '/en/' %}{{ site[locale].name }} | {{ site[locale].description }}{% elif title %}{{ site[locale].name }} | {{ title | safe }}{% else %}{{ site[locale].name }}{% endif %}</title>
+<!-- SEO BÁSICO -->
+  <title>{% if page.url == '/' or page.url == '/en/' %}{{ site[locale].name }} | {{ site[locale].description }}{% elif title %}{{ site[locale].name }} | {{ title | replace('<br>', ' ') | striptags }}{% else %}{{ site[locale].name }}{% endif %}</title>
   <meta name="description" content="{{ description | default(site[locale].description) }}">
   <meta name="author" content="{{ site[locale].author }}">
   <meta name="keywords" content="{{ keywords | default(locales.seo.keywords[locale]) }}">
@@ -29,19 +29,18 @@
   <!-- Interligação de Idiomas para Google (Hreflang) -->
   <link rel="alternate" hreflang="{{ 'en' if locale == 'pt' else 'pt-BR' }}" href="{{ site.pt.url }}{{ switchUrl }}" />
   <link rel="alternate" hreflang="{{ 'pt-BR' if locale == 'pt' else 'en' }}" href="{{ site.pt.url }}{{ page.url }}" />
-  <!-- O x-default agora usa a lógica blindada do switchUrl para achar a raiz PT exata -->
   <link rel="alternate" hreflang="x-default" href="{{ site.pt.url }}{% if locale == 'pt' %}{{ page.url }}{% else %}{{ switchUrl }}{% endif %}" />
   
   <!-- OPEN GRAPH / REDES SOCIAIS -->
   <meta property="og:type" content="{% if isProject %}article{% else %}website{% endif %}">
   <meta property="og:url" content="{{ site[locale].url }}{{ page.url }}">
-  <meta property="og:title" content="{% if page.url == '/' or page.url == '/en/' %}{{ site[locale].name }} | {{ site[locale].description }}{% elif title %}{{ title | safe }} | {{ site[locale].name }}{% else %}{{ site[locale].name }}{% endif %}">
+  <meta property="og:title" content="{% if page.url == '/' or page.url == '/en/' %}{{ site[locale].name }} | {{ site[locale].description }}{% elif title %}{{ title | replace('<br>', ' ') | striptags }} | {{ site[locale].name }}{% else %}{{ site[locale].name }}{% endif %}">
   <meta property="og:description" content="{{ description | default(site[locale].description) }}">
   <meta property="og:image" content="{{ site[locale].url }}{{ image | default('/icons/favicon/android-chrome-512x512.png') }}">
   
   <!-- TWITTER CARDS -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="{% if page.url == '/' or page.url == '/en/' %}{{ site[locale].name }} | {{ site[locale].description }}{% elif title %}{{ title | safe }} | {{ site[locale].name }}{% else %}{{ site[locale].name }}{% endif %}">
+  <meta name="twitter:title" content="{% if page.url == '/' or page.url == '/en/' %}{{ site[locale].name }} | {{ site[locale].description }}{% elif title %}{{ title | replace('<br>', ' ') | striptags }} | {{ site[locale].name }}{% else %}{{ site[locale].name }}{% endif %}">
   <meta name="twitter:description" content="{{ description | default(site[locale].description) }}">
   <meta name="twitter:image" content="{{ site[locale].url }}{{ image | default('/icons/favicon/android-chrome-512x512.png') }}">
 
@@ -51,7 +50,7 @@
   {
     "@context": "https://schema.org",
     "@type": "{% if isProject %}CreativeWork{% else %}Person{% endif %}",
-    "name": "{% if title %}{{ title | safe }}{% else %}{{ site[locale].name }}{% endif %}",
+    "name": "{% if title %}{{ title | replace('<br>', ' ') | striptags }}{% else %}{{ site[locale].name }}{% endif %}",
     "description": "{{ description | default(site[locale].description) }}",
     "url": "{{ site[locale].url }}{{ page.url }}",
     {% if not isProject %}
@@ -146,8 +145,7 @@
   {% endif %}
   {% endif %}
 
-  <!-- GEO: Schema Markup da página Filosofia -->
-  {% if page.url == '/filosofia/' or page.url == '/en/philosophy/' %}
+{% if page.url == '/filosofia/' or page.url == '/en/philosophy/' %}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -156,7 +154,7 @@
         "@type": "ProfilePage",
         "@id": "{{ site[locale].url }}{{ page.url }}#webpage",
         "url": "{{ site[locale].url }}{{ page.url }}",
-        "name": "{{ title | safe }} - Lu Immich",
+        "name": "{{ title | replace('<br>', ' ') | striptags }} - Lu Immich",
         "mainEntity": { "@id": "{{ site[locale].url }}/#person" }
       },
       {
