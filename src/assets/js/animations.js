@@ -1,4 +1,20 @@
 // ==========================================================================
+// RESTAURAÇÃO DE SCROLL DO IDIOMA (DEVE RODAR ANTES DE TUDO)
+// ==========================================================================
+(function restoreLanguageScroll() {
+  const savedScroll = sessionStorage.getItem("langSwitchScroll");
+
+  if (savedScroll !== null) {
+    sessionStorage.removeItem("langSwitchScroll");
+
+    // setTimeout(0) garante que o navegador calcule a altura das imagens antes de rolar.
+    setTimeout(() => {
+      window.scrollTo({ top: parseInt(savedScroll, 10), behavior: "auto" });
+    }, 0);
+  }
+})();
+
+// ==========================================================================
 // MOTOR GLOBAL (ANIMAÇÕES, PARALLAX, NAVEGAÇÃO E UTILIDADES)
 // ==========================================================================
 document.addEventListener("DOMContentLoaded", () => {

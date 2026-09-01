@@ -235,7 +235,7 @@
       {% endif %}
 
       <a href="{{ switchUrl }}" 
-         onclick="localStorage.setItem('userPreferredLang', '{{ 'pt' if locale == 'en' else 'en' }}');"
+         onclick="localStorage.setItem('userPreferredLang', '{{ 'pt' if locale == 'en' else 'en' }}'); sessionStorage.setItem('langSwitchScroll', window.scrollY);"
          class="small-caps language-switcher" 
          aria-label="{{ 'Change language' if locale == 'en' else 'Mudar idioma' }}">
         {{ 'PT' if locale == 'en' else 'EN' }}
