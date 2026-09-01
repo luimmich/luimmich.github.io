@@ -189,6 +189,33 @@
   }
   </script>
   {% endif %}
+
+<!-- INÍCIO: Interceptador de Idioma (Roda antes da tela pintar) -->
+  <script>
+    (function() {
+      try {
+        var path = window.location.pathname;
+        // 1. Só intercepta quem entra pela porta da frente (Home PT ou Home EN)
+        if (path === '/' || path === '/en' || path === '/en/') {
+          
+          // 2. Lê a vontade do usuário, ou o idioma do sistema
+          var savedLang = localStorage.getItem('userPreferredLang');
+          var browserLang = navigator.language || navigator.userLanguage;
+          var isPtBrowser = browserLang.toLowerCase().startsWith('pt');
+          
+          // 3. Define qual deveria ser o idioma alvo
+          var targetLang = savedLang ? savedLang : (isPtBrowser ? 'pt' : 'en');
+          var currentLang = (path === '/en' || path === '/en/') ? 'en' : 'pt';
+          
+          // 4. Redireciona de forma silenciosa e sem sujar o histórico
+          if (targetLang !== currentLang) {
+            window.location.replace(targetLang === 'en' ? '/en/' : '/');
+          }
+        }
+      } catch(e) { console.error('Erro no roteamento de idioma', e); }
+    })();
+  </script>
+  <!-- FIM: Interceptador de Idioma -->
 </head>
 
 <body>
@@ -207,7 +234,10 @@
         {% endif %}
       {% endif %}
 
-      <a href="{{ switchUrl }}" class="small-caps language-switcher aria-label="{{ 'Change language' if locale == 'en' else 'Mudar idioma' }}">
+      <a href="{{ switchUrl }}" 
+         onclick="localStorage.setItem('userPreferredLang', '{{ 'pt' if locale == 'en' else 'en' }}');"
+         class="small-caps language-switcher" 
+         aria-label="{{ 'Change language' if locale == 'en' else 'Mudar idioma' }}">
         {{ 'PT' if locale == 'en' else 'EN' }}
       </a>
       <!-- FIM: Language Switcher Inteligente -->
