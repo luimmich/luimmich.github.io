@@ -9,12 +9,12 @@
       "weight": 15
     },
     {
-      "title": "Ontologia Aplicada ao Armário",
+      "title": "Ontologia Social Aplicada ao Armário",
       "type": "Artigo",
       "year": "2025",
       "url": "/filosofia/#controversia-01",
       "img": "/assets/imgs/philosophy/papers/controversias-01.jpg",
-      "weight": 10
+      "weight": 15
     },
     {
       "title": "Asterismo",
@@ -22,7 +22,7 @@
       "year": "2026",
       "url": "/asterismo/",
       "img": "/assets/project-files/asterismo/asterismo-02.webp",
-      "weight": 10
+      "weight": 5
     },
     {
       "title": "Teclado K02",
@@ -50,11 +50,11 @@
     },
     {
       "title": "Leituras Queer",
-      "type": "Gráfico",
+      "type": "Coordenação",
       "year": "2024",
       "url": "/leituras-queer/",
       "img": "/assets/project-files/leituras-queer/Cartaz-gravidade.webp",
-      "weight": 3
+      "weight": 5
     }
   ],
   "en": [

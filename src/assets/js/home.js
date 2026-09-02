@@ -46,7 +46,7 @@ function ajustarHeroDinamicamente() {
   let quantidadePermitida = Math.floor((alturaMaximaHero + gap) / (itemHeight + gap));
 
   // Regras de Segurança
-  if (quantidadePermitida < 1) quantidadePermitida = 1;
+  if (quantidadePermitida < 1) quantidadePermitida = 2;
   if (isMobile && quantidadePermitida > config.maxMobileItens) {
     quantidadePermitida = config.maxMobileItens;
   }
