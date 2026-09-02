@@ -226,20 +226,33 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================================================
-// LIMPEZA DA URL E SCROLL CROSS-PAGE
+// LIMPEZA DA URL E SCROLL CROSS-PAGE GLOBAL
 // ==========================================================================
 window.addEventListener("load", () => {
-  if (window.location.hash === "#contact") {
-    const contactSection = document.getElementById("contact");
+  const hash = window.location.hash;
 
-    if (contactSection) {
-      setTimeout(() => {
-        contactSection.scrollIntoView({ behavior: "smooth" });
-      }, 100);
+  if (hash) {
+    try {
+      // 1. Busca dinamicamente QUALQUER elemento que possua o ID da URL
+      const targetSection = document.querySelector(hash);
+
+      if (targetSection) {
+        // 2. Mantém o fallback de scroll exclusivo para o #contact
+        if (hash === "#contact") {
+          setTimeout(() => {
+            targetSection.scrollIntoView({ behavior: "smooth" });
+          }, 100);
+        }
+
+        // 3. Limpeza universal: remove o hash da URL preservando os parâmetros de busca
+        // O delay de 600ms garante que animações externas (como a sanfona de filosofia) terminem
+        setTimeout(() => {
+          history.replaceState(null, null, window.location.pathname + window.location.search);
+        }, 600);
+      }
+    } catch (e) {
+      // 4. Blindagem: impede que hashes externos malformados (ex: tracking "#!/token") quebrem o script
+      console.warn("Hash ignorado pelo roteador:", hash);
     }
-
-    setTimeout(() => {
-      history.replaceState(null, null, window.location.pathname + window.location.search);
-    }, 600);
   }
 });

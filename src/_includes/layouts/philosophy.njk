@@ -25,7 +25,7 @@ priority: 0.8
     {% set shelfIndex = loop.index0 %}
     <ul class="bookshelf-row">
       {% for book in shelf %}
-      <li class="book-item {% if shelfIndex == 0 and loop.index0 == 0 %}is-open{% endif %}"
+      <li id="{{ book.id }}" class="book-item {% if shelfIndex == 0 and loop.index0 == 0 %}is-open{% endif %}"
         style="--book-color: {{ book.color }}; --book-height: {{ book.height }};">
 
         <div class="book-spine">

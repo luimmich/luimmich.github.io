@@ -1,6 +1,24 @@
 {
   "pt": [
     {
+      "title": "Para Além do Gênero",
+      "type": "Artigo",
+      "year": "2026",
+      "url": "/filosofia/#bettcher-ontologia-01",
+      "img": "/assets/imgs/philosophy/papers/bettcher.webp",
+      "img": "/assets/project-files/asterismo/asterismo-02.webp",
+      "weight": 15
+    },
+    {
+      "title": "Ontologia Aplicada ao Armário",
+      "type": "Artigo",
+      "year": "2025",
+      "url": "/filosofia/#controversia-01",
+      "img": "/assets/imgs/philosophy/papers/controversia.webp",
+      "img": "/assets/project-files/asterismo/asterismo-02.webp",
+      "weight": 10
+    },
+    {
       "title": "Asterismo",
       "type": "Performance participativa",
       "year": "2026",

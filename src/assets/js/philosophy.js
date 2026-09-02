@@ -6,26 +6,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
   books.forEach((book) => {
     book.addEventListener("click", function () {
-      // 1. Se este livro JÁ está aberto, não faz nada (mantém aberto)
-      if (this.classList.contains("is-open")) {
-        return;
-      }
-
-      // 2. Se clicou em outro livro, fecha todos e abre o novo
+      if (this.classList.contains("is-open")) return;
       books.forEach((b) => b.classList.remove("is-open"));
       this.classList.add("is-open");
 
-      // Regra de rolagem suave para Mobile/Tablet
       if (window.innerWidth <= 1000) {
         setTimeout(() => {
-          this.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
+          this.scrollIntoView({ behavior: "smooth", block: "center" });
         }, 300);
       }
     });
   });
+
+  // ==========================================================================
+  // 1.5 SISTEMA DE DEEP LINK (ABRE O LIVRO VINDO DA HOME)
+  // ==========================================================================
+  const openBookFromHash = () => {
+    const hash = window.location.hash;
+    if (hash) {
+      const targetBook = document.querySelector(hash);
+
+      // Valida se o ID da URL realmente pertence a um livro
+      if (targetBook && targetBook.classList.contains("book-item")) {
+        // Timeout de 150ms garante que o DOM pintou a tela e calculou alturas
+        setTimeout(() => {
+          books.forEach((b) => b.classList.remove("is-open"));
+          targetBook.classList.add("is-open");
+
+          targetBook.scrollIntoView({ behavior: "smooth", block: "center" });
+
+          // Limpa a URL silenciosamente para evitar bugs se o user der F5
+          history.replaceState(null, null, window.location.pathname + window.location.search);
+        }, 150);
+      }
+    }
+  };
+
+  // Dispara o verificador assim que o motor iniciar
+  openBookFromHash();
 
   // ==========================================================================
   // 2. MOTOR MATEMÁTICO DE CORTE DE TEXTO (AGORA BLINDADO CONTRA ZUMBIS)
