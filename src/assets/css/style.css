@@ -302,6 +302,7 @@ footer a {
   row-gap: var(--fs-2);
   opacity: 0;
   transition: opacity 0.4s ease-out;
+  text-wrap: balance;
 }
 
 .hero ul.grid-calculado {
@@ -362,6 +363,9 @@ footer a {
 }
 
 @media (max-width: 1000px) {
+  .hero ul {
+    grid-template-columns: 1fr;
+  }
   .hero-picture-wrapper {
     display: none;
   }
