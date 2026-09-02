@@ -23,7 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const openBookFromHash = () => {
     const hash = window.location.hash;
 
-    // 1. Função blindada que garante a liberação da tela aconteça o que acontecer
     const releaseScreen = () => {
       document.documentElement.classList.remove("hash-loading");
       document.documentElement.classList.add("hash-loading-done");
@@ -36,7 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let targetBook;
     try {
-      // O try/catch impede que hashes inválidos quebrem o JavaScript
       targetBook = document.querySelector(hash);
     } catch (e) {
       releaseScreen();
@@ -58,34 +56,58 @@ document.addEventListener("DOMContentLoaded", () => {
         books.forEach((b) => b.classList.remove("is-open"));
         targetBook.classList.add("is-open");
 
-        void targetBook.offsetHeight; // Reflow forçado
+        void targetBook.offsetHeight;
 
         setTimeout(() => {
+          // 1. Avisa o Smart Nav para ignorar esse pulo e não esconder a barra
+          window.isLanguageSwitchJump = true;
+
           targetBook.scrollIntoView({ behavior: "auto", block: "center" });
+
+          // 2. Garante forçosamente que a barra fique visível e com o fundo correto
+          const nav = document.querySelector(".nav");
+          if (nav) {
+            nav.classList.remove("nav--hidden");
+            nav.classList.add("nav--scrolled");
+          }
 
           setTimeout(() => {
             styleBlock.remove();
-            releaseScreen(); // Libera a tela de forma garantida após o salto
+            releaseScreen();
+
+            // 3. Desliga a trava do Smart Nav para ele voltar a funcionar no scroll manual
+            setTimeout(() => {
+              window.isLanguageSwitchJump = false;
+            }, 100);
+
+            // 4. Adiciona um fade sutil e deslize exclusivo no livro alvo
+            targetBook.animate(
+              [
+                { opacity: 0.3, transform: "translateY(20px)" },
+                { opacity: 1, transform: "translateY(0)" },
+              ],
+              {
+                duration: 700,
+                easing: "cubic-bezier(0.2, 0.8, 0.2, 1)", // Curva de animação bem macia
+                fill: "both",
+              },
+            );
           }, 50);
         }, 50);
       } catch (e) {
-        releaseScreen(); // Se qualquer erro bizarro ocorrer, libere a tela
+        releaseScreen();
       }
     };
 
-    // 2. O DISJUNTOR DE SEGURANÇA (FAIL-SAFE)
     let hasFired = false;
-
     const safeExecute = () => {
       if (hasFired) return;
       hasFired = true;
       executePerfectJump();
     };
 
-    // Se o evento 'load' demorar mais que 800ms por causa de internet lenta, forçamos o salto!
     const fallbackTimer = setTimeout(safeExecute, 800);
 
-    // 3. Execução condicional
     if (document.readyState === "complete") {
       clearTimeout(fallbackTimer);
       safeExecute();
