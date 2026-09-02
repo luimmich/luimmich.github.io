@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
               ],
               {
                 duration: 700,
-                easing: "cubic-bezier(.32,0,.71,1)", // Curva de animação bem macia
+                easing: "cubic-bezier(0.3,0,0.7,1)", // Curva de animação bem macia
                 fill: "both",
               },
             );
