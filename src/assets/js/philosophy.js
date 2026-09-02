@@ -26,18 +26,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (hash) {
       const targetBook = document.querySelector(hash);
 
-      // Valida se o ID da URL realmente pertence a um livro
       if (targetBook && targetBook.classList.contains("book-item")) {
-        // Timeout de 150ms garante que o DOM pintou a tela e calculou alturas
-        setTimeout(() => {
-          books.forEach((b) => b.classList.remove("is-open"));
-          targetBook.classList.add("is-open");
+        // 1. Expande o livro IMEDIATAMENTE na memória, sem o delay de 150ms
+        books.forEach((b) => b.classList.remove("is-open"));
+        targetBook.classList.add("is-open");
 
+        // 2. requestAnimationFrame atrela o salto ao motor de renderização do navegador
+        requestAnimationFrame(() => {
+          // 3. 'behavior: auto' força um corte seco instantâneo, matando o scroll arrastado
           targetBook.scrollIntoView({ behavior: "smooth", block: "center" });
-
-          // Limpa a URL silenciosamente para evitar bugs se o user der F5
-          history.replaceState(null, null, window.location.pathname + window.location.search);
-        }, 150);
+        });
       }
     }
   };
