@@ -83,12 +83,12 @@ document.addEventListener("DOMContentLoaded", () => {
             // 4. Adiciona um fade sutil e deslize exclusivo no livro alvo
             targetBook.animate(
               [
-                { opacity: 0.3, transform: "translateY(20px)" },
+                { opacity: 0.3, transform: "translateY(0px)" },
                 { opacity: 1, transform: "translateY(0)" },
               ],
               {
                 duration: 700,
-                easing: "cubic-bezier(0.2, 0.8, 0.2, 1)", // Curva de animação bem macia
+                easing: "cubic-bezier(.32,0,.71,1)", // Curva de animação bem macia
                 fill: "both",
               },
             );
