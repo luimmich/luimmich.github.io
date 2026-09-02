@@ -23,24 +23,34 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================================================
   const openBookFromHash = () => {
     const hash = window.location.hash;
-    if (hash) {
-      const targetBook = document.querySelector(hash);
+    if (!hash) return;
 
-      if (targetBook && targetBook.classList.contains("book-item")) {
-        // 1. Expande o livro IMEDIATAMENTE na memória, sem o delay de 150ms
-        books.forEach((b) => b.classList.remove("is-open"));
-        targetBook.classList.add("is-open");
+    const targetBook = document.querySelector(hash);
+    if (targetBook && targetBook.classList.contains("book-item")) {
+      // 1. Expande o livro na memória IMEDIATAMENTE para o CSS começar a atuar
+      books.forEach((b) => b.classList.remove("is-open"));
+      targetBook.classList.add("is-open");
 
-        // 2. requestAnimationFrame atrela o salto ao motor de renderização do navegador
-        requestAnimationFrame(() => {
-          // 3. 'behavior: auto' força um corte seco instantâneo, matando o scroll arrastado
-          targetBook.scrollIntoView({ behavior: "smooth", block: "center" });
+      // 2. A MÁGICA: O comando de centralizar o livro
+      const centerBook = () => {
+        // 'auto' é estritamente necessário no carregamento inicial para evitar o lampejo
+        targetBook.scrollIntoView({ behavior: "auto", block: "center" });
+      };
+
+      // 3. A BLINDAGEM: Garante que Fontes, Imagens e o ResizeObserver terminaram de calcular a altura
+      if (document.readyState === "complete") {
+        // Se a página já terminou de carregar, pulamos 2 frames para dar tempo ao ResizeObserver
+        requestAnimationFrame(() => requestAnimationFrame(centerBook));
+      } else {
+        // Se ainda está carregando, atrelamos o salto ao evento 'load' (layout 100% estabilizado)
+        window.addEventListener("load", () => {
+          requestAnimationFrame(() => requestAnimationFrame(centerBook));
         });
       }
     }
   };
 
-  // Dispara o verificador assim que o motor iniciar
+  // Dispara o verificador
   openBookFromHash();
 
   // ==========================================================================
