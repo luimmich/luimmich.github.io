@@ -4,6 +4,28 @@ custom_css: "philosophy.css"
 priority: 0.8
 ---
 
+<!-- BLINDAGEM ANTI-FLICKER (SÍNCRONA) -->
+<style>
+  /* Se o HTML tiver a tag de loading, o corpo do site fica invisível (tela branca limpa) */
+  html.hash-loading body {
+    opacity: 0 !important;
+  }
+  /* Transição macia de 0.4s quando o JavaScript liberar a tela */
+  html.hash-loading-done body {
+    animation: fadePageIn 0.4s ease forwards;
+  }
+  @keyframes fadePageIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+</style>
+<script>
+  // Roda antes do navegador pintar a tela. Se tiver "#", esconde tudo.
+  if (window.location.hash) {
+    document.documentElement.classList.add('hash-loading');
+  }
+</script>
+
 <main class="philosophy-page">
 
   <!-- A HERO -->

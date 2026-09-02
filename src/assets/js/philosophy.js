@@ -17,40 +17,86 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
-
   // ==========================================================================
   // 1.5 SISTEMA DE DEEP LINK (ABRE O LIVRO VINDO DA HOME)
   // ==========================================================================
   const openBookFromHash = () => {
     const hash = window.location.hash;
-    if (!hash) return;
 
-    const targetBook = document.querySelector(hash);
-    if (targetBook && targetBook.classList.contains("book-item")) {
-      // 1. Expande o livro na memória IMEDIATAMENTE para o CSS começar a atuar
-      books.forEach((b) => b.classList.remove("is-open"));
-      targetBook.classList.add("is-open");
+    // 1. Função blindada que garante a liberação da tela aconteça o que acontecer
+    const releaseScreen = () => {
+      document.documentElement.classList.remove("hash-loading");
+      document.documentElement.classList.add("hash-loading-done");
+    };
 
-      // 2. A MÁGICA: O comando de centralizar o livro
-      const centerBook = () => {
-        // 'auto' é estritamente necessário no carregamento inicial para evitar o lampejo
-        targetBook.scrollIntoView({ behavior: "auto", block: "center" });
-      };
+    if (!hash) {
+      releaseScreen();
+      return;
+    }
 
-      // 3. A BLINDAGEM: Garante que Fontes, Imagens e o ResizeObserver terminaram de calcular a altura
-      if (document.readyState === "complete") {
-        // Se a página já terminou de carregar, pulamos 2 frames para dar tempo ao ResizeObserver
-        requestAnimationFrame(() => requestAnimationFrame(centerBook));
-      } else {
-        // Se ainda está carregando, atrelamos o salto ao evento 'load' (layout 100% estabilizado)
-        window.addEventListener("load", () => {
-          requestAnimationFrame(() => requestAnimationFrame(centerBook));
-        });
+    let targetBook;
+    try {
+      // O try/catch impede que hashes inválidos quebrem o JavaScript
+      targetBook = document.querySelector(hash);
+    } catch (e) {
+      releaseScreen();
+      return;
+    }
+
+    if (!targetBook || !targetBook.classList.contains("book-item")) {
+      releaseScreen();
+      return;
+    }
+
+    const executePerfectJump = () => {
+      try {
+        const styleBlock = document.createElement("style");
+        styleBlock.innerHTML =
+          "* { transition: none !important; animation: none !important; scroll-behavior: auto !important; }";
+        document.head.appendChild(styleBlock);
+
+        books.forEach((b) => b.classList.remove("is-open"));
+        targetBook.classList.add("is-open");
+
+        void targetBook.offsetHeight; // Reflow forçado
+
+        setTimeout(() => {
+          targetBook.scrollIntoView({ behavior: "auto", block: "center" });
+
+          setTimeout(() => {
+            styleBlock.remove();
+            releaseScreen(); // Libera a tela de forma garantida após o salto
+          }, 50);
+        }, 50);
+      } catch (e) {
+        releaseScreen(); // Se qualquer erro bizarro ocorrer, libere a tela
       }
+    };
+
+    // 2. O DISJUNTOR DE SEGURANÇA (FAIL-SAFE)
+    let hasFired = false;
+
+    const safeExecute = () => {
+      if (hasFired) return;
+      hasFired = true;
+      executePerfectJump();
+    };
+
+    // Se o evento 'load' demorar mais que 800ms por causa de internet lenta, forçamos o salto!
+    const fallbackTimer = setTimeout(safeExecute, 800);
+
+    // 3. Execução condicional
+    if (document.readyState === "complete") {
+      clearTimeout(fallbackTimer);
+      safeExecute();
+    } else {
+      window.addEventListener("load", () => {
+        clearTimeout(fallbackTimer);
+        safeExecute();
+      });
     }
   };
 
-  // Dispara o verificador
   openBookFromHash();
 
   // ==========================================================================
