@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // 2. A COREOGRAFIA (O livro surge suavemente)
             targetBook.animate(
               [
-                { opacity: 0.3, transform: "translateY(20px)" },
+                { opacity: 0.3, transform: "translateY(0px)" },
                 { opacity: 1, transform: "translateY(0)" },
               ],
               {
@@ -91,9 +91,6 @@ document.addEventListener("DOMContentLoaded", () => {
               },
             );
 
-            // 3. O ENCAIXE MAGNÉTICO (A sua solução)
-            // Disparamos isso 400ms após a página surgir. Esse é o tempo exato para as
-            // barras do celular terem sumido e o navegador ter recalculado o tamanho da tela.
             setTimeout(() => {
               targetBook.scrollIntoView({ behavior: "smooth", block: "center" });
             }, 400);
