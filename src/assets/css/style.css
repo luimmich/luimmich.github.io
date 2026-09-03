@@ -623,6 +623,14 @@ footer a {
 /* ==========================================================================
    7. PROJETOS INDIVIDUAIS
    ========================================================================== */
+.project {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 90svh;
+  box-sizing: border-box;
+}
+
 .project-container {
   display: grid;
   width: 80vw;
@@ -631,8 +639,6 @@ footer a {
   column-gap: 2.5vw;
   align-content: space-between;
   justify-content: space-between;
-  margin-top: 21svh;
-  margin-bottom: 10svh;
   border: 1px solid #000;
   padding: 2.5vw;
 }
@@ -844,10 +850,14 @@ footer a {
   }
 }
 @media (max-width: 1000px) {
+  .project {
+    justify-content: flex-end;
+    padding-bottom: 10svh;
+  }
   .project-container {
     padding: 0;
     border: none;
-    margin-top: 40svh;
+    margin-top: 0;
     grid-template-columns: repeat(3, 1fr);
   }
   .project-title {
