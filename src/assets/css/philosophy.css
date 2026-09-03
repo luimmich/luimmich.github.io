@@ -71,11 +71,11 @@
 /* ==========================================================================
    A ESTANTE (SISTEMA DE PRATELEIRAS FÍSICAS)
    ========================================================================== */
-.bookshelf-wrapper {
+.philosophy-page .bookshelf-wrapper {
   display: flex;
   flex-direction: column;
   gap: 8svh;
-  padding: 0 !important;
+  padding: 0;
 }
 
 .bookshelf-row {
@@ -290,7 +290,7 @@
    O LIVRO TOMBADO (ÚLTIMO ITEM DA PRATELEIRA)
    ========================================================================== */
 .book-item.tilted-book {
-  pointer-events: none; /* Mantém o livro puramente decorativo, sem clique */
+  pointer-events: none;
   cursor: default;
   transform-origin: bottom left;
   transform: rotate(-8deg);
@@ -300,35 +300,18 @@
 /* ==========================================================================
    OVERRIDES MOBILE E TABLETS 
    ========================================================================== */
-@media (max-width: 1366px) {
-  .book-spine-sub {
-    display: none;
-  }
-  .book-subtitle-expanded {
-    display: none;
-  }
-
-  .book-item.is-open {
-    width: 100%;
-    height: 65svh;
-  }
-}
-
-@media (max-width: 1000px) {
+@media (max-width: 1000px), (max-width: 1368px) and (pointer: coarse), (max-aspect-ratio: 4/3) {
   .philosophy-page {
     margin-top: 0svh;
   }
-  /* ==========================================================================
-     OVERRIDES DA HERO MOBILE
-     ========================================================================== */
+
+  /* HERO FLUIDA PARA TOUCH */
   .philosophy-hero {
     display: flex;
     flex-direction: column;
     gap: 4svh;
     margin-bottom: 20svh;
   }
-
-  /* CORREÇÃO DO CONTAINER MOBILE */
   .img-philosophy-hero {
     width: 100%;
     height: auto;
@@ -336,7 +319,6 @@
     overflow: hidden;
     position: relative;
   }
-
   .img-philosophy-hero picture img,
   .img-philosophy-hero img {
     width: 100%;
@@ -353,17 +335,18 @@
   .philosophy-intro {
     flex-direction: column;
     hyphens: auto;
-    text-wrap: wrap;
     text-wrap: pretty;
   }
+
+  /* A ESTANTE ACORDEÃO (O design que já funcionava no celular, agora no iPad) */
   .bookshelf-wrapper {
     gap: 2svh;
   }
-
   .book-excerpt {
     hyphens: auto;
   }
 
+  /* O SEGREDO: Força a fileira a virar uma coluna empilhada em qualquer tablet */
   .bookshelf-row {
     flex-direction: column;
     height: auto;
@@ -376,14 +359,13 @@
     height: 12svh;
     transition: height 0.6s cubic-bezier(0.25, 1, 0.5, 1);
   }
-
   .book-item.is-open {
     flex: none;
     width: 100%;
     height: 65svh;
   }
 
-  /* LOMBADA HORIZONTAL (Mobile) */
+  /* LOMBADA LARGA E FÁCIL DE TOCAR */
   .book-spine {
     width: 100%;
     height: 12svh;
@@ -396,33 +378,34 @@
     align-items: center;
     justify-content: flex-start;
   }
-
+  .book-spine::after {
+    display: none;
+  }
   .book-title-vertical {
-    writing-mode: horizontal-tb;
+    writing-mode: horizontal-tb; /* Devolve a leitura normal */
     transform: none;
     display: flex;
     gap: 0.2rem;
     width: 100%;
     min-width: 0;
   }
-
   .book-spine-main {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     display: block;
   }
-
-  .book-spine-sub {
+  .book-spine-sub,
+  .book-subtitle-expanded {
     display: none;
   }
 
-  /* OCULTA O LIVRO TOMBADO */
+  /* OCULTA O LIVRO TOMBADO NO TABLET */
   .book-item.tilted-book {
     display: none;
   }
 
-  /* CONTEÚDO EXPANDIDO (Mobile) */
+  /* CONTEÚDO EXPANDIDO */
   .book-content {
     width: 100%;
     height: 100%;

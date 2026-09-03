@@ -1,19 +1,23 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // ==========================================================================
-  // 1. SISTEMA DE CLIQUE E ACORDEÃO (TRAVA DE LIVRO ATIVO)
-  // ==========================================================================
   const books = document.querySelectorAll(".book-item");
 
   books.forEach((book) => {
     book.addEventListener("click", function () {
       if (this.classList.contains("is-open")) return;
+
       books.forEach((b) => b.classList.remove("is-open"));
       this.classList.add("is-open");
 
-      if (window.innerWidth <= 1000) {
+      // O JS espelha a regra exata do CSS para saber se o layout vertical está ativo
+      const isVerticalLayout = window.matchMedia(
+        "(max-width: 1000px), (max-width: 1368px) and (pointer: coarse), (max-aspect-ratio: 4/3)",
+      ).matches;
+
+      if (isVerticalLayout) {
+        // Delay elevado para 400ms para aguardar o CSS calcular o início do crescimento do livro
         setTimeout(() => {
           this.scrollIntoView({ behavior: "smooth", block: "center" });
-        }, 300);
+        }, 400);
       }
     });
   });
@@ -56,10 +60,9 @@ document.addEventListener("DOMContentLoaded", () => {
         books.forEach((b) => b.classList.remove("is-open"));
         targetBook.classList.add("is-open");
 
-        void targetBook.offsetHeight; // Reflow
+        void targetBook.offsetHeight;
 
         setTimeout(() => {
-          // 1. O SALTO BRUTO (Invisível) - Leva a tela para o local aproximado
           window.isLanguageSwitchJump = true;
           targetBook.scrollIntoView({ behavior: "auto", block: "center" });
 
