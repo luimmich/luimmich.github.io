@@ -56,15 +56,13 @@ document.addEventListener("DOMContentLoaded", () => {
         books.forEach((b) => b.classList.remove("is-open"));
         targetBook.classList.add("is-open");
 
-        void targetBook.offsetHeight;
+        void targetBook.offsetHeight; // Reflow
 
         setTimeout(() => {
-          // 1. Avisa o Smart Nav para ignorar esse pulo e não esconder a barra
+          // 1. O SALTO BRUTO (Invisível) - Leva a tela para o local aproximado
           window.isLanguageSwitchJump = true;
-
           targetBook.scrollIntoView({ behavior: "auto", block: "center" });
 
-          // 2. Garante forçosamente que a barra fique visível e com o fundo correto
           const nav = document.querySelector(".nav");
           if (nav) {
             nav.classList.remove("nav--hidden");
@@ -73,25 +71,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
           setTimeout(() => {
             styleBlock.remove();
-            releaseScreen();
+            releaseScreen(); // Revela a página HTML
 
-            // 3. Desliga a trava do Smart Nav para ele voltar a funcionar no scroll manual
+            // Aumentamos o tempo da trava do nav para cobrir o ajuste magnético
             setTimeout(() => {
               window.isLanguageSwitchJump = false;
-            }, 100);
+            }, 600);
 
-            // 4. Adiciona um fade sutil e deslize exclusivo no livro alvo
+            // 2. A COREOGRAFIA (O livro surge suavemente)
             targetBook.animate(
               [
-                { opacity: 0.3, transform: "translateY(0px)" },
+                { opacity: 0.3, transform: "translateY(20px)" },
                 { opacity: 1, transform: "translateY(0)" },
               ],
               {
                 duration: 700,
-                easing: "cubic-bezier(0.3,0,0.7,1)", // Curva de animação bem macia
+                easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
                 fill: "both",
               },
             );
+
+            // 3. O ENCAIXE MAGNÉTICO (A sua solução)
+            // Disparamos isso 400ms após a página surgir. Esse é o tempo exato para as
+            // barras do celular terem sumido e o navegador ter recalculado o tamanho da tela.
+            setTimeout(() => {
+              targetBook.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 400);
           }, 50);
         }, 50);
       } catch (e) {

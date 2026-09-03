@@ -5,7 +5,7 @@
   align-content: end;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 15svh;
 }
 
 .grid-philosophy {
@@ -24,7 +24,7 @@
    ========================================================================== */
 .philosophy-hero {
   grid-template-rows: auto auto 1fr;
-  margin-bottom: 25svh;
+  /* margin-bottom: 25svh; */
 }
 
 .img-philosophy-hero {
@@ -59,7 +59,6 @@
 .philosophy-intro {
   height: 100%;
   grid-column: 1 / 13;
-  /* max-width: 36ch; */
   grid-row: 2 / 5;
   line-height: 1.2;
   text-wrap: balance;
@@ -76,7 +75,6 @@
   display: flex;
   flex-direction: column;
   gap: 8svh;
-  margin-bottom: 10svh;
   padding: 0 !important;
 }
 
