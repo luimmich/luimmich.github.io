@@ -14,9 +14,17 @@ layout: base.njk
     <div class="project-desc-container">
       <p class="project-year"><b>{{ year }}</b></p>
       
-      {% if link_url %}
+      <!-- INÍCIO: ROTEADOR HÍBRIDO DE LINKS -->
+      {% if links %}
+        <div class="project-links-wrapper">
+          {% for item in links %}
+            <a class="project-in-use" href="{{ item.url }}" target="_blank" rel="noopener">{{ item.label }}</a>
+          {% endfor %}
+        </div>
+      {% elif link_url %}
         <a class="project-in-use" href="{{ link_url }}" target="_blank" rel="noopener">{{ link_label }}</a>
       {% endif %}
+      <!-- FIM: ROTEADOR HÍBRIDO DE LINKS -->
       
       {% if client %}
         <p class="project-client">{{ client | safe }}</p>

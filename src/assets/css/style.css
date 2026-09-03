@@ -674,6 +674,12 @@ footer a {
   border-left: 1px solid #000;
   padding-left: 2.5vw;
 }
+
+.project-links-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
 /* ==========================================================================
    ESTRUTURA DE IMAGENS COM CSS GRID (RESOLUÇÃO DO ASPECT RATIO)
    ========================================================================== */
