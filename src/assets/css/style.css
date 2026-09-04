@@ -132,6 +132,17 @@ a img:hover {
   }
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .made-with-love:hover {
+    color: rgb(243, 0, 0);
+    text-decoration: none;
+  }
+  .mobile-overlay-title:hover {
+    cursor: url("/icons/heart.svg"), pointer;
+    color: #000;
+  }
+}
+
 ul {
   display: flex;
   flex-direction: column;
@@ -167,9 +178,9 @@ a:has(.border-img) .border-img {
   border: none !important;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1024px) {
   a:has(.border-img) {
-    border: 0.5px solid #000;
+    border: 1px solid rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -234,7 +245,7 @@ section:last-of-type {
   font-size: var(--fs-1);
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1024px) {
   .nav div a {
     padding: 0.3rem;
   }
@@ -248,11 +259,6 @@ footer {
 
 footer a {
   color: #ffffff;
-}
-
-.made-with-love:hover {
-  color: rgb(243, 0, 0);
-  text-decoration: none;
 }
 
 .footer-license {
@@ -273,7 +279,7 @@ footer a {
   width: 1rem;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1024px) {
   footer {
     padding: 5svh 10vw 1rem 10vw;
   }
@@ -362,7 +368,7 @@ footer a {
   }
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1024px) {
   .hero ul {
     grid-template-columns: 1fr;
   }
@@ -552,7 +558,7 @@ footer a {
 /* ==========================================================================
    RESPONSIVIDADE DO AFUNILAMENTO (MOBILE BLINDADO)
    ========================================================================== */
-@media (max-width: 1000px) {
+@media (max-width: 1024px) {
   .home-container {
     gap: 8svh;
   }
@@ -605,7 +611,7 @@ footer a {
   max-width: 40vw;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1024px) {
   .about-container {
     display: flex;
     flex-direction: column;
@@ -849,7 +855,7 @@ footer a {
     grid-column: 1 / 10;
   }
 }
-@media (max-width: 1000px) {
+@media (max-width: 1024px) {
   .project {
     justify-content: flex-end;
     padding-bottom: 10svh;
@@ -909,6 +915,51 @@ footer a {
   }
 }
 
+@media (max-width: 1440px), (max-height: 800px) {
+  /* Oculta o subtítulo apenas na lombada fechada para evitar estouro de limite vertical */
+  .book-spine-sub {
+    display: none;
+  }
+}
+/* ==========================================================================
+   PROTEÇÃO ULTRAWIDE (Monitores 2K, 4K e 8K)
+   ========================================================================== */
+@media (min-width: 2000px) {
+  :root {
+    --fs-0: clamp(1rem, 1vw, 1.25rem);
+    --fs-1: clamp(1.125rem, 1.2vw, 1.8rem);
+    --fs-2: clamp(2.25rem, 2.5vw, 3.5rem);
+    --fs-3: clamp(4.5rem, 4vw, 6.5rem);
+  }
+
+  .philosophy-page .bookshelf-wrapper {
+    align-items: flex-start; /* Impede que o bloco inteiro flutue no meio da tela */
+  }
+
+  .bookshelf-row {
+    max-width: 1400px;
+    height: 700px;
+    justify-content: flex-start; /* Joga os livros contra a parede esquerda do contêiner */
+  }
+
+  .book-item {
+    flex: 0 0 80px;
+  }
+
+  .book-item.is-open {
+    flex: 0 0 550px;
+  }
+
+  .book-content {
+    padding: 3.5rem;
+  }
+
+  /* Mantemos apenas uma declaração para evitar conflitos de margem */
+  .book-item.tilted-book {
+    margin-left: 125px !important;
+  }
+}
+
 /* ==========================================================================
    8. 404 PAGE
    ========================================================================== */
@@ -941,7 +992,7 @@ footer a {
   padding-left: 1rem;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .not-found {
     flex-direction: column;
     justify-content: end;
@@ -1027,10 +1078,6 @@ footer a {
   font-weight: 400;
   color: #fff;
   font-size: var(--fs-1);
-}
-.mobile-overlay-title:hover {
-  cursor: url("/icons/heart.svg"), pointer;
-  color: #000;
 }
 
 .mobile-nav-list {
