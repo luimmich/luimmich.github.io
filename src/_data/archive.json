@@ -27,6 +27,11 @@
           "alt": "Ecobag Leituras Queer"
         },
         {
+          "url": "/leituras-queer/",
+          "image": "/assets/project-files/leituras-queer/leituras-queer-readings.jpg",
+          "alt": "Infografico de leitura"
+        },
+        {
           "url": "#",
           "image": "/assets/project-files/entremundos/P0-Entremundos.webp",
           "alt": "Cartaz evento EntreMundos",
@@ -84,6 +89,11 @@
       "offsetDesktop": "6vw",
       "offsetMobile": "10vw",
       "items": [
+        {
+          "url": "#",
+          "image": "/assets/project-files/mtsf/mtsf-mobile.jpg",
+          "alt": "Site Mulheres Também Sabem Filosofia no celular"
+        },
         {
           "url": "/asterismo/",
           "image": "/assets/project-files/asterismo/asterismo-06.webp",
@@ -246,6 +256,11 @@
           "alt": "Queer Readings tote bag"
         },
         {
+          "url": "/leituras-queer/",
+          "image": "/assets/project-files/leituras-queer/leituras-queer-readings.jpg",
+          "alt": "Reading flow chart mobile page"
+        },
+        {
           "url": "#",
           "image": "/assets/project-files/entremundos/P0-Entremundos.webp",
           "alt": "EntreMundos event poster",
@@ -303,6 +318,11 @@
       "offsetDesktop": "6vw",
       "offsetMobile": "10vw",
       "items": [
+        {
+          "url": "#",
+          "image": "/assets/project-files/mtsf/mtsf-mobile.jpg",
+          "alt": "Webpage Mulheres Também Sabem Filosofia in a mobile phone"
+        },
         {
           "url": "/en/asterism/",
           "image": "/assets/project-files/asterismo/asterismo-06.webp",

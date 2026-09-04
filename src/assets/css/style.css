@@ -7,6 +7,9 @@
   --fs-1: clamp(1rem, 2vw, 1.125rem);
   --fs-2: clamp(2rem, 4vw, 2.25rem);
   --fs-3: clamp(3rem, 6vw, 4.5rem);
+  --z-nav: 100;
+  --z-modal: 500;
+  --z-overlay: 999;
 }
 
 * {
@@ -46,12 +49,8 @@ body.modal-open {
   overflow: hidden !important;
   touch-action: none !important;
 }
-
+.hidden,
 .vh-hidden {
-  display: none !important;
-}
-
-.hidden {
   display: none !important;
 }
 
@@ -117,12 +116,12 @@ a img {
   transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-a img:hover {
+/* a img:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
+} */
 
 @media (hover: hover) and (pointer: fine) {
   a img:hover,
@@ -207,7 +206,7 @@ section:last-of-type {
   align-items: center;
   justify-content: space-between;
   user-select: none;
-  z-index: 1000;
+  z-index: var(--z-nav);
   /* O fundo inicia transparente e a animação usa curva de aceleração */
   background-color: transparent;
   transition:
@@ -712,7 +711,7 @@ footer a {
 .project-split-img {
   display: grid;
   grid-template-columns: 1fr 1fr; /* Duas colunas exatamente iguais */
-  gap: 8vw; /* Mantém o respiro lateral elegante */
+  gap: 10svh;
   width: 100%;
   align-items: start; /* Proíbe o Grid de esticar as fotos verticalmente */
 }
@@ -1043,7 +1042,7 @@ footer a {
   width: 100vw;
   height: 100svh;
   background-color: #fff;
-  z-index: 9999;
+  z-index: var(--z-overlay);
   display: flex;
   flex-direction: column;
   padding: 3svh 10vw;
