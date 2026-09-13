@@ -44,6 +44,7 @@ body {
   -webkit-backdrop-filter: blur(16px);
   z-index: 100;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 24px;
@@ -64,7 +65,7 @@ body:not(.state-disconnected) #connection-overlay {
   background-color: var(--fg-root);
   color: var(--bg-root);
   border: 1px solid var(--fg-root);
-  border-radius: 12px;
+  border-radius: 64px;
   font-family: inherit;
   font-size: clamp(1.2rem, 5vw, 1.8rem);
   padding: clamp(1rem, 4vw, 1.5rem);
@@ -82,7 +83,7 @@ body:not(.state-disconnected) #connection-overlay {
 .btn-overlay:last-child {
   background-color: transparent;
   color: var(--fg-root);
-  border-style: dashed;
+  border-style: solid;
 }
 
 .btn-overlay:last-child:active {
@@ -283,7 +284,6 @@ body.theme-bluefy .action-footer {
   inset: 0;
   max-width: 800px;
   margin: 0 auto;
-
   background-color: var(--bg-root);
   z-index: 300;
   display: flex;
