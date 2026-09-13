@@ -303,7 +303,17 @@ UI.btnConnect.addEventListener("click", () => {
   });
 });
 
-UI.btnTare.addEventListener("click", () => bleManager.sendCommand("TARE"));
+UI.btnTare.addEventListener("click", () => {
+  if (isSimulating) {
+    // Modo Dev: Zera a variável do simulador imediatamente
+    simWeight = 0;
+    brewState.weight = 0;
+    brewState._isDirty = true;
+  } else {
+    // Modo Produção: Envia o comando real para a balança
+    bleManager.sendCommand("TARE");
+  }
+});
 
 UI.btnTimer.addEventListener("click", () => {
   if (isTimerRunning) {
@@ -322,21 +332,27 @@ requestAnimationFrame(renderFrame);
 // --- SIMULADOR DE HARDWARE BLINDADO (DEV MODE) ---
 const btnSimulate = document.getElementById("btn-simulate");
 
+// Variáveis içadas (hoisted) para serem acessíveis pelo botão Tare
+let isSimulating = false;
+let simTime = 0;
+let simWeight = 0;
+
 btnSimulate.addEventListener("click", () => {
   document.body.classList.remove("state-disconnected");
   document.getElementById("status-indicator").textContent = "sim";
 
-  let simTime = 0;
-  let simWeight = 0;
+  isSimulating = true; // Ativa a flag para o botão Tare
+  simTime = 0;
+  simWeight = 0;
 
   setInterval(() => {
-    // Se o timer estiver pausado, interrompe a geração de dados e congela o estado
+    // Se o timer estiver pausado, interrompe a geração de dados
     if (!isTimerRunning) return;
 
     simTime += 0.05;
 
     let flow = (Math.sin(simTime * 2) + 1) * 4 + Math.random() * 0.5;
-    simWeight += flow * 0.05;
+    simWeight += flow * 0.05; // Acumula o peso
 
     brewState.weight = simWeight;
     brewState.time = simTime;
