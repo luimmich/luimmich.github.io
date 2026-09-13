@@ -227,8 +227,8 @@ function renderFlowGraph(currentFlow, currentTime) {
   ctx.font = "10px 'Departure Mono', monospace";
 
   ctx.lineWidth = 1;
-  ctx.strokeStyle = "rgba(119, 119, 119, 0.25)";
-  ctx.fillStyle = "rgba(119, 119, 119, 0.7)";
+  ctx.strokeStyle = "rgba(119, 119, 119, 0.7)";
+  ctx.fillStyle = "rgba(119, 119, 119, 1)";
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
 
@@ -245,7 +245,7 @@ function renderFlowGraph(currentFlow, currentTime) {
   ctx.rect(X_PADDING_LEFT, 0, drawWidth, canvasHeight);
   ctx.clip();
 
-  ctx.strokeStyle = "rgba(119, 119, 119, 0.4)";
+  ctx.strokeStyle = "rgba(119, 119, 119, 0.7)";
   const TIME_INTERVAL = 15;
   let firstLine = Math.ceil(viewStartTime / TIME_INTERVAL) * TIME_INTERVAL;
 
@@ -304,7 +304,7 @@ function renderFlowGraph(currentFlow, currentTime) {
   ctx.restore();
 
   ctx.clearRect(0, 0, X_PADDING_LEFT, canvasHeight);
-  ctx.fillStyle = "rgba(119, 119, 119, 0.7)";
+  ctx.fillStyle = "rgba(119, 119, 119, 1)";
   ctx.textAlign = "left";
   for (let i = 0; i <= MAX_FLOW_SCALE; i += 2) {
     const y = canvasHeight - Y_PADDING_BOTTOM - (i / MAX_FLOW_SCALE) * drawHeight;
