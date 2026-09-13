@@ -32,6 +32,67 @@
         </button>
     </div>
 
+    <!-- TELA DE ESTATÍSTICAS (Modular Full Screen) -->
+        <div id="stats-screen" class="stats-overlay">
+            
+            <header class="stats-nav">
+                <button id="btn-close-stats" class="stats-nav-btn">< back</button>
+                <div class="stats-nav-title">stats</div>
+            </header>
+
+            <div class="stats-modules-grid">
+                
+                <!-- Módulo Hero: Extrações Totais (Dark Mode) -->
+                <div class="stat-module module-dark hero-module">
+                    <span class="module-lbl">total brews</span>
+                    <div id="stat-brews" class="module-val-huge">0</div>
+                </div>
+
+                <!-- Módulo: Volume Médio (ML) -->
+                <div class="stat-module module-light">
+                    <span class="module-lbl">avg yield</span>
+                    <div class="module-val-group">
+                        <div id="stat-avg-yield" class="module-val">0</div>
+                        <span class="module-unit">ml</span>
+                    </div>
+                </div>
+
+                <!-- Módulo: Despejos (Pours) -->
+                <div class="stat-module module-light">
+                    <span class="module-lbl">avg pours</span>
+                    <div class="module-val-group">
+                        <div id="stat-avg-pours" class="module-val">0</div>
+                        <span class="module-unit">x</span>
+                    </div>
+                </div>
+
+                <!-- Módulo: Tempo Médio -->
+                <div class="stat-module module-light">
+                    <span class="module-lbl">avg time</span>
+                    <div id="stat-avg-time" class="module-val">0:00</div>
+                </div>
+
+                <!-- Módulo: Café Estimado -->
+                <div class="stat-module module-light">
+                    <span class="module-lbl">est. coffee</span>
+                    <div class="module-val-group">
+                        <div id="stat-total-coffee" class="module-val">0</div>
+                        <span class="module-unit">g</span>
+                    </div>
+                </div>
+
+            <!-- Módulo de Ação: Exportação -->
+<button id="btn-export" class="stat-module module-light module-action">
+    <span class="module-lbl">system</span>
+    <div class="module-val-group">
+        <div class="module-val">export</div>
+        <span class="module-unit">.json</span>
+    </div>
+</button>
+            </div>
+
+        </div>
+
     <!-- O PAINEL DE EXTRAÇÃO (Stack Vertical) -->
     <main class="app-layout">
         

@@ -1,6 +1,7 @@
 // src/assets/js/scale/app.js
 import { brewState, handleTimemoreData } from "./timemore-decoder.js";
 import { BLEManager } from "./ble-manager.js";
+import { saveExtraction, exportData, getAllExtractions } from "./db.js";
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -24,22 +25,49 @@ const UI = {
   documentElement: document.documentElement,
 };
 
+// Referências da Tela de Estatísticas Modular
+const UIStats = {
+  screen: document.getElementById("stats-screen"),
+  btnClose: document.getElementById("btn-close-stats"),
+  btnExport: document.getElementById("btn-export"),
+  valBrews: document.getElementById("stat-brews"),
+  valAvgTime: document.getElementById("stat-avg-time"),
+  valAvgYield: document.getElementById("stat-avg-yield"),
+  valAvgPours: document.getElementById("stat-avg-pours"),
+  valTotalCoffee: document.getElementById("stat-total-coffee"),
+};
+
+// --- ESTADO GLOBAL DA APLICAÇÃO (FSM e Variáveis) ---
+const TIMER_STATE = {
+  IDLE: 0,
+  RUNNING: 1,
+  DONE: 2,
+};
+let currentTimerState = TIMER_STATE.IDLE;
+
+let isSimulating = false;
+let simTime = 0;
+let simWeight = 0;
+
+let FLOW_HISTORY = [];
+const maxHistorySize = 5000;
+const canvas = document.getElementById("flow-canvas");
+const ctx = canvas.getContext("2d");
+let scrollTime = 0;
+let isDragging = false;
+let lastClientX = 0;
+
 // --- UTILITÁRIO: FULLSCREEN MULTI-BROWSER ---
 function enterFullScreen() {
   const el = document.documentElement;
-
   try {
     if (el.requestFullscreen) {
-      // Padrão W3C (Chrome Android, Edge, Firefox Moderno)
       el.requestFullscreen().catch((err) => console.warn("Fullscreen ignorado pelo OS:", err));
     } else if (el.webkitRequestFullscreen) {
-      // WebKit (Bluefy, WebBLE, Safari no iPad, Chrome no iOS)
       el.webkitRequestFullscreen();
     } else if (el.mozRequestFullScreen) {
-      // Firefox Mobile Antigo
       el.mozRequestFullScreen();
     } else if (el.msRequestFullscreen) {
-      // Fallback Microsoft
       el.msRequestFullscreen();
     }
   } catch (error) {
@@ -63,43 +91,34 @@ const bleManager = new BLEManager(handleTimemoreData, (isConnected) => {
 
 // --- CONFIGURAÇÕES DO GRÁFICO ---
 const MAX_FLOW_SCALE = 10;
-
-// Variável que você pode mudar para ajustar o espaço entre as marcações de 15s.
-// Representa "quantos segundos são exibidos simultaneamente na tela".
-// Diminua o valor (ex: de 20 para 15) para aumentar o espaço entre as barras.
 const TIME_WINDOW = 20;
 
-let FLOW_HISTORY = [];
-let maxHistorySize = 5000; // Mantém longo para permitir bastante scroll
-const canvas = document.getElementById("flow-canvas");
-const ctx = canvas.getContext("2d");
+function resetExtraction() {
+  brewState.time = 0;
+  simTime = 0;
 
-// Variáveis de estado para o Scroll/Pan
-let isTimerRunning = false;
-let scrollTime = 0;
-let isDragging = false;
-let lastClientX = 0;
+  const timeStep = 0.1;
+  const pastPoints = 300;
+  FLOW_HISTORY = Array.from({ length: pastPoints }, (_, i) => {
+    return { flow: 0, time: -(pastPoints - i - 1) * timeStep };
+  });
+
+  brewState._isDirty = true;
+}
 
 function initGraph() {
   canvas.style.touchAction = "none";
-
   if (FLOW_HISTORY.length === 0) {
-    const timeStep = 0.1;
-    const pastPoints = 300;
-    FLOW_HISTORY = Array.from({ length: pastPoints }, (_, i) => {
-      return { flow: 0, time: -(pastPoints - i - 1) * timeStep };
-    });
+    resetExtraction();
   }
 }
 
-// Força um novo render assim que as fontes customizadas terminarem de carregar no Mobile
 document.fonts.ready.then(() => {
   brewState._isDirty = true;
 });
 
-// --- EVENTOS DE TOUCH/MOUSE PARA SCROLL (PAN) ---
 canvas.addEventListener("pointerdown", (e) => {
-  if (isTimerRunning) return;
+  if (currentTimerState === TIMER_STATE.RUNNING) return;
   isDragging = true;
   lastClientX = e.clientX;
 });
@@ -109,12 +128,10 @@ window.addEventListener("pointerup", () => {
 });
 
 canvas.addEventListener("pointermove", (e) => {
-  if (!isDragging || isTimerRunning) return;
-
+  if (!isDragging || currentTimerState === TIMER_STATE.RUNNING) return;
   const deltaPx = e.clientX - lastClientX;
   const drawWidth = canvas.clientWidth - 25;
   const pxPerSec = drawWidth / TIME_WINDOW;
-
   scrollTime += deltaPx / pxPerSec;
   lastClientX = e.clientX;
   brewState._isDirty = true;
@@ -124,7 +141,6 @@ window.addEventListener("resize", initGraph);
 document.addEventListener("DOMContentLoaded", initGraph);
 
 function renderFlowGraph(currentFlow, currentTime) {
-  // === CORREÇÃO DE SERRILHADO (High-DPI Retina/Mobile Displays) ===
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
 
@@ -134,13 +150,11 @@ function renderFlowGraph(currentFlow, currentTime) {
   ) {
     canvas.width = Math.floor(rect.width * dpr);
     canvas.height = Math.floor(rect.height * dpr);
-    ctx.scale(dpr, dpr); // Escala o contexto de desenho nativamente
+    ctx.scale(dpr, dpr);
   }
 
-  // Dimensões lógicas (em CSS pixels) para os cálculos de desenho
   const canvasWidth = rect.width;
   const canvasHeight = rect.height;
-
   const lastRecord = FLOW_HISTORY[FLOW_HISTORY.length - 1];
 
   if (!lastRecord || currentTime > lastRecord.time) {
@@ -161,25 +175,20 @@ function renderFlowGraph(currentFlow, currentTime) {
   const X_PADDING_LEFT = 25;
   const drawWidth = canvasWidth - X_PADDING_LEFT;
 
-  // --- CÁLCULO DE SCROLL ---
   let latestTime = FLOW_HISTORY[FLOW_HISTORY.length - 1].time;
   let maxScrollTime = Math.max(0, latestTime - TIME_WINDOW);
 
-  if (isTimerRunning) {
+  if (currentTimerState === TIMER_STATE.RUNNING) {
     scrollTime = 0;
   } else {
     scrollTime = Math.max(0, Math.min(scrollTime, maxScrollTime));
   }
 
-  let viewEndTime = latestTime - scrollTime;
+  let viewEndTime = Math.max(TIME_WINDOW, latestTime) - scrollTime;
   let viewStartTime = viewEndTime - TIME_WINDOW;
 
-  // Configuração da Fonte - Coloque o nome da fonte customizada do CSS no lugar de 'SuaFontePixel'
   ctx.font = "10px 'Departure Mono', monospace";
 
-  // ==============================================================
-  // CAMADA 1: DESENHO DA GRADE HORIZONTAL FIXA
-  // ==============================================================
   ctx.lineWidth = 1;
   ctx.strokeStyle = "rgba(119, 119, 119, 0.25)";
   ctx.fillStyle = "rgba(119, 119, 119, 0.7)";
@@ -194,23 +203,17 @@ function renderFlowGraph(currentFlow, currentTime) {
     ctx.stroke();
   }
 
-  // ==============================================================
-  // CAMADA 2: ÁREA DE CLIPPING
-  // ==============================================================
   ctx.save();
   ctx.beginPath();
   ctx.rect(X_PADDING_LEFT, 0, drawWidth, canvasHeight);
   ctx.clip();
 
-  // --- DESENHA AS BARRAS DE TEMPO VERTICAIS ---
   ctx.strokeStyle = "rgba(119, 119, 119, 0.4)";
   const TIME_INTERVAL = 15;
-
   let firstLine = Math.ceil(viewStartTime / TIME_INTERVAL) * TIME_INTERVAL;
 
   for (let T = firstLine; T <= viewEndTime; T += TIME_INTERVAL) {
     let x = X_PADDING_LEFT + ((T - viewStartTime) / TIME_WINDOW) * drawWidth;
-
     ctx.beginPath();
     ctx.moveTo(x, Y_PADDING_TOP);
     ctx.lineTo(x, canvasHeight - Y_PADDING_BOTTOM);
@@ -223,7 +226,6 @@ function renderFlowGraph(currentFlow, currentTime) {
     }
   }
 
-  // --- DESENHA A CURVA DE ÁGUA ---
   ctx.strokeStyle = "#FFFFFF";
   ctx.lineWidth = 2.5;
   ctx.lineCap = "round";
@@ -262,14 +264,9 @@ function renderFlowGraph(currentFlow, currentTime) {
     ctx.lineTo(prevX, prevY);
     ctx.stroke();
   }
-
   ctx.restore();
 
-  // ==============================================================
-  // CAMADA 3: LEGENDAS DO EIXO Y
-  // ==============================================================
   ctx.clearRect(0, 0, X_PADDING_LEFT, canvasHeight);
-
   ctx.fillStyle = "rgba(119, 119, 119, 0.7)";
   ctx.textAlign = "left";
   for (let i = 0; i <= MAX_FLOW_SCALE; i += 2) {
@@ -278,17 +275,14 @@ function renderFlowGraph(currentFlow, currentTime) {
   }
 }
 
-// --- TELEMETRIA RESILIENTE E AGNÓSTICA ---
 function updateFlowVisuals(flowRate) {
   let ratio = flowRate / MAX_FLOW_SCALE;
   if (ratio > 1.0) ratio = 1.0;
   if (ratio < 0.0) ratio = 0.0;
-
   UI.documentElement.style.setProperty("--flow-ratio", ratio.toFixed(3));
   UI.valFlowNum.textContent = flowRate.toFixed(1) + " g/s";
 }
 
-// --- PIPELINE DE RENDERIZAÇÃO ESTREITA ---
 function renderFrame() {
   requestAnimationFrame(renderFrame);
   if (!brewState._isDirty) return;
@@ -314,11 +308,32 @@ function renderFrame() {
   brewState._isDirty = false;
 }
 
-// --- EVENT BINDINGS ---
-UI.btnConnect.addEventListener("click", () => {
-  // Solicita tela cheia no exato milissegundo do clique do usuário
-  enterFullScreen();
+// --- INTEGRAÇÃO COM BANCO DE DADOS (DB) ---
+function processAndSaveExtraction() {
+  const MIN_TIME = 20;
+  const MIN_WEIGHT = 50;
 
+  if (brewState.time < MIN_TIME || brewState.weight < MIN_WEIGHT) {
+    console.log("Extração descartada (Escaldo/Purga).");
+    return;
+  }
+
+  const cleanFlowProfile = FLOW_HISTORY.filter((point) => point.time >= 0);
+
+  const extractionData = {
+    id: Date.now(),
+    date: new Date().toISOString(),
+    totalTime: brewState.time,
+    totalWeight: brewState.weight,
+    flowProfile: cleanFlowProfile,
+  };
+
+  saveExtraction(extractionData);
+}
+
+// --- EVENT BINDINGS (INTERAÇÕES GERAIS) ---
+UI.btnConnect.addEventListener("click", () => {
+  enterFullScreen();
   UI.btnConnect.textContent = "connecting";
   UI.btnConnect.classList.add("pulse-cursor");
 
@@ -331,55 +346,125 @@ UI.btnConnect.addEventListener("click", () => {
 
 UI.btnTare.addEventListener("click", () => {
   if (isSimulating) {
-    // Modo Dev: Zera a variável do simulador imediatamente
     simWeight = 0;
     brewState.weight = 0;
     brewState._isDirty = true;
   } else {
-    // Modo Produção: Envia o comando real para a balança
     bleManager.sendCommand("TARE");
   }
 });
 
 UI.btnTimer.addEventListener("click", () => {
-  if (isTimerRunning) {
-    bleManager.sendCommand("TIMER_PAUSE");
-    UI.timerIcon.src = "/icons/scale/play.svg";
-  } else {
-    bleManager.sendCommand("TIMER_START");
-    UI.timerIcon.src = "/icons/scale/pause.svg";
+  switch (currentTimerState) {
+    case TIMER_STATE.IDLE:
+      if (!isSimulating) bleManager.sendCommand("TIMER_START");
+      currentTimerState = TIMER_STATE.RUNNING;
+      UI.timerIcon.src = "/icons/scale/pause.svg";
+      break;
+
+    case TIMER_STATE.RUNNING:
+      if (!isSimulating) bleManager.sendCommand("TIMER_PAUSE");
+      currentTimerState = TIMER_STATE.DONE;
+      UI.timerIcon.src = "/icons/scale/restart.svg";
+      break;
+
+    case TIMER_STATE.DONE:
+      if (!isSimulating) bleManager.sendCommand("TIMER_RESET");
+      processAndSaveExtraction();
+      resetExtraction();
+
+      currentTimerState = TIMER_STATE.IDLE;
+      UI.timerIcon.src = "/icons/scale/play.svg";
+      break;
   }
-  isTimerRunning = !isTimerRunning;
 });
 
-// Kickstart do Render Loop
+// --- MÓDULO DE ESTATÍSTICAS (STAT SCREEN) ---
+UI.stableDot.addEventListener("click", async () => {
+  const extractions = await getAllExtractions();
+
+  if (extractions.length === 0) {
+    UIStats.valBrews.textContent = "0";
+    UIStats.screen.classList.add("is-visible");
+    return;
+  }
+
+  const count = extractions.length;
+  let sumTime = 0;
+  let sumYield = 0;
+  let sumPours = 0;
+
+  extractions.forEach((ext) => {
+    sumTime += ext.totalTime;
+    sumYield += ext.totalWeight;
+
+    // ALGORITMO DE DETECÇÃO DE DESPEJOS (HISTERESE)
+    let localPours = 0;
+    let isPouring = false;
+
+    if (ext.flowProfile && ext.flowProfile.length > 0) {
+      ext.flowProfile.forEach((pt) => {
+        if (pt.flow > 1.0 && !isPouring) {
+          isPouring = true;
+          localPours++;
+        } else if (pt.flow < 0.5 && isPouring) {
+          isPouring = false;
+        }
+      });
+    }
+
+    // Fallback de segurança para extrações muito lentas sem picos bruscos
+    if (localPours === 0 && ext.totalWeight > 0) localPours = 1;
+    sumPours += localPours;
+  });
+
+  const avgTime = sumTime / count;
+  const avgYield = sumYield / count; // 1g de água = 1ml
+  const avgPours = sumPours / count;
+  const estCoffeeGrams = sumYield / 15; // Proporção base (1:15)
+
+  UIStats.valBrews.textContent = count.toString();
+
+  const m = Math.floor(avgTime / 60);
+  const s = Math.floor(avgTime % 60)
+    .toString()
+    .padStart(2, "0");
+  UIStats.valAvgTime.textContent = `${m}:${s}`;
+
+  UIStats.valAvgYield.textContent = avgYield.toFixed(0);
+  UIStats.valAvgPours.textContent = avgPours.toFixed(1);
+  UIStats.valTotalCoffee.textContent = estCoffeeGrams.toFixed(0);
+
+  UIStats.screen.classList.add("is-visible");
+});
+
+UIStats.btnClose.addEventListener("click", () => {
+  UIStats.screen.classList.remove("is-visible");
+});
+
+UIStats.btnExport.addEventListener("click", () => {
+  exportData();
+});
+
 requestAnimationFrame(renderFrame);
 
-// --- SIMULADOR DE HARDWARE BLINDADO (DEV MODE) ---
+// --- DEV MODE (MOCK DE DADOS) ---
 const btnSimulate = document.getElementById("btn-simulate");
-
-// Variáveis içadas (hoisted) para serem acessíveis pelo botão Tare
-let isSimulating = false;
-let simTime = 0;
-let simWeight = 0;
 
 btnSimulate.addEventListener("click", () => {
   enterFullScreen();
   document.body.classList.remove("state-disconnected");
   document.getElementById("status-indicator").textContent = "sim";
 
-  isSimulating = true; // Ativa a flag para o botão Tare
-  simTime = 0;
-  simWeight = 0;
+  isSimulating = true;
+  resetExtraction();
 
   setInterval(() => {
-    // Se o timer estiver pausado, interrompe a geração de dados
-    if (!isTimerRunning) return;
+    if (currentTimerState !== TIMER_STATE.RUNNING) return;
 
     simTime += 0.05;
-
     let flow = (Math.sin(simTime * 2) + 1) * 4 + Math.random() * 0.5;
-    simWeight += flow * 0.05; // Acumula o peso
+    simWeight += flow * 0.05;
 
     brewState.weight = simWeight;
     brewState.time = simTime;

@@ -112,6 +112,7 @@ body:not(.state-disconnected) #connection-overlay {
 .nav-item {
   color: var(--fg-dim);
   font-size: clamp(1.2rem, 4vw, 1.5rem);
+  opacity: 0;
 }
 
 /* --- METRICS --- */
@@ -248,4 +249,151 @@ body:not(.state-disconnected) #connection-overlay {
   .action-btn {
     padding: 2.5rem 0;
   }
+}
+/* --- TELA DE ESTATÍSTICAS (BRUTALISMO MODULAR) --- */
+.stats-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: var(--bg-root);
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  padding: var(--safe-pad);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.stats-overlay.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Nav Bar Minimalista */
+.stats-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: clamp(1.5rem, 4vh, 3rem);
+  color: var(--fg-dim);
+  font-size: clamp(1rem, 4vw, 1.2rem);
+}
+.stats-nav-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.stats-nav-btn:active {
+  color: var(--fg-root);
+}
+.stats-nav-title {
+  letter-spacing: 0.05em;
+}
+
+/* Grid de Módulos (Estilo OP-Z) */
+.stats-modules-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(8px, 2vw, 12px);
+  flex: 1;
+  align-content: start;
+}
+
+/* Base dos Módulos */
+.stat-module {
+  border-radius: clamp(12px, 3vw, 20px);
+  padding: clamp(12px, 3vw, 20px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.module-dark {
+  background-color: #1a1a1a;
+  color: var(--fg-root);
+}
+.module-dark::before {
+  background-color: var(--fg-dim);
+}
+
+.module-light {
+  background-color: #f0f0f0;
+  color: var(--bg-root);
+}
+.module-light::before {
+  background-color: #a0a0a0;
+}
+
+.hero-module {
+  grid-column: 1 / -1; /* Ocupa a largura inteira */
+  padding-bottom: 2rem;
+}
+
+/* Tipografia Interna dos Módulos */
+.module-lbl {
+  font-size: clamp(0.7rem, 2.5vw, 1rem);
+  opacity: 0.6;
+  /* margin-top: 1.5rem; */
+  margin-bottom: clamp(0.5rem, 1.5rem, 3rem);
+}
+.module-val-huge {
+  font-size: clamp(4rem, 15vw, 8rem);
+  line-height: 0.9;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.05em;
+  margin-right: 0.5rem;
+}
+.module-val {
+  font-size: clamp(2rem, 7vw, 3.5rem);
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  justify-content: flex-end;
+}
+.module-val-group {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: auto; /* Joga os valores para a base do card */
+}
+.module-unit {
+  font-size: clamp(0.9rem, 3vw, 1.2rem);
+  opacity: 0.6;
+}
+
+/* --- MÓDULO INTERATIVO (EXPORT) --- */
+.module-action {
+  /* Força o botão a resetar estilos nativos e se comportar como um módulo */
+  appearance: none;
+  border: none;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+
+  /* Ocupa a largura total da grade (2 colunas) */
+  grid-column: 1 / -1;
+
+  /* Feedback tátil */
+  transition:
+    transform 0.05s ease,
+    filter 0.1s ease;
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.module-action:active {
+  transform: scale(0.98);
+  filter: brightness(0.85);
+}
+
+/* Alinha o texto do botão à esquerda (ao contrário dos números que ficam à direita) */
+.module-action .module-val-group {
+  justify-content: flex-start;
+  margin-top: 10px; /* Dá um leve respiro após o label */
 }
