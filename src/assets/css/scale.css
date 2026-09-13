@@ -4,8 +4,13 @@
   --fg-dim: #777777;
   --accent-color: #ffffff;
   --font-mono: "Departure Mono", monospace, sans-serif;
-
   --safe-pad: clamp(1rem, 4vw, 2rem);
+}
+
+/* Modo Camaleão (Bluefy/iOS) */
+body.theme-bluefy {
+  --bg-root: #1c1c1e;
+  --fg-dim: #8e8e93; /* Cinza adaptado para legibilidade ideal no fundo chumbo */
 }
 
 * {
@@ -24,18 +29,17 @@ body {
   overflow: hidden;
   text-transform: lowercase;
 
-  /* Touch UX Otimizado */
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
-  touch-action: pan-y; /* Previne zoom de double-tap mantendo acessibilidade */
+  touch-action: pan-y;
 }
 
 /* --- OVERLAY --- */
 .overlay {
   position: absolute;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: color-mix(in srgb, var(--bg-root) 70%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   z-index: 100;
@@ -69,14 +73,17 @@ body:not(.state-disconnected) #connection-overlay {
     transform 0.05s ease,
     filter 0.1s ease;
 }
+
 .btn-overlay:active {
   transform: scale(0.95);
 }
+
 .btn-overlay:last-child {
   background-color: transparent;
   color: var(--fg-root);
   border-style: dashed;
 }
+
 .btn-overlay:last-child:active {
   background-color: var(--fg-root);
   color: var(--bg-root);
@@ -90,7 +97,6 @@ body:not(.state-disconnected) #connection-overlay {
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  /* Padding lateral apenas nos filhos para permitir footer full-width natural */
 }
 
 .top-nav,
@@ -142,6 +148,7 @@ body:not(.state-disconnected) #connection-overlay {
   font-size: clamp(0.9rem, 3vw, 1.2rem);
   color: var(--fg-dim);
 }
+
 .tiny-label {
   opacity: 0;
 }
@@ -152,6 +159,7 @@ body:not(.state-disconnected) #connection-overlay {
   letter-spacing: -0.05em;
   font-variant-numeric: tabular-nums;
 }
+
 @media (pointer: fine) {
   .hero-metric {
     font-size: clamp(4rem, 10vmin, 8rem);
@@ -166,6 +174,7 @@ body:not(.state-disconnected) #connection-overlay {
   opacity: 0.15;
   transition: opacity 0.1s ease;
 }
+
 .stable-dot.is-stable {
   opacity: 1;
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
@@ -192,7 +201,7 @@ body:not(.state-disconnected) #connection-overlay {
 .signal-canvas {
   flex: 1;
   width: 100%;
-  min-height: 0; /* Impede vazamento no flexbox */
+  min-height: 0;
 }
 
 /* --- RODAPÉ --- */
@@ -201,7 +210,7 @@ body:not(.state-disconnected) #connection-overlay {
   background-color: #f0f0f0;
   border-radius: 24px 24px 0 0;
   overflow: hidden;
-  margin-top: auto; /* Ancara na base */
+  margin-top: auto;
 }
 
 .action-btn {
@@ -210,7 +219,7 @@ body:not(.state-disconnected) #connection-overlay {
   justify-content: center;
   align-items: center;
   background-color: transparent;
-  color: #000000;
+  color: var(--bg-root);
   border: none;
   font-family: inherit;
   font-size: clamp(2rem, 6vw, 3rem);
@@ -218,17 +227,19 @@ body:not(.state-disconnected) #connection-overlay {
   cursor: pointer;
   transition: background-color 0.1s ease;
 }
+
 .action-btn #timer-icon {
   height: clamp(2rem, 6vw, 3rem);
 }
 
 .action-btn:first-child {
-  border-right: 1px solid rgba(0, 0, 0, 0.25);
+  border-right: 1px solid color-mix(in srgb, var(--bg-root) 25%, transparent);
 }
 
 .action-btn:active {
-  background-color: rgba(0, 0, 0, 0.15);
+  background-color: color-mix(in srgb, var(--bg-root) 15%, transparent);
 }
+
 .action-btn img {
   width: clamp(28px, 7vw, 40px);
   pointer-events: none;
@@ -250,6 +261,7 @@ body:not(.state-disconnected) #connection-overlay {
     padding: 2.5rem 0;
   }
 }
+
 /* --- TELA DE ESTATÍSTICAS (BRUTALISMO MODULAR) --- */
 .stats-overlay {
   position: absolute;
@@ -271,7 +283,6 @@ body:not(.state-disconnected) #connection-overlay {
   transform: translateY(0);
 }
 
-/* Nav Bar Minimalista */
 .stats-nav {
   display: flex;
   justify-content: space-between;
@@ -280,6 +291,7 @@ body:not(.state-disconnected) #connection-overlay {
   color: var(--fg-dim);
   font-size: clamp(1rem, 4vw, 1.2rem);
 }
+
 .stats-nav-btn {
   background: none;
   border: none;
@@ -287,6 +299,7 @@ body:not(.state-disconnected) #connection-overlay {
   font: inherit;
   cursor: pointer;
 }
+
 .stats-nav-btn:active {
   color: var(--fg-root);
 }
@@ -294,7 +307,6 @@ body:not(.state-disconnected) #connection-overlay {
   letter-spacing: 0.05em;
 }
 
-/* Grid de Módulos (Estilo OP-Z) */
 .stats-modules-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -313,33 +325,35 @@ body:not(.state-disconnected) #connection-overlay {
 }
 
 .module-dark {
-  background-color: #1a1a1a;
+  /* Calcula um fundo levemente mais claro baseado na cor primária, seja preto ou chumbo */
+  background-color: color-mix(in srgb, var(--bg-root) 85%, white);
   color: var(--fg-root);
 }
+
 .module-dark::before {
   background-color: var(--fg-dim);
 }
 
 .module-light {
   background-color: #f0f0f0;
-  color: var(--bg-root);
+  color: #000000;
 }
+
 .module-light::before {
   background-color: #a0a0a0;
 }
 
 .hero-module {
-  grid-column: 1 / -1; /* Ocupa a largura inteira */
+  grid-column: 1 / -1;
   padding-bottom: 2rem;
 }
 
-/* Tipografia Interna dos Módulos */
 .module-lbl {
   font-size: clamp(0.7rem, 2.5vw, 1rem);
   opacity: 0.6;
-  /* margin-top: 1.5rem; */
   margin-bottom: clamp(0.5rem, 1.5rem, 3rem);
 }
+
 .module-val-huge {
   font-size: clamp(4rem, 15vw, 8rem);
   line-height: 0.9;
@@ -348,6 +362,7 @@ body:not(.state-disconnected) #connection-overlay {
   letter-spacing: -0.05em;
   margin-right: 0.5rem;
 }
+
 .module-val {
   font-size: clamp(2rem, 7vw, 3.5rem);
   line-height: 0.9;
@@ -355,13 +370,15 @@ body:not(.state-disconnected) #connection-overlay {
   display: flex;
   justify-content: flex-end;
 }
+
 .module-val-group {
   display: flex;
   align-items: baseline;
   justify-content: flex-end;
   gap: 4px;
-  margin-top: auto; /* Joga os valores para a base do card */
+  margin-top: auto;
 }
+
 .module-unit {
   font-size: clamp(0.9rem, 3vw, 1.2rem);
   opacity: 0.6;
@@ -369,22 +386,19 @@ body:not(.state-disconnected) #connection-overlay {
 
 /* --- MÓDULO INTERATIVO (EXPORT) --- */
 .module-action {
-  /* Força o botão a resetar estilos nativos e se comportar como um módulo */
   appearance: none;
   border: none;
   text-align: left;
   font-family: inherit;
   cursor: pointer;
-
-  /* Ocupa a largura total da grade (2 colunas) */
   grid-column: 1 / -1;
-
-  /* Feedback tátil */
   transition:
     transform 0.05s ease,
     filter 0.1s ease;
-  background-color: #1a1a1a;
-  color: #ffffff;
+
+  /* Reaproveita o mix escuro adaptativo */
+  background-color: color-mix(in srgb, var(--bg-root) 85%, white);
+  color: var(--fg-root);
 }
 
 .module-action:active {
@@ -392,8 +406,7 @@ body:not(.state-disconnected) #connection-overlay {
   filter: brightness(0.85);
 }
 
-/* Alinha o texto do botão à esquerda (ao contrário dos números que ficam à direita) */
 .module-action .module-val-group {
   justify-content: flex-start;
-  margin-top: 10px; /* Dá um leve respiro após o label */
+  margin-top: 10px;
 }

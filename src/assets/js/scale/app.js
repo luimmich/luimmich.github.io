@@ -43,6 +43,18 @@ const UI = {
   documentElement: document.documentElement,
 };
 
+// --- MODO CAMALEÃO (Detecção de Bluefy) ---
+const isBluefy = navigator.userAgent.toLowerCase().includes("bluefy");
+if (isBluefy) {
+  document.body.classList.add("theme-bluefy");
+
+  // Altera a cor da barra de status do iOS no topo
+  const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+  if (metaThemeColor) {
+    metaThemeColor.setAttribute("content", "#1C1C1E");
+  }
+}
+
 // Referências da Tela de Estatísticas Modular
 const UIStats = {
   screen: document.getElementById("stats-screen"),
@@ -77,6 +89,12 @@ let lastClientX = 0;
 
 // --- UTILITÁRIO: FULLSCREEN MULTI-BROWSER ---
 function enterFullScreen() {
+  // Bloqueio para Desktop: Só prossegue se for dispositivo móvel ou touch
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    navigator.maxTouchPoints > 0;
+  if (!isMobile) return;
+
   const el = document.documentElement;
   try {
     if (el.requestFullscreen) {
@@ -113,6 +131,7 @@ const TIME_WINDOW = 20;
 
 function resetExtraction() {
   brewState.time = 0;
+  brewState.flowRateEMA = 0;
   simTime = 0;
 
   const timeStep = 0.1;
