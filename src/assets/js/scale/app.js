@@ -118,7 +118,11 @@ function renderFlowGraph(currentFlow, currentTime) {
   const canvasWidth = rect.width;
   const canvasHeight = rect.height;
 
-  FLOW_HISTORY.push({ flow: currentFlow, time: currentTime });
+  const lastRecord = FLOW_HISTORY[FLOW_HISTORY.length - 1];
+
+  if (!lastRecord || currentTime > lastRecord.time) {
+    FLOW_HISTORY.push({ flow: currentFlow, time: currentTime });
+  }
 
   if (currentTime <= 0 || FLOW_HISTORY.length > 50000) {
     if (FLOW_HISTORY.length > maxHistorySize) {
@@ -326,11 +330,12 @@ btnSimulate.addEventListener("click", () => {
   let simWeight = 0;
 
   setInterval(() => {
-    if (isTimerRunning) simTime += 0.05;
+    // Se o timer estiver pausado, interrompe a geração de dados e congela o estado
+    if (!isTimerRunning) return;
+
+    simTime += 0.05;
 
     let flow = (Math.sin(simTime * 2) + 1) * 4 + Math.random() * 0.5;
-    if (!isTimerRunning) flow = 0;
-
     simWeight += flow * 0.05;
 
     brewState.weight = simWeight;
