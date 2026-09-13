@@ -40,8 +40,14 @@ const bleManager = new BLEManager(handleTimemoreData, (isConnected) => {
 
 // --- CONFIGURAÇÕES DO GRÁFICO ---
 const MAX_FLOW_SCALE = 10;
+
+// Variável que você pode mudar para ajustar o espaço entre as marcações de 15s.
+// Representa "quantos segundos são exibidos simultaneamente na tela".
+// Diminua o valor (ex: de 20 para 15) para aumentar o espaço entre as barras.
+const TIME_WINDOW = 20;
+
 let FLOW_HISTORY = [];
-let maxHistorySize = 100;
+let maxHistorySize = 5000; // Mantém longo para permitir bastante scroll
 const canvas = document.getElementById("flow-canvas");
 const ctx = canvas.getContext("2d");
 
@@ -52,16 +58,21 @@ let isDragging = false;
 let lastClientX = 0;
 
 function initGraph() {
-  canvas.style.touchAction = "none"; // Previne o pull-to-refresh nativo ao dar scroll no gráfico
-  maxHistorySize = Math.floor(window.innerWidth);
+  canvas.style.touchAction = "none";
 
   if (FLOW_HISTORY.length === 0) {
     const timeStep = 0.1;
-    FLOW_HISTORY = Array.from({ length: maxHistorySize }, (_, i) => {
-      return { flow: 0, time: -(maxHistorySize - i - 1) * timeStep };
+    const pastPoints = 300;
+    FLOW_HISTORY = Array.from({ length: pastPoints }, (_, i) => {
+      return { flow: 0, time: -(pastPoints - i - 1) * timeStep };
     });
   }
 }
+
+// Força um novo render assim que as fontes customizadas terminarem de carregar no Mobile
+document.fonts.ready.then(() => {
+  brewState._isDirty = true;
+});
 
 // --- EVENTOS DE TOUCH/MOUSE PARA SCROLL (PAN) ---
 canvas.addEventListener("pointerdown", (e) => {
@@ -78,21 +89,34 @@ canvas.addEventListener("pointermove", (e) => {
   if (!isDragging || isTimerRunning) return;
 
   const deltaPx = e.clientX - lastClientX;
-  const TIME_WINDOW = maxHistorySize * 0.1;
   const drawWidth = canvas.clientWidth - 25;
   const pxPerSec = drawWidth / TIME_WINDOW;
 
-  // Desloca o tempo de visão baseado no movimento do dedo
   scrollTime += deltaPx / pxPerSec;
   lastClientX = e.clientX;
-  brewState._isDirty = true; // Força re-render
+  brewState._isDirty = true;
 });
 
 window.addEventListener("resize", initGraph);
 document.addEventListener("DOMContentLoaded", initGraph);
+
 function renderFlowGraph(currentFlow, currentTime) {
-  if (canvas.width !== canvas.clientWidth) canvas.width = canvas.clientWidth;
-  if (canvas.height !== canvas.clientHeight) canvas.height = canvas.clientHeight;
+  // === CORREÇÃO DE SERRILHADO (High-DPI Retina/Mobile Displays) ===
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+
+  if (
+    canvas.width !== Math.floor(rect.width * dpr) ||
+    canvas.height !== Math.floor(rect.height * dpr)
+  ) {
+    canvas.width = Math.floor(rect.width * dpr);
+    canvas.height = Math.floor(rect.height * dpr);
+    ctx.scale(dpr, dpr); // Escala o contexto de desenho nativamente
+  }
+
+  // Dimensões lógicas (em CSS pixels) para os cálculos de desenho
+  const canvasWidth = rect.width;
+  const canvasHeight = rect.height;
 
   FLOW_HISTORY.push({ flow: currentFlow, time: currentTime });
 
@@ -102,18 +126,16 @@ function renderFlowGraph(currentFlow, currentTime) {
     }
   }
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
   const Y_PADDING_TOP = 20;
   const Y_PADDING_BOTTOM = 25;
-  const drawHeight = canvas.height - Y_PADDING_TOP - Y_PADDING_BOTTOM;
+  const drawHeight = canvasHeight - Y_PADDING_TOP - Y_PADDING_BOTTOM;
   const X_PADDING_LEFT = 25;
-  const drawWidth = canvas.width - X_PADDING_LEFT;
+  const drawWidth = canvasWidth - X_PADDING_LEFT;
 
-  // --- CÁLCULO DA JANELA DE TEMPO E SCROLL ---
-  const TIME_WINDOW = maxHistorySize * 0.1;
+  // --- CÁLCULO DE SCROLL ---
   let latestTime = FLOW_HISTORY[FLOW_HISTORY.length - 1].time;
-
   let maxScrollTime = Math.max(0, latestTime - TIME_WINDOW);
 
   if (isTimerRunning) {
@@ -125,30 +147,32 @@ function renderFlowGraph(currentFlow, currentTime) {
   let viewEndTime = latestTime - scrollTime;
   let viewStartTime = viewEndTime - TIME_WINDOW;
 
+  // Configuração da Fonte - Coloque o nome da fonte customizada do CSS no lugar de 'SuaFontePixel'
+  ctx.font = "10px 'SuaFontePixel', monospace";
+
   // ==============================================================
   // CAMADA 1: DESENHO DA GRADE HORIZONTAL FIXA
   // ==============================================================
   ctx.lineWidth = 1;
   ctx.strokeStyle = "rgba(119, 119, 119, 0.25)";
   ctx.fillStyle = "rgba(119, 119, 119, 0.7)";
-  ctx.font = "10px monospace";
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
 
   for (let i = 0; i <= MAX_FLOW_SCALE; i += 2) {
-    const y = canvas.height - Y_PADDING_BOTTOM - (i / MAX_FLOW_SCALE) * drawHeight;
+    const y = canvasHeight - Y_PADDING_BOTTOM - (i / MAX_FLOW_SCALE) * drawHeight;
     ctx.beginPath();
     ctx.moveTo(X_PADDING_LEFT, y);
-    ctx.lineTo(canvas.width, y);
+    ctx.lineTo(canvasWidth, y);
     ctx.stroke();
   }
 
   // ==============================================================
-  // CAMADA 2: ÁREA DE CLIPPING (Permite o scroll sem invadir a legenda Y)
+  // CAMADA 2: ÁREA DE CLIPPING
   // ==============================================================
   ctx.save();
   ctx.beginPath();
-  ctx.rect(X_PADDING_LEFT, 0, drawWidth, canvas.height);
+  ctx.rect(X_PADDING_LEFT, 0, drawWidth, canvasHeight);
   ctx.clip();
 
   // --- DESENHA AS BARRAS DE TEMPO VERTICAIS ---
@@ -162,17 +186,17 @@ function renderFlowGraph(currentFlow, currentTime) {
 
     ctx.beginPath();
     ctx.moveTo(x, Y_PADDING_TOP);
-    ctx.lineTo(x, canvas.height - Y_PADDING_BOTTOM);
+    ctx.lineTo(x, canvasHeight - Y_PADDING_BOTTOM);
     ctx.stroke();
 
     if (T >= 0 && T % 15 === 0) {
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
-      ctx.fillText(T + "s", x, canvas.height - Y_PADDING_BOTTOM + 6);
+      ctx.fillText(T + "s", x, canvasHeight - Y_PADDING_BOTTOM + 6);
     }
   }
 
-  // --- DESENHA A CURVA DE ÁGUA (Agora oculta antes do 0s) ---
+  // --- DESENHA A CURVA DE ÁGUA ---
   ctx.strokeStyle = "#FFFFFF";
   ctx.lineWidth = 2.5;
   ctx.lineCap = "round";
@@ -187,12 +211,11 @@ function renderFlowGraph(currentFlow, currentTime) {
     let val = FLOW_HISTORY[i].flow;
     let ptTime = FLOW_HISTORY[i].time;
 
-    // IGNORA os pontos de tempo negativo (a "barra" falsa)
     if (ptTime < 0) continue;
 
     let currentX = X_PADDING_LEFT + ((ptTime - viewStartTime) / TIME_WINDOW) * drawWidth;
-    let currentY = canvas.height - Y_PADDING_BOTTOM - (val / MAX_FLOW_SCALE) * drawHeight;
-    currentY = Math.max(Y_PADDING_TOP, Math.min(currentY, canvas.height - Y_PADDING_BOTTOM));
+    let currentY = canvasHeight - Y_PADDING_BOTTOM - (val / MAX_FLOW_SCALE) * drawHeight;
+    currentY = Math.max(Y_PADDING_TOP, Math.min(currentY, canvasHeight - Y_PADDING_BOTTOM));
 
     if (!startedDrawingCurve) {
       ctx.moveTo(currentX, currentY);
@@ -208,24 +231,22 @@ function renderFlowGraph(currentFlow, currentTime) {
     }
   }
 
-  // Finaliza a linha se algum ponto foi desenhado
   if (startedDrawingCurve) {
     ctx.lineTo(prevX, prevY);
     ctx.stroke();
   }
 
-  // Fecha o clipping mask
   ctx.restore();
 
   // ==============================================================
   // CAMADA 3: LEGENDAS DO EIXO Y
   // ==============================================================
-  ctx.clearRect(0, 0, X_PADDING_LEFT, canvas.height);
+  ctx.clearRect(0, 0, X_PADDING_LEFT, canvasHeight);
 
   ctx.fillStyle = "rgba(119, 119, 119, 0.7)";
   ctx.textAlign = "left";
   for (let i = 0; i <= MAX_FLOW_SCALE; i += 2) {
-    const y = canvas.height - Y_PADDING_BOTTOM - (i / MAX_FLOW_SCALE) * drawHeight;
+    const y = canvasHeight - Y_PADDING_BOTTOM - (i / MAX_FLOW_SCALE) * drawHeight;
     ctx.fillText(i.toString(), 5, y);
   }
 }
@@ -305,7 +326,6 @@ btnSimulate.addEventListener("click", () => {
   let simWeight = 0;
 
   setInterval(() => {
-    // Só atualiza o tempo se o timer não estiver pausado
     if (isTimerRunning) simTime += 0.05;
 
     let flow = (Math.sin(simTime * 2) + 1) * 4 + Math.random() * 0.5;
