@@ -18,7 +18,7 @@ body {
   color: var(--fg-root);
   font-family: var(--font-mono);
   width: 100vw;
-  height: 100dvh;
+  height: 100svh;
   overflow: hidden;
   text-transform: lowercase;
   user-select: none;
@@ -119,8 +119,8 @@ body:not(.state-disconnected) #connection-overlay {
 .metrics-stack {
   display: flex;
   flex-direction: column;
-  gap: clamp(2rem, 5svh, 4rem);
-  margin: auto 0 clamp(2rem, 5svh, 4rem);
+  gap: clamp(1.5rem, 5svh, 4rem);
+  margin: auto 0 clamp(1.5rem, 5svh, 4rem);
 }
 
 .metric-row {
@@ -148,7 +148,8 @@ body:not(.state-disconnected) #connection-overlay {
 }
 
 .hero-metric {
-  font-size: clamp(5.5rem, 24vw, 14rem);
+  margin-top: auto;
+  font-size: clamp(4rem, 10vh, 14rem);
   line-height: 1;
   letter-spacing: -0.05em;
   color: var(--fg-root);
@@ -199,16 +200,17 @@ body:not(.state-disconnected) #connection-overlay {
 
 /* --- RODAPÉ --- */
 .action-footer {
-  /* 
-    O margin negativo garante que a barra toque as laterais 
-    exatas da tela, anulando o padding do .app-layout 
-  */
   margin-left: calc(-1 * clamp(1rem, 4vw, 2rem));
   margin-right: calc(-1 * clamp(1rem, 4vw, 2rem));
   background-color: #f0f0f0;
   border-radius: 24px 24px 0 0;
   display: flex;
   overflow: hidden;
+}
+@media (max-height: 667px) {
+  .action-footer {
+    margin-top: clamp(1.5rem, 5svh, 3rem);
+  }
 }
 
 .action-btn {
@@ -255,19 +257,20 @@ body:not(.state-disconnected) #connection-overlay {
 
   .hero-metric {
     /* Trava o tamanho máximo da fonte para não estourar no iPad Pro */
-    font-size: 11rem;
+    font-size: clamp(5rem, 10svh, 7rem);
   }
 
   .signal-graph-container {
     /* Aumenta a altura do gráfico para equilibrar a nova largura */
-    height: 300px;
-    margin-bottom: 4rem;
+    /* height: 300px; */
+    margin-bottom: 13svh;
   }
 
   .action-footer {
     /* Reajusta a margem negativa baseada no novo padding do tablet */
     margin-left: -3rem;
     margin-right: -3rem;
+    margin-top: auto;
   }
 
   .action-btn {
