@@ -51,7 +51,7 @@ if (isBluefy) {
   // Altera a cor da barra de status do iOS no topo
   const metaThemeColor = document.querySelector('meta[name="theme-color"]');
   if (metaThemeColor) {
-    metaThemeColor.setAttribute("content", "#1C1C1E");
+    metaThemeColor.setAttribute("content", "#0a0a0a");
   }
 }
 

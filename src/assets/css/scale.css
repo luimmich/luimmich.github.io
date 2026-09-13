@@ -9,7 +9,7 @@
 
 /* Modo Camaleão (Bluefy/iOS) */
 body.theme-bluefy {
-  --bg-root: #1c1c1e;
+  --bg-root: #0a0a0a;
   --fg-dim: #8e8e93; /* Cinza adaptado para legibilidade ideal no fundo chumbo */
 }
 
@@ -51,6 +51,7 @@ body {
   transition:
     opacity 0.3s ease,
     visibility 0.3s ease;
+  will-change: opacity, visibility; /* Aceleração de hardware */
 }
 
 body:not(.state-disconnected) #connection-overlay {
@@ -207,10 +208,12 @@ body:not(.state-disconnected) #connection-overlay {
 /* --- RODAPÉ --- */
 .action-footer {
   display: flex;
-  background-color: #f0f0f0;
-  border-radius: 24px 24px 0 0;
+  border-radius: 64px;
   overflow: hidden;
-  margin-top: auto;
+  margin: auto 2rem 5vh 2rem;
+  margin-bottom: calc(5vh + env(safe-area-inset-bottom, 0px));
+  background-color: color-mix(in srgb, var(--bg-root) 85%, white);
+  color: var(--fg-root);
 }
 
 .action-btn {
@@ -219,7 +222,7 @@ body:not(.state-disconnected) #connection-overlay {
   justify-content: center;
   align-items: center;
   background-color: transparent;
-  color: var(--bg-root);
+  color: var(--accent-color);
   border: none;
   font-family: inherit;
   font-size: clamp(2rem, 6vw, 3rem);
@@ -233,16 +236,32 @@ body:not(.state-disconnected) #connection-overlay {
 }
 
 .action-btn:first-child {
-  border-right: 1px solid color-mix(in srgb, var(--bg-root) 25%, transparent);
+  position: relative;
+}
+
+.action-btn:first-child::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 15%; /* Centraliza visualmente a linha */
+  bottom: 15%;
+  width: 1px;
+  background-color: color-mix(in srgb, var(--fg-root) 15%, transparent);
 }
 
 .action-btn:active {
-  background-color: color-mix(in srgb, var(--bg-root) 15%, transparent);
+  background-color: color-mix(in srgb, var(--fg-root) 1%, transparent);
 }
 
 .action-btn img {
   width: clamp(28px, 7vw, 40px);
   pointer-events: none;
+  filter: invert(1);
+}
+
+/* --- RODAPÉ ESPECÍFICO PARA BLUEFY --- */
+body.theme-bluefy .action-footer {
+  background-color: #1f1f1f;
 }
 
 /* TABLET MODO */
@@ -253,19 +272,18 @@ body:not(.state-disconnected) #connection-overlay {
   .app-layout {
     padding-top: 2rem;
   }
-  .action-footer {
-    border-radius: 32px 32px 0 0;
-    margin: 0 2rem;
-  }
   .action-btn {
     padding: 2.5rem 0;
   }
 }
 
-/* --- TELA DE ESTATÍSTICAS (BRUTALISMO MODULAR) --- */
+/* --- TELA DE ESTATÍSTICAS --- */
 .stats-overlay {
   position: absolute;
   inset: 0;
+  max-width: 800px;
+  margin: 0 auto;
+
   background-color: var(--bg-root);
   z-index: 300;
   display: flex;
@@ -275,6 +293,7 @@ body:not(.state-disconnected) #connection-overlay {
   visibility: hidden;
   transform: translateY(20px);
   transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform, opacity, visibility;
 }
 
 .stats-overlay.is-visible {
