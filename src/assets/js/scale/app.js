@@ -3,31 +3,31 @@ import { brewState, handleTimemoreData } from "./timemore-decoder.js";
 import { BLEManager } from "./ble-manager.js";
 import { saveExtraction, exportData, getAllExtractions } from "./db.js";
 
-// if ("serviceWorker" in navigator) {
-//   window.addEventListener("load", () => {
-//     navigator.serviceWorker.register("/scale-app/sw.js").catch((err) => {
-//       console.warn("Service Worker falhou:", err);
-//     });
-//   });
-// }
-
-// Substitua o bloco de registro original por este temporariamente
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      for (let registration of registrations) {
-        registration.unregister().then((boolean) => {
-          if (boolean) console.log("Service Worker desinstalado (Dev Mode)");
-        });
-      }
-    });
-
-    // Opcional: Limpa também o cache físico do navegador armazenado pelo SW
-    caches.keys().then((keyList) => {
-      return Promise.all(keyList.map((key) => caches.delete(key)));
+    navigator.serviceWorker.register("/scale-app/sw.js").catch((err) => {
+      console.warn("Service Worker falhou:", err);
     });
   });
 }
+
+// Substitua o bloco de registro original por este temporariamente
+// if ("serviceWorker" in navigator) {
+//   window.addEventListener("load", () => {
+//     navigator.serviceWorker.getRegistrations().then((registrations) => {
+//       for (let registration of registrations) {
+//         registration.unregister().then((boolean) => {
+//           if (boolean) console.log("Service Worker desinstalado (Dev Mode)");
+//         });
+//       }
+//     });
+
+//     // Opcional: Limpa também o cache físico do navegador armazenado pelo SW
+//     caches.keys().then((keyList) => {
+//       return Promise.all(keyList.map((key) => caches.delete(key)));
+//     });
+//   });
+// }
 
 const UI = {
   body: document.body,
