@@ -1,4 +1,4 @@
-const CACHE_NAME = "timemore-terminal-v2";
+const CACHE_NAME = "timemore-terminal-v3";
 
 const ASSETS_TO_CACHE = [
   "/scale-app/",
@@ -10,37 +10,42 @@ const ASSETS_TO_CACHE = [
   "/js/scale/timemore-decoder.js",
   "/css/departure.css",
   "/fonts/departuremono/DepartureMono-Regular.woff2",
-  "/fonts/departuremono/DepartureMono-Regular.woff",
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    }),
-  );
   self.skipWaiting();
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE)));
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((keyList) => {
-      return Promise.all(
-        keyList.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        }),
-      );
-    }),
-  );
   self.clients.claim();
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))),
+      ),
+  );
 });
 
+// Stale-While-Revalidate Strategy
 self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
+      const fetchPromise = fetch(event.request)
+        .then((networkResponse) => {
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+          });
+          return networkResponse;
+        })
+        .catch(() => {
+          // Ignora erros de rede silenciosamente (offline mode)
+        });
+
+      return cachedResponse || fetchPromise;
     }),
   );
 });

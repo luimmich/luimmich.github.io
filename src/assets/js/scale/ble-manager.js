@@ -1,15 +1,15 @@
 // ble-manager.js
 
 // Definições restritas dos perfis UART estipulados pela Timemore[cite: 1]
-const TIMEMORE_SERVICE_UUID = 0xffe0; // Serviço Principal (UART)[cite: 1]
-const TIMEMORE_CHARACTERISTIC_UUID = 0xffe1; // Característica RX / TX[cite: 1]
+const TIMEMORE_SERVICE_UUID = "ffe0"; // Serviço Principal (UART)
+const TIMEMORE_CHARACTERISTIC_UUID = "ffe1"; // Característica RX / TX
 
-// Mapas de alocação estática para comandos hexadecimais (Prevenindo instanciação extra)[cite: 1]
+// Mapas de alocação estática para comandos hexadecimais (Prevenindo instanciação extra)
 const COMMANDS = {
-  TARE: new Uint8Array([0xfd, 0x00, 0x01, 0x01, 0x00, 0x02, 0x00]), // Zera a célula de carga[cite: 1]
-  TIMER_START: new Uint8Array([0xfd, 0x00, 0x02, 0x01, 0x01, 0x04, 0x00]), // Inicia os ciclos do relógio[cite: 1]
-  TIMER_PAUSE: new Uint8Array([0xfd, 0x00, 0x02, 0x01, 0x02, 0x05, 0x00]), // Pausa incremento temporal[cite: 1]
-  TIMER_RESET: new Uint8Array([0xfd, 0x00, 0x02, 0x01, 0x00, 0x03, 0x00]), // Repõe o acumulador a zeros[cite: 1]
+  TARE: new Uint8Array([0xfd, 0x00, 0x01, 0x01, 0x00, 0x02, 0x00]), // Zera a célula de carga[cite: 7]
+  TIMER_START: new Uint8Array([0xfd, 0x00, 0x02, 0x01, 0x01, 0x04, 0x00]), // Inicia os ciclos do relógio[cite: 7]
+  TIMER_PAUSE: new Uint8Array([0xfd, 0x00, 0x02, 0x01, 0x02, 0x05, 0x00]), // Pausa incremento temporal[cite: 7]
+  TIMER_RESET: new Uint8Array([0xfd, 0x00, 0x02, 0x01, 0x00, 0x03, 0x00]), // Repõe o acumulador a zeros[cite: 7]
 };
 
 // Algoritmo de backoff exponencial para gerir falhas de ligação[cite: 1]

@@ -4,6 +4,8 @@
   --fg-dim: #777777;
   --accent-color: #ffffff;
   --font-mono: "Departure Mono", monospace, sans-serif;
+
+  --safe-pad: clamp(1rem, 4vw, 2rem);
 }
 
 * {
@@ -12,21 +14,24 @@
   padding: 0;
 }
 
-/* --- BASE & TYPOGRAPHY --- */
 body {
   background-color: var(--bg-root);
   color: var(--fg-root);
   font-family: var(--font-mono);
   width: 100vw;
+  height: 100vh; /* Fallback iOS Antigo */
   height: 100svh;
   overflow: hidden;
   text-transform: lowercase;
+
+  /* Touch UX Otimizado */
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y; /* Previne zoom de double-tap mantendo acessibilidade */
 }
 
-/* --- OVERLAY DE CONEXÃO --- */
+/* --- OVERLAY --- */
 .overlay {
   position: absolute;
   inset: 0;
@@ -35,11 +40,10 @@ body {
   -webkit-backdrop-filter: blur(16px);
   z-index: 100;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 24px;
-  padding: 24px;
+  padding: var(--safe-pad);
   transition:
     opacity 0.3s ease,
     visibility 0.3s ease;
@@ -54,44 +58,46 @@ body:not(.state-disconnected) #connection-overlay {
 .btn-overlay {
   background-color: var(--fg-root);
   color: var(--bg-root);
-  border: none;
+  border: 1px solid var(--fg-root);
   border-radius: 12px;
   font-family: inherit;
   font-size: clamp(1.2rem, 5vw, 1.8rem);
   padding: clamp(1rem, 4vw, 1.5rem);
-  width: clamp(200px, 80%, 350px);
+  width: clamp(120px, 45%, 250px);
   cursor: pointer;
-  text-transform: lowercase;
+  transition:
+    transform 0.05s ease,
+    filter 0.1s ease;
 }
-
 .btn-overlay:active {
-  filter: brightness(0.8);
-  transform: scale(0.97);
+  transform: scale(0.95);
 }
-
-.btn-overlay.dashed {
+.btn-overlay:last-child {
   background-color: transparent;
   color: var(--fg-root);
-  border: 1px dashed var(--fg-dim);
+  border-style: dashed;
 }
-
-.btn-overlay.dashed:active {
+.btn-overlay:last-child:active {
   background-color: var(--fg-root);
   color: var(--bg-root);
 }
 
-/* --- LAYOUT PRINCIPAL --- */
+/* --- LAYOUT ESTRUTURAL --- */
 .app-layout {
   display: flex;
   flex-direction: column;
   height: 100%;
-  /* 
-    Removemos o max-width de 600px para permitir que o app 
-    ocupe toda a largura da tela em tablets 
-  */
   width: 100%;
+  max-width: 800px;
   margin: 0 auto;
-  padding: clamp(1rem, 4vw, 2rem) clamp(1rem, 4vw, 2rem) 0;
+  /* Padding lateral apenas nos filhos para permitir footer full-width natural */
+}
+
+.top-nav,
+.metrics-stack,
+.signal-graph-container {
+  padding-left: var(--safe-pad);
+  padding-right: var(--safe-pad);
 }
 
 /* --- CABEÇALHO --- */
@@ -99,34 +105,28 @@ body:not(.state-disconnected) #connection-overlay {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: clamp(1rem, 4svh, 2rem);
+  padding-top: var(--safe-pad);
+  padding-bottom: clamp(1rem, 3svh, 2rem);
 }
 
 .nav-item {
-  background-color: transparent;
   color: var(--fg-dim);
-  border: none;
-  font-family: inherit;
   font-size: clamp(1.2rem, 4vw, 1.5rem);
-  cursor: pointer;
 }
 
-.nav-item:active {
-  color: var(--fg-root);
-}
-
-/* --- DADOS GIGANTES --- */
+/* --- METRICS --- */
 .metrics-stack {
   display: flex;
   flex-direction: column;
-  gap: clamp(1.5rem, 5svh, 4rem);
-  margin: auto 0 clamp(1.5rem, 5svh, 4rem);
+  justify-content: end;
+  flex-grow: 1;
+  gap: clamp(1.5rem, 5svh, 5rem);
+  margin-bottom: clamp(1.5rem, 5svh, 5rem);
 }
 
 .metric-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
   width: 100%;
 }
 
@@ -141,20 +141,20 @@ body:not(.state-disconnected) #connection-overlay {
   font-size: clamp(0.9rem, 3vw, 1.2rem);
   color: var(--fg-dim);
 }
-
 .tiny-label {
-  margin-top: -0.2rem;
   opacity: 0;
 }
 
 .hero-metric {
-  margin-top: auto;
-  font-size: clamp(4rem, 10vh, 14rem);
-  line-height: 1;
+  font-size: clamp(4rem, 22vmin, 14rem);
+  line-height: 0.85;
   letter-spacing: -0.05em;
-  color: var(--fg-root);
   font-variant-numeric: tabular-nums;
-  white-space: pre;
+}
+@media (pointer: fine) {
+  .hero-metric {
+    font-size: clamp(4rem, 10vmin, 8rem);
+  }
 }
 
 .stable-dot {
@@ -165,52 +165,42 @@ body:not(.state-disconnected) #connection-overlay {
   opacity: 0.15;
   transition: opacity 0.1s ease;
 }
-
 .stable-dot.is-stable {
   opacity: 1;
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
 }
 
-/* --- GRÁFICO DE SINAL --- */
+/* --- GRÁFICO --- */
 .signal-graph-container {
-  height: clamp(140px, 22svh, 200px);
+  height: clamp(100px, 18svh, 200px);
   width: 100%;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  margin-bottom: clamp(1.5rem, 7svh, 3rem);
+  margin-bottom: clamp(1.5rem, 4svh, 3rem);
+  min-height: 30svh;
 }
 
 .signal-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 1rem;
-}
-
-.signal-header .tiny-unit {
-  margin-bottom: -5px;
+  margin-bottom: 0.5rem;
 }
 
 .signal-canvas {
   flex: 1;
   width: 100%;
-  background-color: transparent;
+  min-height: 0; /* Impede vazamento no flexbox */
 }
 
 /* --- RODAPÉ --- */
 .action-footer {
-  margin-left: calc(-1 * clamp(1rem, 4vw, 2rem));
-  margin-right: calc(-1 * clamp(1rem, 4vw, 2rem));
+  display: flex;
   background-color: #f0f0f0;
   border-radius: 24px 24px 0 0;
-  display: flex;
   overflow: hidden;
-}
-@media (max-height: 667px) {
-  .action-footer {
-    margin-top: clamp(1.5rem, 5svh, 3rem);
-  }
+  margin-top: auto; /* Ancara na base */
 }
 
 .action-btn {
@@ -221,10 +211,9 @@ body:not(.state-disconnected) #connection-overlay {
   background-color: transparent;
   color: #000000;
   border: none;
-  border-radius: 0;
   font-family: inherit;
-  font-size: clamp(1.2rem, 5vw, 1.8rem);
-  padding: clamp(1.5rem, 4svh, 2.5rem) 0;
+  font-size: clamp(2rem, 6vw, 3rem);
+  padding: clamp(1.2rem, 3svh, 2rem) 0;
   cursor: pointer;
   transition: background-color 0.1s ease;
 }
@@ -236,44 +225,24 @@ body:not(.state-disconnected) #connection-overlay {
 .action-btn:active {
   background-color: rgba(0, 0, 0, 0.15);
 }
-
 .action-btn img {
-  width: clamp(24px, 6vw, 32px);
-  height: clamp(24px, 6vw, 32px);
+  width: clamp(28px, 7vw, 40px);
   pointer-events: none;
 }
 
-#btn-tare {
-  font-size: clamp(2rem, 6vw, 2.5rem);
-  font-weight: 500;
-}
-
-/* --- MEDIA QUERIES (TABLETS) --- */
+/* TABLET MODO */
 @media (min-width: 700px) {
-  .app-layout {
-    /* Em telas maiores, evitamos que os números fiquem desproporcionalmente grandes */
-    padding: 2rem 3rem 0;
-  }
-
   .hero-metric {
-    /* Trava o tamanho máximo da fonte para não estourar no iPad Pro */
-    font-size: clamp(5rem, 10svh, 7rem);
+    font-size: clamp(4rem, 15vmin, 12rem);
   }
-
-  .signal-graph-container {
-    /* Aumenta a altura do gráfico para equilibrar a nova largura */
-    /* height: 300px; */
-    margin-bottom: 13svh;
+  .app-layout {
+    padding-top: 2rem;
   }
-
   .action-footer {
-    /* Reajusta a margem negativa baseada no novo padding do tablet */
-    margin-left: -3rem;
-    margin-right: -3rem;
-    margin-top: auto;
+    border-radius: 32px 32px 0 0;
+    margin: 0 2rem;
   }
-
   .action-btn {
-    padding: 3rem 0; /* Botões mais altos para toque em tablet */
+    padding: 2.5rem 0;
   }
 }
