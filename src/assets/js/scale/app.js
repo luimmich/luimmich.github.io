@@ -148,7 +148,7 @@ function renderFlowGraph(currentFlow, currentTime) {
   let viewStartTime = viewEndTime - TIME_WINDOW;
 
   // Configuração da Fonte - Coloque o nome da fonte customizada do CSS no lugar de 'SuaFontePixel'
-  ctx.font = "10px 'SuaFontePixel', monospace";
+  ctx.font = "10px 'Departure Mono', monospace";
 
   // ==============================================================
   // CAMADA 1: DESENHO DA GRADE HORIZONTAL FIXA
@@ -292,10 +292,10 @@ UI.btnConnect.addEventListener("click", () => {
   UI.btnConnect.textContent = "connecting";
   UI.btnConnect.classList.add("pulse-cursor");
   bleManager.connect().catch((error) => {
-    console.error("Erro detalhado do Web Bluetooth:", error);
     UI.btnConnect.textContent = "connect";
     UI.btnConnect.classList.remove("pulse-cursor");
-    alert("Falha ao parear. Verifique o console para mais detalhes.");
+    // Exibe o erro real gerado pela engine do iOS
+    alert("Falha: " + (error.message || error));
   });
 });
 

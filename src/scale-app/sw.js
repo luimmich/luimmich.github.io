@@ -8,6 +8,9 @@ const ASSETS_TO_CACHE = [
   "/js/scale/app.js",
   "/js/scale/ble-manager.js",
   "/js/scale/timemore-decoder.js",
+  "/css/departure.css",
+  "/fonts/departuremono/DepartureMono-Regular.woff2",
+  "/fonts/departuremono/DepartureMono-Regular.woff",
 ];
 
 self.addEventListener("install", (event) => {
