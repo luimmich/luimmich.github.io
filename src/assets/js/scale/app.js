@@ -24,6 +24,29 @@ const UI = {
   documentElement: document.documentElement,
 };
 
+// --- UTILITÁRIO: FULLSCREEN MULTI-BROWSER ---
+function enterFullScreen() {
+  const el = document.documentElement;
+
+  try {
+    if (el.requestFullscreen) {
+      // Padrão W3C (Chrome Android, Edge, Firefox Moderno)
+      el.requestFullscreen().catch((err) => console.warn("Fullscreen ignorado pelo OS:", err));
+    } else if (el.webkitRequestFullscreen) {
+      // WebKit (Bluefy, WebBLE, Safari no iPad, Chrome no iOS)
+      el.webkitRequestFullscreen();
+    } else if (el.mozRequestFullScreen) {
+      // Firefox Mobile Antigo
+      el.mozRequestFullScreen();
+    } else if (el.msRequestFullscreen) {
+      // Fallback Microsoft
+      el.msRequestFullscreen();
+    }
+  } catch (error) {
+    console.warn("Dispositivo não suporta Fullscreen API programática.");
+  }
+}
+
 const timeStrs = new Array(60);
 for (let i = 0; i < 60; i++) {
   timeStrs[i] = i < 10 ? "0" + i : i.toString();
@@ -293,12 +316,15 @@ function renderFrame() {
 
 // --- EVENT BINDINGS ---
 UI.btnConnect.addEventListener("click", () => {
+  // Solicita tela cheia no exato milissegundo do clique do usuário
+  enterFullScreen();
+
   UI.btnConnect.textContent = "connecting";
   UI.btnConnect.classList.add("pulse-cursor");
+
   bleManager.connect().catch((error) => {
     UI.btnConnect.textContent = "connect";
     UI.btnConnect.classList.remove("pulse-cursor");
-    // Exibe o erro real gerado pela engine do iOS
     alert("Falha: " + (error.message || error));
   });
 });
@@ -338,6 +364,7 @@ let simTime = 0;
 let simWeight = 0;
 
 btnSimulate.addEventListener("click", () => {
+  enterFullScreen();
   document.body.classList.remove("state-disconnected");
   document.getElementById("status-indicator").textContent = "sim";
 
