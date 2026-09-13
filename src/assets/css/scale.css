@@ -211,7 +211,7 @@ body:not(.state-disconnected) #connection-overlay {
   display: flex;
   border-radius: 64px;
   overflow: hidden;
-  margin: auto 2rem 5vh 2rem;
+  margin: auto 1rem 5vh 1rem;
   margin-bottom: calc(5vh + env(safe-area-inset-bottom, 0px));
   background-color: color-mix(in srgb, var(--bg-root) 85%, white);
   color: var(--fg-root);
@@ -227,13 +227,13 @@ body:not(.state-disconnected) #connection-overlay {
   border: none;
   font-family: inherit;
   font-size: clamp(2rem, 6vw, 3rem);
-  padding: clamp(1.2rem, 3svh, 2rem) 0;
+  padding: clamp(0.75rem, 3svh, 1rem) 0;
   cursor: pointer;
   transition: background-color 0.1s ease;
 }
 
 .action-btn #timer-icon {
-  height: clamp(2rem, 6vw, 3rem);
+  height: clamp(1.7rem, 5vw, 2.5rem);
 }
 
 .action-btn:first-child {
