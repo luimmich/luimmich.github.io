@@ -1,0 +1,276 @@
+:root {
+  --bg-root: #000000;
+  --fg-root: #ffffff;
+  --fg-dim: #777777;
+  --accent-color: #ffffff;
+  --font-mono: "Departure Mono", monospace, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- BASE & TYPOGRAPHY --- */
+body {
+  background-color: var(--bg-root);
+  color: var(--fg-root);
+  font-family: var(--font-mono);
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  text-transform: lowercase;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* --- OVERLAY DE CONEXÃO --- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
+}
+
+body:not(.state-disconnected) #connection-overlay {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.btn-overlay {
+  background-color: var(--fg-root);
+  color: var(--bg-root);
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: clamp(1.2rem, 5vw, 1.8rem);
+  padding: clamp(1rem, 4vw, 1.5rem);
+  width: clamp(200px, 80%, 350px);
+  cursor: pointer;
+  text-transform: lowercase;
+}
+
+.btn-overlay:active {
+  filter: brightness(0.8);
+  transform: scale(0.97);
+}
+
+.btn-overlay.dashed {
+  background-color: transparent;
+  color: var(--fg-root);
+  border: 1px dashed var(--fg-dim);
+}
+
+.btn-overlay.dashed:active {
+  background-color: var(--fg-root);
+  color: var(--bg-root);
+}
+
+/* --- LAYOUT PRINCIPAL --- */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  /* 
+    Removemos o max-width de 600px para permitir que o app 
+    ocupe toda a largura da tela em tablets 
+  */
+  width: 100%;
+  margin: 0 auto;
+  padding: clamp(1rem, 4vw, 2rem) clamp(1rem, 4vw, 2rem) 0;
+}
+
+/* --- CABEÇALHO --- */
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: clamp(1rem, 4svh, 2rem);
+}
+
+.nav-item {
+  background-color: transparent;
+  color: var(--fg-dim);
+  border: none;
+  font-family: inherit;
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  cursor: pointer;
+}
+
+.nav-item:active {
+  color: var(--fg-root);
+}
+
+/* --- DADOS GIGANTES --- */
+.metrics-stack {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 5svh, 4rem);
+  margin: auto 0 clamp(2rem, 5svh, 4rem);
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.metric-value-group {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.tiny-label,
+.tiny-unit {
+  font-size: clamp(0.9rem, 3vw, 1.2rem);
+  color: var(--fg-dim);
+}
+
+.tiny-label {
+  margin-top: -0.2rem;
+  opacity: 0;
+}
+
+.hero-metric {
+  font-size: clamp(5.5rem, 24vw, 14rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--fg-root);
+  font-variant-numeric: tabular-nums;
+  white-space: pre;
+}
+
+.stable-dot {
+  width: clamp(1rem, 3.5vw, 1.5rem);
+  height: clamp(1rem, 3.5vw, 1.5rem);
+  background-color: var(--accent-color);
+  border-radius: 50%;
+  opacity: 0.15;
+  transition: opacity 0.1s ease;
+}
+
+.stable-dot.is-stable {
+  opacity: 1;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+}
+
+/* --- GRÁFICO DE SINAL --- */
+.signal-graph-container {
+  height: clamp(140px, 22svh, 200px);
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: clamp(1.5rem, 7svh, 3rem);
+}
+
+.signal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.signal-header .tiny-unit {
+  margin-bottom: -5px;
+}
+
+.signal-canvas {
+  flex: 1;
+  width: 100%;
+  background-color: transparent;
+}
+
+/* --- RODAPÉ --- */
+.action-footer {
+  /* 
+    O margin negativo garante que a barra toque as laterais 
+    exatas da tela, anulando o padding do .app-layout 
+  */
+  margin-left: calc(-1 * clamp(1rem, 4vw, 2rem));
+  margin-right: calc(-1 * clamp(1rem, 4vw, 2rem));
+  background-color: #f0f0f0;
+  border-radius: 24px 24px 0 0;
+  display: flex;
+  overflow: hidden;
+}
+
+.action-btn {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  color: #000000;
+  border: none;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: clamp(1.2rem, 5vw, 1.8rem);
+  padding: clamp(1.5rem, 4svh, 2.5rem) 0;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.action-btn:first-child {
+  border-right: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.action-btn:active {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+.action-btn img {
+  width: clamp(24px, 6vw, 32px);
+  height: clamp(24px, 6vw, 32px);
+  pointer-events: none;
+}
+
+#btn-tare {
+  font-size: clamp(2rem, 6vw, 2.5rem);
+  font-weight: 500;
+}
+
+/* --- MEDIA QUERIES (TABLETS) --- */
+@media (min-width: 700px) {
+  .app-layout {
+    /* Em telas maiores, evitamos que os números fiquem desproporcionalmente grandes */
+    padding: 2rem 3rem 0;
+  }
+
+  .hero-metric {
+    /* Trava o tamanho máximo da fonte para não estourar no iPad Pro */
+    font-size: 11rem;
+  }
+
+  .signal-graph-container {
+    /* Aumenta a altura do gráfico para equilibrar a nova largura */
+    height: 300px;
+    margin-bottom: 4rem;
+  }
+
+  .action-footer {
+    /* Reajusta a margem negativa baseada no novo padding do tablet */
+    margin-left: -3rem;
+    margin-right: -3rem;
+  }
+
+  .action-btn {
+    padding: 3rem 0; /* Botões mais altos para toque em tablet */
+  }
+}

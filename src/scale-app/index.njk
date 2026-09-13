@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <title>Simbolic Scale</title>
+
+    <link rel="stylesheet" href="/css/scale.css">
+    <link rel="manifest" href="/scale-app/manifest.json">
+</head>
+<body class="state-disconnected">
+
+    <!-- OVERLAY DE DESCONEXÃO -->
+    <div id="connection-overlay" class="overlay">
+        <button id="btn-connect" class="btn-overlay">
+            connect
+        </button>
+        <button id="btn-simulate" class="btn-overlay">
+            dev 
+        </button>
+    </div>
+
+    <!-- O PAINEL DE EXTRAÇÃO (Stack Vertical) -->
+    <main class="app-layout">
+        
+       <header class="top-nav">
+            <!-- BLE agora fica na esquerda -->
+            <div id="status-indicator" class="nav-item">ble</div>
+            
+            <!-- Ponto de estabilidade agora fica na direita -->
+            <div id="stable-dot" class="stable-dot"></div>
+        </header>
+
+        <!-- DADOS GIGANTES (Tempo e Peso empilhados) -->
+        <section class="metrics-stack">
+            
+            <div class="metric-row">
+                <span class="tiny-label">time</span>
+                <div class="metric-value-group">
+                    <div id="val-time" class="hero-metric">0:00</div>
+                    <span class="tiny-unit">s</span>
+                </div>
+            </div>
+
+            <div class="metric-row">
+                <span class="tiny-label">weight</span>
+                <div class="metric-value-group">
+                    <div id="val-weight" class="hero-metric">0.0</div>
+                    <span class="tiny-unit">g</span>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- GRÁFICO DE SINAL (Flow em Linha) -->
+        <section class="signal-graph-container">
+            <div class="signal-header">
+                <span class="tiny-label">flow</span>
+                <span id="val-flow-numeric" class="tiny-unit">0.0 g/s</span>
+            </div>
+            <canvas id="flow-canvas" class="signal-canvas"></canvas>
+        </section>
+
+        <!-- RODAPÉ (Ações) -->
+<footer class="action-footer">
+  <button id="btn-timer" class="action-btn">
+    <img id="timer-icon" src="/icons/scale/play.svg" alt="Timer">
+  </button>
+  <button id="btn-tare" class="action-btn">T</button>
+</footer>
+    </main>
+    <script type="module" src="/js/scale/app.js"></script>
+</body>
+</html>

@@ -20,6 +20,8 @@ module.exports = function (eleventyConfig) {
     "src/assets/icons": "icons",
     "src/assets/imgs": "imgs",
     "src/assets/project-files": "project-files",
+    "src/scale-app/manifest.json": "scale-app/manifest.json",
+    "src/scale-app/sw.js": "scale-app/sw.js",
   });
 
   // --- SHORTCODE DE IMAGEM OTIMIZADA ---

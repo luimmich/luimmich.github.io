@@ -1,0 +1,9 @@
+{
+  "name": "Simbolic Scale",
+  "short_name": "Scale",
+  "start_url": "/scale-app/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary"
+}
