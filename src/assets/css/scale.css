@@ -217,6 +217,9 @@ body:not(.state-disconnected) #connection-overlay {
   cursor: pointer;
   transition: background-color 0.1s ease;
 }
+.action-btn #timer-icon {
+  height: clamp(2rem, 6vw, 3rem);
+}
 
 .action-btn:first-child {
   border-right: 1px solid rgba(0, 0, 0, 0.25);
