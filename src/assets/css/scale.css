@@ -437,7 +437,7 @@ body.theme-bluefy .action-footer {
 /* --- MÓDULO DE HISTÓRICO --- */
 .history-module {
   grid-column: 1 / -1;
-  max-height: clamp(200px, 35svh, 600px); /* Respeita telas pequenas */
+  max-height: clamp(200px, 35svh, 400px); /* Respeita telas pequenas */
   display: flex;
   flex-direction: column;
 }
