@@ -283,9 +283,6 @@ body.theme-bluefy .action-footer {
   .hero-metric {
     font-size: clamp(4rem, 15vmin, 12rem);
   }
-  .app-layout {
-    /* padding-top: 2rem; */
-  }
   .action-btn {
     padding: 2.5rem 0;
   }
