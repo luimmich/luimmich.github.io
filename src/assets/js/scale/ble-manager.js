@@ -23,10 +23,7 @@ export class BLEManager {
     this.reconnectAttempts = 0;
     this.intentionalDisconnect = false;
 
-    // Fila transacional para evitar erros GATT "Operation in Progress"
     this.commandQueue = Promise.resolve();
-
-    // Controlador de aborto para gestão limpa de memória (Event Listeners)
     this.abortController = new AbortController();
 
     this._handleDisconnect = this._handleDisconnect.bind(this);
@@ -39,12 +36,11 @@ export class BLEManager {
     }
 
     try {
+      // Payload simplificado: o parser nativo do Bluefy/WebBLE aceita a injeção do serviço diretamente no filtro
       this.device = await navigator.bluetooth.requestDevice({
-        filters: [{ namePrefix: "TIMEMORE" }, { namePrefix: "TES" }, { namePrefix: "BK" }],
-        optionalServices: [TIMEMORE_SERVICE_UUID],
+        filters: [{ services: [TIMEMORE_SERVICE_UUID] }],
       });
 
-      // AbortController limpa listeners antigos automaticamente antes de renovar
       this.device.addEventListener("gattserverdisconnected", this._handleDisconnect, {
         signal: this.abortController.signal,
       });
@@ -121,7 +117,6 @@ export class BLEManager {
     const payload = COMMANDS[commandKey];
     if (!this.characteristic || !payload) return;
 
-    // Encadeia o novo comando na fila de Promises (Mutex)
     this.commandQueue = this.commandQueue.then(async () => {
       try {
         if (this.characteristic.properties.writeWithoutResponse) {
@@ -132,7 +127,6 @@ export class BLEManager {
       } catch (error) {
         console.error(`Erro ao enviar comando BLE (${commandKey}):`, error);
       } finally {
-        // Pausa obrigatória para o hardware processar antes de aceitar o próximo comando
         await new Promise((resolve) => setTimeout(resolve, 150));
       }
     });
@@ -144,12 +138,11 @@ export class BLEManager {
     if (this.device && this.device.gatt && this.device.gatt.connected) {
       this.intentionalDisconnect = true;
 
-      // Revoga todos os event listeners ativos amarrados a este sinal
       this.abortController.abort();
-      this.abortController = new AbortController(); // Prepara para nova conexão futura
+      this.abortController = new AbortController();
 
       this.device.gatt.disconnect();
-      console.log("Conexão GATT encerrada intencionalmente e listeners limpos.");
+      console.log("Conexão GATT encerrada intencionalmente.");
     }
   }
 }
