@@ -205,6 +205,10 @@ body:not(.state-disconnected) #connection-overlay {
   width: 100%;
   min-height: 0;
 }
+body.state-reconnecting #val-flow-numeric {
+  opacity: 0.3;
+  animation: pulse 1s infinite alternate;
+}
 
 /* --- RODAPÉ --- */
 .action-footer {
@@ -428,4 +432,66 @@ body.theme-bluefy .action-footer {
 .module-action .module-val-group {
   justify-content: flex-start;
   margin-top: 10px;
+}
+
+/* --- MÓDULO DE HISTÓRICO --- */
+.history-module {
+  grid-column: 1 / -1;
+  max-height: clamp(200px, 35svh, 600px); /* Respeita telas pequenas */
+  display: flex;
+  flex-direction: column;
+}
+
+.history-list {
+  list-style: none;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+
+  /* Oculta scrollbar nativa mantendo a funcionalidade de rolagem */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.history-list::-webkit-scrollbar {
+  display: none;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed var(--fg-dim);
+  padding-bottom: 8px;
+  font-size: clamp(0.8rem, 3vw, 1rem);
+}
+
+.history-info {
+  display: flex;
+  gap: clamp(8px, 2vw, 16px);
+  color: var(--fg-dim);
+}
+
+.history-info strong {
+  color: var(--fg-root);
+  font-weight: normal;
+}
+
+.btn-delete-brew {
+  background: transparent;
+  border: 1px solid var(--fg-dim);
+  color: var(--fg-root);
+  font-family: inherit;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.btn-delete-brew:active {
+  background-color: var(--fg-root);
+  color: var(--bg-root);
 }
