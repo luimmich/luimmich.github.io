@@ -1,7 +1,7 @@
 // ble-manager.js
 
-const TIMEMORE_SERVICE_UUID = 0xffe0;
-const TIMEMORE_CHARACTERISTIC_UUID = 0xffe1;
+const TIMEMORE_SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb";
+const TIMEMORE_CHARACTERISTIC_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
 
 const COMMANDS = {
   TARE: new Uint8Array([0xfd, 0x00, 0x01, 0x01, 0x00, 0x02, 0x00]),
@@ -22,7 +22,12 @@ export class BLEManager {
 
     this.reconnectAttempts = 0;
     this.intentionalDisconnect = false;
-    this.isCommandPending = false;
+
+    // Fila transacional para evitar erros GATT "Operation in Progress"
+    this.commandQueue = Promise.resolve();
+
+    // Controlador de aborto para gestão limpa de memória (Event Listeners)
+    this.abortController = new AbortController();
 
     this._handleDisconnect = this._handleDisconnect.bind(this);
     this._handleNotifications = this._handleNotifications.bind(this);
@@ -30,21 +35,19 @@ export class BLEManager {
 
   async connect() {
     if (!navigator.bluetooth) {
-      throw new Error(
-        "Web Bluetooth não é suportado neste navegador ou exige contexto seguro (HTTPS).",
-      );
+      throw new Error("Web Bluetooth não é suportado ou exige contexto HTTPS.");
     }
 
     try {
-      // requestDevice é executado imediatamente no topo da chamada para preservar o evento do usuário
       this.device = await navigator.bluetooth.requestDevice({
         filters: [{ namePrefix: "TIMEMORE" }, { namePrefix: "TES" }, { namePrefix: "BK" }],
         optionalServices: [TIMEMORE_SERVICE_UUID],
       });
 
-      // Remove event listeners antigos para evitar chamadas duplicadas
-      this.device.removeEventListener("gattserverdisconnected", this._handleDisconnect);
-      this.device.addEventListener("gattserverdisconnected", this._handleDisconnect);
+      // AbortController limpa listeners antigos automaticamente antes de renovar
+      this.device.addEventListener("gattserverdisconnected", this._handleDisconnect, {
+        signal: this.abortController.signal,
+      });
 
       await this._establishGATT(this.device);
     } catch (error) {
@@ -63,12 +66,9 @@ export class BLEManager {
 
     this.characteristic = await service.getCharacteristic(TIMEMORE_CHARACTERISTIC_UUID);
 
-    // Evita ouvintes duplicados no canal de notificação
-    this.characteristic.removeEventListener(
-      "characteristicvaluechanged",
-      this._handleNotifications,
-    );
-    this.characteristic.addEventListener("characteristicvaluechanged", this._handleNotifications);
+    this.characteristic.addEventListener("characteristicvaluechanged", this._handleNotifications, {
+      signal: this.abortController.signal,
+    });
 
     await this.characteristic.startNotifications();
 
@@ -117,37 +117,39 @@ export class BLEManager {
     }, backoffDelay);
   }
 
-  async sendCommand(commandKey) {
-    if (!this.characteristic || this.isCommandPending) return;
-
+  sendCommand(commandKey) {
     const payload = COMMANDS[commandKey];
-    if (!payload) {
-      console.warn(`Comando não reconhecido: ${commandKey}`);
-      return;
-    }
+    if (!this.characteristic || !payload) return;
 
-    this.isCommandPending = true;
-
-    try {
-      if (this.characteristic.properties.writeWithoutResponse) {
-        await this.characteristic.writeValueWithoutResponse(payload);
-      } else if (this.characteristic.properties.write) {
-        await this.characteristic.writeValue(payload);
+    // Encadeia o novo comando na fila de Promises (Mutex)
+    this.commandQueue = this.commandQueue.then(async () => {
+      try {
+        if (this.characteristic.properties.writeWithoutResponse) {
+          await this.characteristic.writeValueWithoutResponse(payload);
+        } else if (this.characteristic.properties.write) {
+          await this.characteristic.writeValue(payload);
+        }
+      } catch (error) {
+        console.error(`Erro ao enviar comando BLE (${commandKey}):`, error);
+      } finally {
+        // Pausa obrigatória para o hardware processar antes de aceitar o próximo comando
+        await new Promise((resolve) => setTimeout(resolve, 150));
       }
-    } catch (error) {
-      console.error("Erro ao enviar comando BLE:", error);
-    } finally {
-      setTimeout(() => {
-        this.isCommandPending = false;
-      }, 150);
-    }
+    });
+
+    return this.commandQueue;
   }
 
   disconnect() {
     if (this.device && this.device.gatt && this.device.gatt.connected) {
       this.intentionalDisconnect = true;
+
+      // Revoga todos os event listeners ativos amarrados a este sinal
+      this.abortController.abort();
+      this.abortController = new AbortController(); // Prepara para nova conexão futura
+
       this.device.gatt.disconnect();
-      console.log("Conexão GATT encerrada intencionalmente.");
+      console.log("Conexão GATT encerrada intencionalmente e listeners limpos.");
     }
   }
 }
