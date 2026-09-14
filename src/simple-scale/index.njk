@@ -9,15 +9,16 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="theme-color" content="#000000">
-    <title>Simbolic Scale</title>
-
+    <title>Simple Scale</title>
+    <link rel="preload" href="/fonts/departuremono/DepartureMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    
     <link rel="stylesheet" href="/css/scale.css">
-<link rel="stylesheet" href="/fonts/departuremono/departure.css">
-    <link rel="manifest" href="/scale-app/manifest.json">
+    <link rel="stylesheet" href="/fonts/departuremono/departure.css">
+    <link rel="manifest" href="/simple-scale/manifest.json">
 
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/scale/favicon/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/scale/favicon/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/icons/scale/favicon/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/scale/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/scale/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/scale/favicon/favicon-16x16.png">
 
 </head>
 <body class="state-disconnected">
@@ -80,24 +81,23 @@
                     </div>
                 </div>
 
-<!-- Módulo de Histórico (Scroll Interno) -->
-<div class="stat-module module-dark history-module">
-    <span class="module-lbl">brew history</span>
-    <ul id="history-list" class="history-list">
-        <!-- Itens injetados via JavaScript -->
-    </ul>
-</div>
+                <!-- Módulo de Histórico (Scroll Interno) -->
+                <div class="stat-module module-dark history-module">
+                    <span class="module-lbl">brew history</span>
+                    <ul id="history-list" class="history-list">
+                        <!-- Itens injetados via JavaScript -->
+                    </ul>
+                </div>
 
-            <!-- Módulo de Ação: Exportação -->
-<button id="btn-export" class="stat-module module-light module-action">
-    <span class="module-lbl">system</span>
-    <div class="module-val-group">
-        <div class="module-val">export</div>
-        <span class="module-unit">.json</span>
-    </div>
-</button>
+                <!-- Módulo de Ação: Exportação -->
+                <button id="btn-export" class="stat-module module-light module-action">
+                    <span class="module-lbl">system</span>
+                    <div class="module-val-group">
+                        <div class="module-val">export</div>
+                        <span class="module-unit">.json</span>
+                    </div>
+                </button>
             </div>
-
         </div>
 
     <!-- O PAINEL DE EXTRAÇÃO (Stack Vertical) -->
@@ -143,12 +143,12 @@
         </section>
 
         <!-- RODAPÉ (Ações) -->
-<footer class="action-footer">
-  <button id="btn-timer" class="action-btn">
-    <img id="timer-icon" src="/icons/scale/play.svg" alt="Timer">
-  </button>
-  <button id="btn-tare" class="action-btn">T</button>
-</footer>
+        <footer class="action-footer">
+            <button id="btn-timer" class="action-btn">
+                <img id="timer-icon" src="/icons/scale/play.svg" alt="Timer">
+            </button>
+            <button id="btn-tare" class="action-btn">T</button>
+        </footer>
     </main>
     <script type="module" src="/js/scale/app.js"></script>
 </body>

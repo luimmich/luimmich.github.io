@@ -120,7 +120,7 @@ body:not(.state-disconnected) #connection-overlay {
 .nav-item {
   color: var(--fg-dim);
   font-size: clamp(1.2rem, 4vw, 1.5rem);
-  opacity: 0;
+  opacity: 0.3;
 }
 
 /* --- METRICS --- */
@@ -175,6 +175,15 @@ body:not(.state-disconnected) #connection-overlay {
   border-radius: 50%;
   opacity: 0.15;
   transition: opacity 0.1s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .stable-dot:hover {
+    cursor: pointer;
+    background-color: rgb(255, 174, 0);
+    opacity: 1;
+    box-shadow: 0 0 15px rgba(255, 174, 0, 0.6);
+  }
 }
 
 .stable-dot.is-stable {

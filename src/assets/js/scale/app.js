@@ -5,7 +5,7 @@ import { saveExtraction, exportData, getAllExtractions, deleteExtraction } from 
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/scale-app/sw.js").catch((err) => {
+    navigator.serviceWorker.register("/simple-scale/sw.js").catch((err) => {
       console.warn("Service Worker falhou:", err);
     });
   });
@@ -92,13 +92,22 @@ let idleTimeout = null;
 const IDLE_LIMIT_MS = 5 * 60 * 1000;
 const MAX_RUN_LIMIT_MS = 10 * 60 * 1000;
 
+let wakeLockRecoveryPending = false;
+
 async function requestWakeLock() {
   try {
     if ("wakeLock" in navigator && wakeLock === null) {
       wakeLock = await navigator.wakeLock.request("screen");
+      wakeLockRecoveryPending = false;
+
+      wakeLock.addEventListener("release", () => {
+        wakeLock = null;
+        wakeLockRecoveryPending = true;
+      });
     }
   } catch (err) {
-    console.warn(`Wake Lock falhou: ${err.name}`);
+    console.warn(`Wake Lock bloqueado pelo OS (${err.name}). Armadilhado para o próximo toque.`);
+    wakeLockRecoveryPending = true;
   }
 }
 
@@ -112,6 +121,8 @@ function dropConnection() {
   currentTimerState = TIMER_STATE.IDLE;
   UI.timerIcon.src = "/icons/scale/play.svg";
 
+  wakeLockRecoveryPending = false;
+
   if (wakeLock !== null) {
     wakeLock.release().catch(() => {});
     wakeLock = null;
@@ -124,7 +135,12 @@ function resetIdleTimer() {
   idleTimeout = setTimeout(() => dropConnection(), timeoutLimit);
 }
 
-window.addEventListener("pointerdown", resetIdleTimer);
+window.addEventListener("pointerdown", () => {
+  resetIdleTimer();
+  if (wakeLockRecoveryPending && !UI.body.classList.contains("state-disconnected")) {
+    requestWakeLock();
+  }
+});
 
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") {
@@ -158,7 +174,7 @@ const bleManager = new BLEManager(handleTimemoreData, (isConnected) => {
   }
 });
 
-window.addEventListener("beforeunload", () => {
+window.addEventListener("pagehide", () => {
   if (currentTimerState === TIMER_STATE.RUNNING || currentTimerState === TIMER_STATE.DONE) {
     processAndSaveExtraction(true);
   }
@@ -173,6 +189,9 @@ function resetExtraction() {
   brewState.time = 0;
   brewState.flowRateEMA = 0;
   simTime = 0;
+
+  lastHardwareTime = 0;
+  lastHardwareTimeChange = performance.now();
 
   const timeStep = 0.1;
   const pastPoints = 300;
@@ -235,9 +254,8 @@ function renderFlowGraph(currentFlow, currentTime) {
     FLOW_HISTORY.push({ flow: currentFlow, time: currentTime });
   }
 
-  // Estabilização de Memória Corrigida
-  if (FLOW_HISTORY.length > maxHistorySize) {
-    FLOW_HISTORY.shift();
+  if (FLOW_HISTORY.length > maxHistorySize + 100) {
+    FLOW_HISTORY.splice(0, 100);
   }
 
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -357,21 +375,35 @@ function updateFlowVisuals(flowRate) {
 
 let lastKnownWeight = 0;
 let lastHardwareTime = 0;
+let lastHardwareTimeChange = 0;
 
 function renderFrame() {
   requestAnimationFrame(renderFrame);
   if (!brewState._isDirty) return;
+
+  const now = performance.now();
 
   if (Math.abs(brewState.weight - lastKnownWeight) > 0.5) {
     resetIdleTimer();
     lastKnownWeight = brewState.weight;
   }
 
-  if (brewState.time > lastHardwareTime && currentTimerState === TIMER_STATE.IDLE) {
-    currentTimerState = TIMER_STATE.RUNNING;
-    UI.timerIcon.src = "/icons/scale/pause.svg";
-    resetIdleTimer();
+  if (brewState.time > lastHardwareTime) {
+    if (currentTimerState === TIMER_STATE.IDLE) {
+      currentTimerState = TIMER_STATE.RUNNING;
+      UI.timerIcon.src = "/icons/scale/pause.svg";
+      resetIdleTimer();
+    }
+    lastHardwareTimeChange = now;
+  } else if (brewState.time === lastHardwareTime && currentTimerState === TIMER_STATE.RUNNING) {
+    if (!isSimulating && now - lastHardwareTimeChange > 2000) {
+      console.log("Pause físico detectado na balança. Ajustando UI.");
+      currentTimerState = TIMER_STATE.DONE;
+      UI.timerIcon.src = "/icons/scale/restart.svg";
+      resetIdleTimer();
+    }
   }
+
   lastHardwareTime = brewState.time;
 
   const displayWeight = Math.min(brewState.weight, 999.9);
@@ -524,6 +556,7 @@ UI.stableDot.addEventListener("click", async () => {
 async function renderStatsScreen() {
   const extractions = await getAllExtractions();
   const historyList = document.getElementById("history-list");
+  const fragment = document.createDocumentFragment();
 
   if (historyList) historyList.innerHTML = "";
 
@@ -581,9 +614,11 @@ async function renderStatsScreen() {
         </div>
         <button class="btn-delete-brew" data-id="${ext.id}">del</button>
       `;
-        historyList.appendChild(li);
+        fragment.appendChild(li);
       }
     });
+
+  if (historyList) historyList.appendChild(fragment);
 
   UIStats.valBrews.textContent = extractions.length.toString();
 
