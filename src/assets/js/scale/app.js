@@ -68,23 +68,23 @@ let isDragging = false;
 let lastClientX = 0;
 
 // --- UTILITÁRIO: FULLSCREEN MULTI-BROWSER ---
-function enterFullScreen() {
-  const isMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-    navigator.maxTouchPoints > 0;
-  if (!isMobile) return;
+// function enterFullScreen() {
+//   const isMobile =
+//     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+//     navigator.maxTouchPoints > 0;
+//   if (!isMobile) return;
 
-  const el = document.documentElement;
-  try {
-    if (el.requestFullscreen) {
-      el.requestFullscreen().catch(() => {});
-    } else if (el.webkitRequestFullscreen) {
-      el.webkitRequestFullscreen();
-    }
-  } catch (error) {
-    console.warn("Dispositivo não suporta Fullscreen API programática.");
-  }
-}
+//   const el = document.documentElement;
+//   try {
+//     if (el.requestFullscreen) {
+//       el.requestFullscreen().catch(() => {});
+//     } else if (el.webkitRequestFullscreen) {
+//       el.webkitRequestFullscreen();
+//     }
+//   } catch (error) {
+//     console.warn("Dispositivo não suporta Fullscreen API programática.");
+//   }
+// }
 
 // --- GERENCIADOR DE ENERGIA E INATIVIDADE ---
 let wakeLock = null;
@@ -500,7 +500,7 @@ UI.btnConnect.addEventListener("click", () => {
     .then(() => {
       // Operações secundárias e não bloqueantes executadas após o pareamento
       requestWakeLock();
-      enterFullScreen();
+      // enterFullScreen();
     })
     .catch((error) => {
       UI.btnConnect.textContent = "connect";
@@ -671,7 +671,7 @@ let simInterval = null; // Armazena a referência para limpar processos paralelo
 
 btnSimulate.addEventListener("click", () => {
   requestWakeLock();
-  enterFullScreen();
+  // enterFullScreen();
   document.body.classList.remove("state-disconnected");
   document.getElementById("status-indicator").textContent = "sim";
 
