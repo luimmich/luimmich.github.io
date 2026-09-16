@@ -74,8 +74,10 @@ const advancedState = {
 };
 
 let liveTicksData = [];
+let currentPourIndex = 0; // Máquina de estados: rastreia exatamente em qual despejo estamos
 let isCurrentlyPouring = false;
-let lastSettledTickIndex = -1;
+let isPourDebouncing = false; // Controle de turbulência da chaleira
+let stopPourTimeout = 0; // Timer de estabilização
 
 let isSimulating = false;
 let simTime = 0;
@@ -188,9 +190,11 @@ const TIME_WINDOW = 20;
 function resetExtraction() {
   if (typeof resetDecoderState === "function") resetDecoderState();
   brewState.time = 0;
+  brewState.weight = 0;
   brewState.flowRateEMA = 0;
+  brewState.isStable = true;
   simTime = 0;
-  simWeight = 0; // FIX: Garante que o peso simulado zere a cada teste
+  simWeight = 0;
 
   lastHardwareTime = 0;
   lastHardwareTimeChange = performance.now();
@@ -380,7 +384,8 @@ function renderAdaptiveTicks() {
   if (!UI.liveTicks) return;
   UI.liveTicks.innerHTML = "";
   liveTicksData = [];
-  lastSettledTickIndex = -1;
+  currentPourIndex = 0;
+  isPourDebouncing = false;
 
   const totalWater = advancedState.targetYield;
   if (totalWater <= 0) return;
@@ -411,45 +416,65 @@ function renderAdaptiveTicks() {
 }
 
 // --- FUNÇÃO DE RECALCULO DE FLUXO (SMART ADJUSTMENT) ---
+// --- FUNÇÃO DE RECALCULO DE FLUXO (MOTOR TETSU SEQUENCIAL) ---
 function handlePourStop(activeWeight) {
-  if (!advancedState.tetsuMode || activeWeight >= advancedState.targetYield) return;
+  // Ignora se não for Tetsu, se a extração já bateu o alvo total ou se já acabaram os pours
+  if (
+    !advancedState.tetsuMode ||
+    activeWeight >= advancedState.targetYield ||
+    currentPourIndex >= liveTicksData.length
+  )
+    return;
 
-  let lastPassedIndex = -1;
-  for (let i = liveTicksData.length - 1; i >= 0; i--) {
-    if (liveTicksData[i].passed) {
-      lastPassedIndex = i;
-      break;
-    }
-  }
+  let targetTick = liveTicksData[currentPourIndex];
 
-  if (lastPassedIndex === -1) return;
-
-  if (lastPassedIndex > lastSettledTickIndex + 1) {
-    for (let i = lastSettledTickIndex + 1; i < lastPassedIndex; i++) {
-      liveTicksData[i].dom.classList.add("is-hidden");
-    }
-  }
-
-  let targetTick = liveTicksData[lastPassedIndex];
+  // 1. ATRAÇÃO MAGNÉTICA (Snap): Valida o pour real onde a água parou
   targetTick.weight = activeWeight;
+  targetTick.passed = true;
   const newPct = (activeWeight / advancedState.targetYield) * 100;
   targetTick.dom.style.left = `${Math.min(newPct, 100)}%`;
 
-  const remainingTicks = liveTicksData.length - 1 - lastPassedIndex;
-  if (remainingTicks > 0) {
-    const remainingWater = advancedState.targetYield - activeWeight;
-    const waterPerTick = remainingWater / remainingTicks;
+  // Feedback Visual (Acende e depois esmaece)
+  targetTick.dom.classList.add("is-passed");
+  setTimeout(() => targetTick.dom.classList.replace("is-passed", "is-settled"), 600);
 
-    let currentTarget = activeWeight;
-    for (let i = lastPassedIndex + 1; i < liveTicksData.length; i++) {
-      currentTarget += waterPerTick;
-      liveTicksData[i].weight = currentTarget;
-      const pct = (currentTarget / advancedState.targetYield) * 100;
-      liveTicksData[i].dom.style.left = `${Math.min(pct, 100)}%`;
+  // 2. RECÁLCULO KASUYA 4:6 (A Regra dos 40/60)
+  let totalTarget = advancedState.targetYield;
+  let phase1Target = totalTarget * 0.4;
+
+  if (currentPourIndex === 0) {
+    // FIM DO BLOOM: O Pour 2 ajusta o balanço de Doçura/Acidez garantindo os 40% da Fase 1
+    // Se o usuário exagerou e passou de 40%, o Pour 2 é empurrado para a frente.
+    let p2Target = Math.max(activeWeight, phase1Target);
+    if (liveTicksData[1]) liveTicksData[1].weight = p2Target;
+
+    // Distribui a Fase 2 (os 60% que trazem o corpo/força) igualmente nos 3 pours finais
+    let remainingPours = liveTicksData.length - 2;
+    if (remainingPours > 0) {
+      let step = (totalTarget - p2Target) / remainingPours;
+      for (let i = 2; i < liveTicksData.length; i++) {
+        liveTicksData[i].weight = p2Target + step * (i - 1);
+      }
+    }
+  } else {
+    // FIM DE POURS SUBSEQUENTES: Distribui a água restante para garantir o Target Yield
+    let remainingPours = liveTicksData.length - 1 - currentPourIndex;
+    if (remainingPours > 0) {
+      let step = (totalTarget - activeWeight) / remainingPours;
+      for (let i = currentPourIndex + 1; i < liveTicksData.length; i++) {
+        liveTicksData[i].weight = activeWeight + step * (i - currentPourIndex);
+      }
     }
   }
 
-  lastSettledTickIndex = lastPassedIndex;
+  // 3. REPOSICIONAMENTO SUAVE (DOM/CSS GPU)
+  for (let i = currentPourIndex + 1; i < liveTicksData.length; i++) {
+    const pct = (liveTicksData[i].weight / totalTarget) * 100;
+    liveTicksData[i].dom.style.left = `${Math.min(pct, 100)}%`;
+  }
+
+  // 4. AVANÇA O ESTADO SEQUENCIAL
+  currentPourIndex++;
 }
 
 let lastKnownWeight = 0;
@@ -535,12 +560,27 @@ function renderFrame() {
       UI.liveProgress.classList.remove("is-drawdown");
     }
 
+    // --- ANÁLISE DE FLUXO COM HISTERESE (DEBOUNCE FÍSICO) ---
     if (brewState.flowRateEMA > 1.5) {
+      // Começou a jogar água pesado
       isCurrentlyPouring = true;
+      isPourDebouncing = false;
     } else if (brewState.flowRateEMA < 0.5 && isCurrentlyPouring) {
-      isCurrentlyPouring = false;
-      handlePourStop(activeWeight);
+      // Água parou. Inicia a janela de confirmação de 1.2 segundos
+      if (!isPourDebouncing) {
+        isPourDebouncing = true;
+        stopPourTimeout = brewState.time + 1.2;
+      } else if (brewState.time >= stopPourTimeout) {
+        // Confirmado: A chaleira foi afastada
+        isCurrentlyPouring = false;
+        isPourDebouncing = false;
+        handlePourStop(activeWeight); // Dispara a Inteligência do Tetsu
+      }
+    } else if (brewState.flowRateEMA >= 0.5 && isPourDebouncing) {
+      // Falso positivo (A pessoa só levantou a mão rapidinho e já voltou a jogar)
+      isPourDebouncing = false;
     }
+    // NOTA: O loop forEach espacial antigo foi completamente apagado!
 
     liveTicksData.forEach((tick) => {
       if (!tick.passed && activeWeight >= tick.weight) {
@@ -845,6 +885,7 @@ UIStats.btnExport.addEventListener("click", () => exportData());
 
 requestAnimationFrame(renderFrame);
 
+// --- DEV MODE (MOCK DE DADOS INTELIGENTE PARA TETSU E CT) ---
 const btnSimulate = document.getElementById("btn-simulate");
 let simInterval = null;
 
@@ -858,19 +899,63 @@ btnSimulate.addEventListener("click", () => {
 
   if (simInterval) clearInterval(simInterval);
 
+  let simPoursCompleted = 0;
+  let simIsPouring = false;
+  let simPourTarget = 0;
+  let simPauseTimeOut = 0;
+  let coffeeAdded = false;
+
+  const setNextPour = () => {
+    if (simPoursCompleted < 5) {
+      const randomPourWeight = 30 + Math.random() * 30;
+      simPourTarget = simWeight + randomPourWeight;
+      simIsPouring = true;
+    }
+  };
+
   simInterval = setInterval(() => {
-    if (currentTimerState !== TIMER_STATE.RUNNING) return;
+    let flow = 0;
 
-    simTime += 0.05;
-    let rawFlow = Math.sin(simTime * 1.5) * 6;
-    let flow = Math.max(0, rawFlow) + Math.random() * 0.2;
+    if (currentTimerState === TIMER_STATE.IDLE) {
+      // Fase 1: Simula o usuário jogando o pó na V60
+      if (!coffeeAdded) {
+        if (simWeight < 18.5) {
+          flow = 5.0;
+          simWeight += flow * 0.05;
+        } else {
+          simWeight = 18.5; // Travou o peso do pó
+          flow = 0;
+          coffeeAdded = true; // Pronto para o Smart CT!
+        }
+      }
+    } else if (currentTimerState === TIMER_STATE.RUNNING) {
+      // Fase 2: O preparo dinâmico
+      simTime += 0.05;
+      if (simPourTarget === 0) setNextPour();
 
-    simWeight += flow * 0.05;
+      if (simPoursCompleted < 5) {
+        if (simIsPouring) {
+          flow = 6 + (Math.random() * 0.5 - 0.25);
+          simWeight += flow * 0.05;
 
+          if (simWeight >= simPourTarget) {
+            simWeight = simPourTarget;
+            simIsPouring = false;
+            simPoursCompleted++;
+            simPauseTimeOut = simTime + 15.0; // Pausa a chaleira
+          }
+        } else {
+          flow = Math.random() * 0.1; // Ruído leve
+          if (simTime >= simPauseTimeOut) setNextPour();
+        }
+      }
+    }
+
+    // CRÍTICO: Atualiza o estado da balança em todos os frames (IDLE e RUNNING)
     brewState.weight = simWeight;
-    brewState.time = simTime;
+    if (currentTimerState === TIMER_STATE.RUNNING) brewState.time = simTime;
     brewState.flowRateEMA = flow;
-    brewState.isStable = flow < 0.5;
+    brewState.isStable = flow < 0.5; // O CT exige que isso seja true
     brewState._isDirty = true;
   }, 50);
 });

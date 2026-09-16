@@ -241,16 +241,18 @@ body.theme-bluefy .footer-top-row {
   background-color: #1f1f1f;
 }
 /* --- A ILHA DINÂMICA (Base Fixa) --- */
+/* --- A ILHA DINÂMICA (Base Fixa) --- */
 .footer-bottom-row {
   background-color: color-mix(in srgb, var(--bg-root) 92%, white);
-  border-radius: 0 0 24px 24px;
-  margin-top: -20px;
-  padding-top: 20px; /* Compensa a sobreposição da pílula */
-
-  /* CRÍTICO: Altura fixa = Zero Layout Shift */
+  border-radius: 36px 36px 24px 24px;
+  margin-top: -24px;
+  padding-top: 24px;
   height: clamp(65px, 8vh, 80px);
   overflow: hidden;
   position: relative;
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
+  transform: translateZ(0); /* Força o contexto de pintura isolado na GPU */
 }
 body.theme-bluefy .footer-bottom-row {
   background-color: #141414;
