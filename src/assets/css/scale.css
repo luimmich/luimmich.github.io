@@ -511,6 +511,7 @@ body.theme-bluefy .footer-bottom-row {
 /* --- TELA DE ESTATÍSTICAS --- */
 .stats-overlay {
   position: absolute;
+  /* position: fixed; também funciona muito bem aqui se houver bugs no scroll do iOS */
   inset: 0;
   max-width: 900px;
   margin: 0 auto;
@@ -524,6 +525,9 @@ body.theme-bluefy .footer-bottom-row {
   transform: translateY(20px);
   transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
   will-change: transform, opacity, visibility;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .stats-overlay.is-visible {
@@ -562,6 +566,7 @@ body.theme-bluefy .footer-bottom-row {
   gap: clamp(8px, 2vw, 12px);
   flex: 1;
   align-content: start;
+  padding-bottom: clamp(2rem, 8vh, 4rem);
 }
 
 /* Base dos Módulos */
