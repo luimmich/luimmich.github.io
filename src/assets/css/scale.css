@@ -254,7 +254,7 @@ body.theme-bluefy .footer-top-row {
   transform: translateZ(0); /* Força o contexto de pintura isolado na GPU */
 }
 body.theme-bluefy .footer-bottom-row {
-  /* background-color: #141414; */
+  background-color: #141414;
 }
 
 /* O Trilho Deslizante (Cilindro) */
@@ -490,11 +490,6 @@ body.theme-bluefy .footer-bottom-row {
 /* Ticks ignorados (Quando o user funde dois pours em um só) */
 .pour-tick.is-hidden {
   opacity: 0 !important;
-}
-
-/* --- RODAPÉ ESPECÍFICO PARA BLUEFY --- */
-body.theme-bluefy .action-footer {
-  /* background-color: #1f1f1f; */
 }
 
 /* TABLET MODO */
