@@ -23,13 +23,21 @@ const UI = {
   stableDot: document.getElementById("stable-dot"),
   statusBadge: document.getElementById("status-indicator"),
   documentElement: document.documentElement,
+
+  // Elementos da nova Brew Island (Advanced Mode)
+  actionFooter: document.getElementById("action-footer"),
+  btnDose: document.getElementById("btn-dose"),
+  btnRatio: document.getElementById("btn-ratio"),
+  btnMethod: document.getElementById("btn-method"),
+  liveProgress: document.getElementById("live-progress-fill"),
+  liveTicks: document.getElementById("live-ticks-container"),
+  overpourProgress: document.getElementById("overpour-fill"),
 };
 
 // --- MODO CAMALEÃO (Detecção de Bluefy) ---
 const isBluefy = navigator.userAgent.toLowerCase().includes("bluefy");
 if (isBluefy) {
   document.body.classList.add("theme-bluefy");
-
   const metaThemeColor = document.querySelector('meta[name="theme-color"]');
   if (metaThemeColor) {
     metaThemeColor.setAttribute("content", "#0a0a0a");
@@ -55,10 +63,24 @@ const TIMER_STATE = {
 };
 let currentTimerState = TIMER_STATE.IDLE;
 
+const advancedState = {
+  dose: 15.0,
+  ratio: 15.0,
+  targetYield: 225.0,
+  tetsuMode: true,
+  poursCount: 5,
+  method: "4:6",
+  pours: [],
+};
+
+let liveTicksData = [];
+let isCurrentlyPouring = false;
+let lastSettledTickIndex = -1;
+
 let isSimulating = false;
 let simTime = 0;
 let simWeight = 0;
-
+let brewBaselineWeight = 0;
 let FLOW_HISTORY = [];
 const maxHistorySize = 5000;
 const canvas = document.getElementById("flow-canvas");
@@ -67,31 +89,11 @@ let scrollTime = 0;
 let isDragging = false;
 let lastClientX = 0;
 
-// --- UTILITÁRIO: FULLSCREEN MULTI-BROWSER ---
-// function enterFullScreen() {
-//   const isMobile =
-//     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-//     navigator.maxTouchPoints > 0;
-//   if (!isMobile) return;
-
-//   const el = document.documentElement;
-//   try {
-//     if (el.requestFullscreen) {
-//       el.requestFullscreen().catch(() => {});
-//     } else if (el.webkitRequestFullscreen) {
-//       el.webkitRequestFullscreen();
-//     }
-//   } catch (error) {
-//     console.warn("Dispositivo não suporta Fullscreen API programática.");
-//   }
-// }
-
 // --- GERENCIADOR DE ENERGIA E INATIVIDADE ---
 let wakeLock = null;
 let idleTimeout = null;
 const IDLE_LIMIT_MS = 5 * 60 * 1000;
 const MAX_RUN_LIMIT_MS = 10 * 60 * 1000;
-
 let wakeLockRecoveryPending = false;
 
 async function requestWakeLock() {
@@ -106,7 +108,7 @@ async function requestWakeLock() {
       });
     }
   } catch (err) {
-    console.warn(`Wake Lock bloqueado pelo OS (${err.name}). Armadilhado para o próximo toque.`);
+    console.warn(`Wake Lock bloqueado pelo OS. Armadilhado para o próximo toque.`);
     wakeLockRecoveryPending = true;
   }
 }
@@ -120,7 +122,6 @@ function dropConnection() {
   UI.btnConnect.classList.remove("pulse-cursor");
   currentTimerState = TIMER_STATE.IDLE;
   UI.timerIcon.src = "/icons/scale/play.svg";
-
   wakeLockRecoveryPending = false;
 
   if (wakeLock !== null) {
@@ -185,10 +186,11 @@ const MAX_FLOW_SCALE = 10;
 const TIME_WINDOW = 20;
 
 function resetExtraction() {
-  resetDecoderState();
+  if (typeof resetDecoderState === "function") resetDecoderState();
   brewState.time = 0;
   brewState.flowRateEMA = 0;
   simTime = 0;
+  simWeight = 0; // FIX: Garante que o peso simulado zere a cada teste
 
   lastHardwareTime = 0;
   lastHardwareTimeChange = performance.now();
@@ -373,6 +375,83 @@ function updateFlowVisuals(flowRate) {
   UI.valFlowNum.textContent = flowRate.toFixed(1) + " g/s";
 }
 
+// --- MOTOR ADAPTATIVO 4:6 (GERAÇÃO DE TICKS) ---
+function renderAdaptiveTicks() {
+  if (!UI.liveTicks) return;
+  UI.liveTicks.innerHTML = "";
+  liveTicksData = [];
+  lastSettledTickIndex = -1;
+
+  const totalWater = advancedState.targetYield;
+  if (totalWater <= 0) return;
+
+  if (advancedState.tetsuMode) {
+    const weights = [
+      totalWater * 0.2,
+      totalWater * 0.4,
+      totalWater * 0.6,
+      totalWater * 0.8,
+      totalWater * 1.0,
+    ];
+
+    weights.forEach((w, index) => {
+      const pct = (w / totalWater) * 100;
+      const tick = document.createElement("div");
+      tick.className = `pour-tick ${index === 0 ? "tick-bloom" : ""}`;
+      tick.style.left = `${Math.min(pct, 100)}%`;
+      UI.liveTicks.appendChild(tick);
+
+      liveTicksData.push({
+        weight: w,
+        dom: tick,
+        passed: false,
+      });
+    });
+  }
+}
+
+// --- FUNÇÃO DE RECALCULO DE FLUXO (SMART ADJUSTMENT) ---
+function handlePourStop(activeWeight) {
+  if (!advancedState.tetsuMode || activeWeight >= advancedState.targetYield) return;
+
+  let lastPassedIndex = -1;
+  for (let i = liveTicksData.length - 1; i >= 0; i--) {
+    if (liveTicksData[i].passed) {
+      lastPassedIndex = i;
+      break;
+    }
+  }
+
+  if (lastPassedIndex === -1) return;
+
+  if (lastPassedIndex > lastSettledTickIndex + 1) {
+    for (let i = lastSettledTickIndex + 1; i < lastPassedIndex; i++) {
+      liveTicksData[i].dom.classList.add("is-hidden");
+    }
+  }
+
+  let targetTick = liveTicksData[lastPassedIndex];
+  targetTick.weight = activeWeight;
+  const newPct = (activeWeight / advancedState.targetYield) * 100;
+  targetTick.dom.style.left = `${Math.min(newPct, 100)}%`;
+
+  const remainingTicks = liveTicksData.length - 1 - lastPassedIndex;
+  if (remainingTicks > 0) {
+    const remainingWater = advancedState.targetYield - activeWeight;
+    const waterPerTick = remainingWater / remainingTicks;
+
+    let currentTarget = activeWeight;
+    for (let i = lastPassedIndex + 1; i < liveTicksData.length; i++) {
+      currentTarget += waterPerTick;
+      liveTicksData[i].weight = currentTarget;
+      const pct = (currentTarget / advancedState.targetYield) * 100;
+      liveTicksData[i].dom.style.left = `${Math.min(pct, 100)}%`;
+    }
+  }
+
+  lastSettledTickIndex = lastPassedIndex;
+}
+
 let lastKnownWeight = 0;
 let lastHardwareTime = 0;
 let lastHardwareTimeChange = 0;
@@ -390,22 +469,96 @@ function renderFrame() {
 
   if (brewState.time > lastHardwareTime) {
     if (currentTimerState === TIMER_STATE.IDLE) {
+      brewBaselineWeight = brewState.weight;
+      renderAdaptiveTicks();
+
       currentTimerState = TIMER_STATE.RUNNING;
       UI.timerIcon.src = "/icons/scale/pause.svg";
+      if (UI.actionFooter) UI.actionFooter.classList.add("is-running");
       resetIdleTimer();
     }
     lastHardwareTimeChange = now;
   } else if (brewState.time === lastHardwareTime && currentTimerState === TIMER_STATE.RUNNING) {
     if (!isSimulating && now - lastHardwareTimeChange > 2000) {
-      console.log("Pause físico detectado na balança. Ajustando UI.");
+      console.log("Pause físico detectado na balança.");
       currentTimerState = TIMER_STATE.DONE;
       UI.timerIcon.src = "/icons/scale/restart.svg";
+      if (UI.actionFooter) UI.actionFooter.classList.remove("is-running");
       resetIdleTimer();
     }
   }
 
-  lastHardwareTime = brewState.time;
+  if (
+    currentTimerState === TIMER_STATE.IDLE &&
+    brewState.isStable &&
+    brewState.weight >= 10.0 &&
+    brewState.weight <= 40.0
+  ) {
+    if (UI.btnDose && UI.btnDose.textContent !== "CT") {
+      UI.btnDose.textContent = "CT";
+      UI.btnDose.classList.add("ct-active");
+    }
+  } else {
+    if (UI.btnDose && UI.btnDose.textContent === "CT") {
+      UI.btnDose.textContent = `${advancedState.dose}g`;
+      UI.btnDose.classList.remove("ct-active");
+    }
+  }
 
+  if (currentTimerState === TIMER_STATE.RUNNING && UI.liveProgress) {
+    let activeWeight = brewState.weight - brewBaselineWeight;
+
+    if (activeWeight < 0) {
+      activeWeight = brewState.weight;
+      brewBaselineWeight = 0;
+    }
+
+    const rawPct = (activeWeight / advancedState.targetYield) * 100;
+    const fillPct = Math.max(0, Math.min(rawPct, 100));
+    UI.liveProgress.style.width = `${fillPct}%`;
+
+    if (activeWeight > advancedState.targetYield && UI.overpourProgress) {
+      const overWeight = activeWeight - advancedState.targetYield;
+      const overPct = Math.min((overWeight / advancedState.targetYield) * 100, 20);
+      UI.overpourProgress.style.width = `${overPct}%`;
+    } else if (UI.overpourProgress) {
+      UI.overpourProgress.style.width = `0%`;
+    }
+
+    if (activeWeight >= advancedState.targetYield) {
+      if (brewState.flowRateEMA > 0.3) {
+        UI.liveProgress.classList.add("is-drawdown");
+      } else {
+        UI.liveProgress.classList.remove("is-drawdown");
+      }
+    } else {
+      UI.liveProgress.classList.remove("is-drawdown");
+    }
+
+    if (brewState.flowRateEMA > 1.5) {
+      isCurrentlyPouring = true;
+    } else if (brewState.flowRateEMA < 0.5 && isCurrentlyPouring) {
+      isCurrentlyPouring = false;
+      handlePourStop(activeWeight);
+    }
+
+    liveTicksData.forEach((tick) => {
+      if (!tick.passed && activeWeight >= tick.weight) {
+        tick.passed = true;
+        tick.dom.classList.add("is-passed");
+
+        setTimeout(() => {
+          tick.dom.classList.replace("is-passed", "is-settled");
+        }, 600);
+      }
+    });
+  } else if (currentTimerState === TIMER_STATE.IDLE && UI.liveProgress) {
+    UI.liveProgress.style.width = `0%`;
+    if (UI.overpourProgress) UI.overpourProgress.style.width = `0%`;
+    UI.liveProgress.classList.remove("is-drawdown");
+  }
+
+  lastHardwareTime = brewState.time;
   const displayWeight = Math.min(brewState.weight, 999.9);
   UI.valWeight.textContent = displayWeight.toFixed(1);
 
@@ -427,7 +580,6 @@ function renderFrame() {
   brewState._isDirty = false;
 }
 
-// --- ALGORITMO DE HISTERESE (POURS) ---
 function calculatePours(flowProfile) {
   let localPours = 0;
   let isPouring = false;
@@ -452,7 +604,6 @@ function calculatePours(flowProfile) {
   return localPours;
 }
 
-// --- INTEGRAÇÃO COM BANCO DE DADOS (DB) ---
 function processAndSaveExtraction(isEmergencySave = false) {
   const MIN_ESPRESSO_TIME = 15;
   const MIN_ESPRESSO_WEIGHT = 15;
@@ -475,7 +626,6 @@ function processAndSaveExtraction(isEmergencySave = false) {
   }
 
   const cleanFlowProfile = FLOW_HISTORY.filter((point) => point.time >= 0);
-
   const extractionData = {
     id: Date.now(),
     date: new Date().toISOString(),
@@ -484,31 +634,28 @@ function processAndSaveExtraction(isEmergencySave = false) {
     flowProfile: cleanFlowProfile,
     type: brewType,
     isEmergencySave: isEmergencySave,
+    dose: advancedState.dose,
+    ratio: advancedState.ratio,
+    targetYield: advancedState.targetYield,
+    method: advancedState.method,
   };
 
   saveExtraction(extractionData);
 }
 
-// --- EVENT BINDINGS (INTERAÇÕES GERAIS) ---
 UI.btnConnect.addEventListener("click", () => {
   UI.btnConnect.textContent = "connecting";
   UI.btnConnect.classList.add("pulse-cursor");
 
-  // Inicia a solicitação de permissão Bluetooth imediatamente no evento do usuário
   bleManager
     .connect()
     .then(() => {
-      // Operações secundárias e não bloqueantes executadas após o pareamento
       requestWakeLock();
-      // enterFullScreen();
     })
     .catch((error) => {
       UI.btnConnect.textContent = "connect";
       UI.btnConnect.classList.remove("pulse-cursor");
-      if (error.name !== "NotFoundError") {
-        // Ignora se o usuário apenas cancelou a janela modal
-        alert("Falha: " + (error.message || error));
-      }
+      if (error.name !== "NotFoundError") alert("Falha: " + (error.message || error));
     });
 });
 
@@ -526,14 +673,23 @@ UI.btnTimer.addEventListener("click", () => {
   switch (currentTimerState) {
     case TIMER_STATE.IDLE:
       if (!isSimulating) bleManager.sendCommand("TIMER_START");
+      brewBaselineWeight = brewState.weight;
+
+      renderAdaptiveTicks();
+
       currentTimerState = TIMER_STATE.RUNNING;
       UI.timerIcon.src = "/icons/scale/pause.svg";
+      if (UI.actionFooter) UI.actionFooter.classList.add("is-running");
+
+      brewState._isDirty = true; // FIX: Força render imediato ao clicar
       break;
 
     case TIMER_STATE.RUNNING:
       if (!isSimulating) bleManager.sendCommand("TIMER_PAUSE");
       currentTimerState = TIMER_STATE.DONE;
       UI.timerIcon.src = "/icons/scale/restart.svg";
+      if (UI.actionFooter) UI.actionFooter.classList.remove("is-running");
+      brewState._isDirty = true;
       break;
 
     case TIMER_STATE.DONE:
@@ -543,12 +699,36 @@ UI.btnTimer.addEventListener("click", () => {
 
       currentTimerState = TIMER_STATE.IDLE;
       UI.timerIcon.src = "/icons/scale/play.svg";
+      if (UI.actionFooter) UI.actionFooter.classList.remove("is-running");
+      brewState._isDirty = true;
       break;
   }
   resetIdleTimer();
 });
 
-// --- MÓDULO DE ESTATÍSTICAS (STAT SCREEN E HISTÓRICO) ---
+if (UI.btnDose) {
+  UI.btnDose.addEventListener("click", () => {
+    if (UI.btnDose.textContent === "CT") {
+      advancedState.dose = parseFloat(brewState.weight.toFixed(1));
+      advancedState.targetYield = advancedState.dose * advancedState.ratio;
+      renderAdaptiveTicks();
+
+      if (!isSimulating) {
+        bleManager.sendCommand("TARE");
+        brewState.weight = 0;
+        brewBaselineWeight = 0;
+      } else {
+        simWeight = 0;
+        brewState.weight = 0;
+      }
+
+      brewState._isDirty = true;
+      UI.btnDose.classList.remove("ct-active");
+      UI.btnDose.textContent = `${advancedState.dose}g`;
+    }
+  });
+}
+
 UI.stableDot.addEventListener("click", async () => {
   await renderStatsScreen();
 });
@@ -665,13 +845,11 @@ UIStats.btnExport.addEventListener("click", () => exportData());
 
 requestAnimationFrame(renderFrame);
 
-// --- DEV MODE (MOCK DE DADOS) ---
 const btnSimulate = document.getElementById("btn-simulate");
-let simInterval = null; // Armazena a referência para limpar processos paralelos
+let simInterval = null;
 
 btnSimulate.addEventListener("click", () => {
   requestWakeLock();
-  // enterFullScreen();
   document.body.classList.remove("state-disconnected");
   document.getElementById("status-indicator").textContent = "sim";
 
@@ -684,13 +862,15 @@ btnSimulate.addEventListener("click", () => {
     if (currentTimerState !== TIMER_STATE.RUNNING) return;
 
     simTime += 0.05;
-    let flow = (Math.sin(simTime * 2) + 1) * 4 + Math.random() * 0.5;
+    let rawFlow = Math.sin(simTime * 1.5) * 6;
+    let flow = Math.max(0, rawFlow) + Math.random() * 0.2;
+
     simWeight += flow * 0.05;
 
     brewState.weight = simWeight;
     brewState.time = simTime;
     brewState.flowRateEMA = flow;
-    brewState.isStable = Math.random() > 0.1;
+    brewState.isStable = flow < 0.5;
     brewState._isDirty = true;
   }, 50);
 });

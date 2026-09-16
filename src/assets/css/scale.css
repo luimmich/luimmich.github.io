@@ -219,15 +219,162 @@ body.state-reconnecting #val-flow-numeric {
   animation: pulse 1s infinite alternate;
 }
 
-/* --- RODAPÉ --- */
+/* --- RODAPÉ E BREW ISLAND --- */
 .action-footer {
   display: flex;
-  border-radius: 64px;
-  overflow: hidden;
+  flex-direction: column;
+  /* Retiramos o background e bordas do pai, passando para os filhos */
   margin: auto 1rem 5vh 1rem;
   margin-bottom: calc(5vh + env(safe-area-inset-bottom, 0px));
+  background-color: transparent;
+}
+
+/* Pílula Principal (Over it) */
+.footer-top-row {
+  display: flex;
   background-color: color-mix(in srgb, var(--bg-root) 85%, white);
-  color: var(--fg-root);
+  border-radius: 64px; /* Mantém o formato de pílula */
+  z-index: 10; /* Fica sempre por cima */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+body.theme-bluefy .footer-top-row {
+  background-color: #1f1f1f;
+}
+/* --- A ILHA DINÂMICA (Base Fixa) --- */
+.footer-bottom-row {
+  background-color: color-mix(in srgb, var(--bg-root) 92%, white);
+  border-radius: 0 0 24px 24px;
+  margin-top: -20px;
+  padding-top: 20px; /* Compensa a sobreposição da pílula */
+
+  /* CRÍTICO: Altura fixa = Zero Layout Shift */
+  height: clamp(65px, 8vh, 80px);
+  overflow: hidden;
+  position: relative;
+}
+body.theme-bluefy .footer-bottom-row {
+  background-color: #141414;
+}
+
+/* O Trilho Deslizante (Cilindro) */
+.island-slider {
+  display: flex;
+  flex-direction: column;
+  height: 200%; /* Duas telas (Config e Live) */
+  width: 100%;
+  transition: transform 0.45s cubic-bezier(0.25, 1, 0.3, 1); /* Curva elástica suave */
+  will-change: transform;
+}
+
+/* Transição acionada via classe is-running no pai */
+.action-footer.is-running .island-slider {
+  transform: translateY(-50%); /* Rola para a segunda tela */
+}
+
+/* Telas individuais */
+.island-panel {
+  height: 50%;
+  width: 100%;
+  display: flex;
+}
+
+.island-config {
+  justify-content: space-between;
+}
+
+/* --- BARRA DE PROGRESSO MINIMALISTA (TIMELINE) --- */
+.island-live {
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.live-track-wrapper {
+  position: relative;
+  width: 85%; /* Afasta das bordas arredondadas da ilha */
+  height: 100%;
+  margin: 0 auto;
+}
+
+/* Linha base do trilho (fundo translúcido para dar contexto) */
+.live-track-wrapper::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background-color: var(--fg-dim);
+  opacity: 0.3;
+  transform: translateY(-50%);
+}
+
+/* A barra de água real preenchendo (Linha fina avançando) */
+.live-progress-fill {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 3px; /* Espessura minimalista */
+  width: 0%;
+  background-color: var(--fg-root); /* Branco/Destaque absoluto */
+  transform: translateY(-50%);
+  border-radius: 3px;
+  transition: width 0.15s linear;
+  z-index: 2; /* Fica por cima da linha base */
+}
+
+/* Container das linhas guias */
+.live-ticks-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+/* O design minimalista dos cortes (Ticks verticais) */
+.pour-tick {
+  position: absolute;
+  top: 35%;
+  bottom: 35%;
+  width: 1px;
+  background-color: var(--fg-dim);
+  opacity: 0.5;
+  transform: translateX(-50%); /* Garante alinhamento matemático exato com o % */
+  z-index: 1;
+}
+
+/* Destaque para o primeiro tick (Bloom) */
+.pour-tick.tick-bloom {
+  top: 25%;
+  bottom: 25%;
+  width: 2px;
+  background-color: var(--fg-root);
+  opacity: 0.8;
+}
+
+/* Botões da Ilha */
+.island-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--fg-dim);
+  font-family: inherit;
+  font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+  padding: clamp(0.8rem, 2vh, 1.2rem) 0;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.island-btn:active {
+  color: var(--accent-color);
+}
+
+/* Estado ativo do Smart CT */
+.island-btn.ct-active {
+  color: var(--accent-color);
 }
 
 .action-btn {
@@ -271,6 +418,77 @@ body.state-reconnecting #val-flow-numeric {
   width: clamp(28px, 7vw, 40px);
   pointer-events: none;
   filter: invert(1);
+}
+
+/* --- FEATURES AVANÇADAS DO LIVE TRACKER --- */
+
+/* FEATURE 5: Micro-Tipografia da Legenda */
+.live-legend {
+  position: absolute;
+  top: -8px; /* Flutua acima do trilho */
+  font-size: clamp(0.6rem, 2vw, 0.75rem);
+  color: var(--fg-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: opacity 0.3s;
+}
+
+/* FEATURE 4: Overpour (O Excesso Suave) */
+.overpour-fill {
+  position: absolute;
+  left: 100%; /* Nasce exatamete onde a barra branca morre */
+  top: 50%;
+  height: 3px;
+  width: 0%;
+  background-color: #ff4a4a; /* Vermelho brutalista leve */
+  transform: translateY(-50%);
+  border-radius: 0 3px 3px 0;
+  transition: width 0.15s linear;
+  z-index: 1;
+}
+
+/* FEATURE 3: Drawdown Automático (Animação de Pulso) */
+.live-progress-fill.is-drawdown {
+  animation: pulse-drawdown 1.2s infinite alternate;
+}
+@keyframes pulse-drawdown {
+  0% {
+    opacity: 1;
+    box-shadow: 0 0 2px var(--fg-root);
+  }
+  100% {
+    opacity: 0.4;
+    box-shadow: 0 0 10px var(--fg-root);
+  }
+}
+
+/* FEATURE 1: Ticks Reativos e Adaptáveis */
+.pour-tick {
+  /* Transição de 'left' permite mover o tick na tela sem layout shift */
+  transition:
+    left 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+    height 0.2s,
+    background-color 0.2s,
+    opacity 0.3s;
+}
+
+/* Tick sendo cruzado agora (Brilho instantâneo) */
+.pour-tick.is-passed {
+  height: 18px;
+  background-color: var(--fg-root);
+  opacity: 1;
+  z-index: 5;
+}
+
+/* Tick que já foi superado (Assenta e fica translúcido) */
+.pour-tick.is-settled {
+  height: 6px;
+  opacity: 0.3;
+}
+
+/* Ticks ignorados (Quando o user funde dois pours em um só) */
+.pour-tick.is-hidden {
+  opacity: 0 !important;
 }
 
 /* --- RODAPÉ ESPECÍFICO PARA BLUEFY --- */
