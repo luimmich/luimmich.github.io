@@ -505,10 +505,24 @@ function renderFrame() {
     lastHardwareTimeChange = now;
   } else if (brewState.time === lastHardwareTime && currentTimerState === TIMER_STATE.RUNNING) {
     if (!isSimulating && now - lastHardwareTimeChange > 2000) {
-      console.log("Pause físico detectado na balança.");
+      console.log("Pause físico detectado na balança. Entrando em Review Mode.");
       currentTimerState = TIMER_STATE.DONE;
       UI.timerIcon.src = "/icons/scale/restart.svg";
-      if (UI.actionFooter) UI.actionFooter.classList.remove("is-running");
+
+      // --- INTELIGÊNCIA PÓS-EXTRAÇÃO: Calcula o Ratio Real ---
+      let finalWaterHW = brewState.weight - brewBaselineWeight;
+      if (finalWaterHW < 0) finalWaterHW = 0;
+      let finalRatioHW =
+        advancedState.dose > 0 ? (finalWaterHW / advancedState.dose).toFixed(1) : "0.0";
+
+      UI.btnDose.textContent = `${advancedState.dose}g`;
+      UI.btnRatio.textContent = `1:${finalRatioHW}`;
+      UI.btnMethod.textContent = `↓`;
+
+      if (UI.actionFooter) {
+        UI.actionFooter.classList.remove("is-running");
+        UI.actionFooter.classList.add("is-done");
+      }
       resetIdleTimer();
     }
   }
@@ -728,7 +742,22 @@ UI.btnTimer.addEventListener("click", () => {
       if (!isSimulating) bleManager.sendCommand("TIMER_PAUSE");
       currentTimerState = TIMER_STATE.DONE;
       UI.timerIcon.src = "/icons/scale/restart.svg";
-      if (UI.actionFooter) UI.actionFooter.classList.remove("is-running");
+
+      // --- INTELIGÊNCIA PÓS-EXTRAÇÃO: Calcula o Ratio Real ---
+      let finalWaterApp = brewState.weight - brewBaselineWeight;
+      if (finalWaterApp < 0) finalWaterApp = 0;
+      let finalRatioApp =
+        advancedState.dose > 0 ? (finalWaterApp / advancedState.dose).toFixed(1) : "0.0";
+
+      // Atualiza os botões com os dados finais
+      UI.btnDose.textContent = `${advancedState.dose}g`;
+      UI.btnRatio.textContent = `1:${finalRatioApp}`;
+      UI.btnMethod.textContent = `↓`; // Indica que o cilindro pode rolar
+
+      if (UI.actionFooter) {
+        UI.actionFooter.classList.remove("is-running");
+        UI.actionFooter.classList.add("is-done"); // Nova flag
+      }
       brewState._isDirty = true;
       break;
 
@@ -737,9 +766,16 @@ UI.btnTimer.addEventListener("click", () => {
       processAndSaveExtraction();
       resetExtraction();
 
+      // --- RESET DA ILHA: Volta aos parâmetros da receita ---
+      UI.btnDose.textContent = `${advancedState.dose}g`;
+      UI.btnRatio.textContent = `1:${advancedState.ratio}`;
+      UI.btnMethod.textContent = advancedState.method; // Ex: '4:6'
+
       currentTimerState = TIMER_STATE.IDLE;
       UI.timerIcon.src = "/icons/scale/play.svg";
-      if (UI.actionFooter) UI.actionFooter.classList.remove("is-running");
+      if (UI.actionFooter) {
+        UI.actionFooter.classList.remove("is-running", "is-done", "is-reviewing");
+      }
       brewState._isDirty = true;
       break;
   }
@@ -748,6 +784,7 @@ UI.btnTimer.addEventListener("click", () => {
 
 if (UI.btnDose) {
   UI.btnDose.addEventListener("click", () => {
+    if (currentTimerState === TIMER_STATE.DONE) return;
     if (UI.btnDose.textContent === "CT") {
       advancedState.dose = parseFloat(brewState.weight.toFixed(1));
       advancedState.targetYield = advancedState.dose * advancedState.ratio;
@@ -765,6 +802,24 @@ if (UI.btnDose) {
       brewState._isDirty = true;
       UI.btnDose.classList.remove("ct-active");
       UI.btnDose.textContent = `${advancedState.dose}g`;
+    }
+  });
+}
+
+// --- INTERAÇÃO PÓS-EXTRAÇÃO (REVIEW TOGGLE) ---
+const islandSlider = document.getElementById("island-slider");
+if (islandSlider) {
+  islandSlider.addEventListener("click", () => {
+    // Se a extração acabou, tocar na ilha rotaciona o painel
+    if (currentTimerState === TIMER_STATE.DONE && UI.actionFooter) {
+      UI.actionFooter.classList.toggle("is-reviewing");
+
+      // Atualiza o ícone tipográfico brutalista
+      if (UI.actionFooter.classList.contains("is-reviewing")) {
+        UI.btnMethod.textContent = `↑`; // Mostrando a barra, clica pra voltar aos números
+      } else {
+        UI.btnMethod.textContent = `↓`; // Mostrando os números, clica pra ver a barra
+      }
     }
   });
 }

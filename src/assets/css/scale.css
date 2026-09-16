@@ -267,9 +267,15 @@ body.theme-bluefy .footer-bottom-row {
   will-change: transform;
 }
 
-/* Transição acionada via classe is-running no pai */
-.action-footer.is-running .island-slider {
+/* Transição acionada no RUNNING ou na REVISÃO PÓS-EXTRAÇÃO */
+.action-footer.is-running .island-slider,
+.action-footer.is-reviewing .island-slider {
   transform: translateY(-50%); /* Rola para a segunda tela */
+}
+
+/* Garante que o usuário saiba que a área virou um botão "clicável" no estado DONE */
+.action-footer.is-done .island-slider {
+  cursor: pointer;
 }
 
 /* Telas individuais */
