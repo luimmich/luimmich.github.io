@@ -387,14 +387,14 @@ body.theme-bluefy .footer-bottom-row {
   color: var(--accent-color);
   border: none;
   font-family: inherit;
-  font-size: clamp(2rem, 6vw, 3rem);
-  padding: clamp(0.75rem, 3svh, 1rem) 0;
+  font-size: clamp(1.5rem, 5.5vw, 2.5rem);
+  padding: clamp(0.75rem, 3svh, 1.25rem) 0;
   cursor: pointer;
   transition: background-color 0.1s ease;
 }
 
 .action-btn #timer-icon {
-  height: clamp(1.7rem, 5vw, 2.5rem);
+  height: clamp(1.2rem, 4.5vw, 2rem);
 }
 
 .action-btn:first-child {
@@ -498,7 +498,7 @@ body.theme-bluefy .footer-bottom-row {
     font-size: clamp(4rem, 15vmin, 12rem);
   }
   .action-btn {
-    padding: 2.5rem 0;
+    /* padding: 1rem 0; */
   }
 }
 

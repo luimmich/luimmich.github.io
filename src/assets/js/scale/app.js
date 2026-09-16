@@ -498,7 +498,7 @@ function renderFrame() {
       renderAdaptiveTicks();
 
       currentTimerState = TIMER_STATE.RUNNING;
-      UI.timerIcon.src = "/icons/scale/pause.svg";
+      UI.timerIcon.src = "/icons/scale/stop.svg";
       if (UI.actionFooter) UI.actionFooter.classList.add("is-running");
       resetIdleTimer();
     }
@@ -718,7 +718,7 @@ UI.btnTimer.addEventListener("click", () => {
       renderAdaptiveTicks();
 
       currentTimerState = TIMER_STATE.RUNNING;
-      UI.timerIcon.src = "/icons/scale/pause.svg";
+      UI.timerIcon.src = "/icons/scale/stop.svg";
       if (UI.actionFooter) UI.actionFooter.classList.add("is-running");
 
       brewState._isDirty = true; // FIX: Força render imediato ao clicar
