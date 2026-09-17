@@ -24,7 +24,6 @@ const UI = {
   statusBadge: document.getElementById("status-indicator"),
   documentElement: document.documentElement,
 
-  // Elementos da nova Brew Island (Advanced Mode)
   actionFooter: document.getElementById("action-footer"),
   btnDose: document.getElementById("btn-dose"),
   btnRatio: document.getElementById("btn-ratio"),
@@ -73,11 +72,26 @@ const advancedState = {
   pours: [],
 };
 
+// Carregamento de Perfil Persistido
+try {
+  const savedProfile = localStorage.getItem("simple_scale_profile");
+  if (savedProfile) {
+    const parsed = JSON.parse(savedProfile);
+    if (typeof parsed.dose === "number") advancedState.dose = parsed.dose;
+    if (typeof parsed.ratio === "number") advancedState.ratio = parsed.ratio;
+    advancedState.targetYield = advancedState.dose * advancedState.ratio;
+    if (UI.btnDose) UI.btnDose.textContent = `${advancedState.dose}g`;
+    if (UI.btnRatio) UI.btnRatio.textContent = `1:${advancedState.ratio}`;
+  }
+} catch (e) {
+  console.warn("Falha ao recuperar perfil local:", e);
+}
+
 let liveTicksData = [];
-let currentPourIndex = 0; // Máquina de estados: rastreia exatamente em qual despejo estamos
+let currentPourIndex = 0;
 let isCurrentlyPouring = false;
-let isPourDebouncing = false; // Controle de turbulência da chaleira
-let stopPourTimeout = 0; // Timer de estabilização
+let isPourDebouncing = false;
+let stopPourTimeout = 0;
 
 let isSimulating = false;
 let simTime = 0;
@@ -86,7 +100,7 @@ let brewBaselineWeight = 0;
 let FLOW_HISTORY = [];
 const maxHistorySize = 5000;
 const canvas = document.getElementById("flow-canvas");
-const ctx = canvas.getContext("2d");
+const ctx = canvas ? canvas.getContext("2d") : null;
 let scrollTime = 0;
 let isDragging = false;
 let lastClientX = 0;
@@ -183,6 +197,176 @@ window.addEventListener("pagehide", () => {
   }
 });
 
+// ============================================================================
+// --- OVERLAY DE CONFIGURAÇÃO (AUTO-SAVE & GESTOS)
+// ============================================================================
+const UIConfig = {
+  screen: document.getElementById("config-screen"),
+  navHeader: document.querySelector("#config-screen .stats-nav"), // Busca a barra mesmo sem ID
+  btnClose: document.getElementById("btn-close-config"),
+  sliderDose: document.getElementById("cfg-slider-dose"),
+  sliderRatio: document.getElementById("cfg-slider-ratio"),
+  valDose: document.getElementById("cfg-val-dose"),
+  valRatio: document.getElementById("cfg-val-ratio"),
+  valYield: document.getElementById("cfg-val-yield"),
+};
+
+function autoSaveRecipe(newDose, newRatio) {
+  advancedState.dose = newDose;
+  advancedState.ratio = newRatio;
+  advancedState.targetYield = newDose * newRatio;
+
+  // Atualiza modal de configuração
+  if (UIConfig.valDose) UIConfig.valDose.textContent = newDose.toFixed(1);
+  if (UIConfig.valRatio) UIConfig.valRatio.textContent = newRatio.toFixed(1);
+  if (UIConfig.valYield)
+    UIConfig.valYield.textContent = Math.round(advancedState.targetYield).toString();
+
+  // Reflete na Home imediatamente
+  if (UI.btnDose && UI.btnDose.textContent !== "CT") {
+    UI.btnDose.textContent = `${newDose}g`;
+  }
+  if (UI.btnRatio) {
+    UI.btnRatio.textContent = `1:${newRatio}`;
+  }
+
+  // Recalcula régua visual da ilha
+  renderAdaptiveTicks();
+
+  // Persistência local silenciosa
+  try {
+    localStorage.setItem(
+      "simple_scale_profile",
+      JSON.stringify({
+        dose: advancedState.dose,
+        ratio: advancedState.ratio,
+        targetYield: advancedState.targetYield,
+      }),
+    );
+  } catch (err) {
+    console.warn("Falha ao salvar receita automaticamente:", err);
+  }
+}
+
+function openConfig() {
+  if (currentTimerState !== TIMER_STATE.IDLE) return;
+  if (UIConfig.sliderDose) UIConfig.sliderDose.value = advancedState.dose;
+  if (UIConfig.sliderRatio) UIConfig.sliderRatio.value = advancedState.ratio;
+
+  if (UIConfig.valDose) UIConfig.valDose.textContent = advancedState.dose.toFixed(1);
+  if (UIConfig.valRatio) UIConfig.valRatio.textContent = advancedState.ratio.toFixed(1);
+  if (UIConfig.valYield)
+    UIConfig.valYield.textContent = Math.round(advancedState.targetYield).toString();
+
+  if (UIConfig.screen) UIConfig.screen.classList.add("is-visible");
+}
+
+function closeConfig() {
+  if (UIConfig.screen) UIConfig.screen.classList.remove("is-visible");
+}
+
+// Auto-save em tempo real no evento input dos sliders
+if (UIConfig.sliderDose) {
+  UIConfig.sliderDose.addEventListener("input", (e) => {
+    const dose = parseFloat(e.target.value);
+    const ratio = parseFloat(UIConfig.sliderRatio?.value || advancedState.ratio);
+    autoSaveRecipe(dose, ratio);
+  });
+}
+
+if (UIConfig.sliderRatio) {
+  UIConfig.sliderRatio.addEventListener("input", (e) => {
+    const ratio = parseFloat(e.target.value);
+    const dose = parseFloat(UIConfig.sliderDose?.value || advancedState.dose);
+    autoSaveRecipe(dose, ratio);
+  });
+}
+
+// Fechar ao clicar na barra superior inteira ou no botão de voltar
+// Fecha ao clicar no botão "< brew config"
+if (UIConfig.btnClose) {
+  UIConfig.btnClose.addEventListener("click", (e) => {
+    e.stopPropagation();
+    closeConfig();
+  });
+}
+
+// Fecha ao clicar em qualquer ponto vazio da barra superior
+if (UIConfig.navHeader) {
+  UIConfig.navHeader.addEventListener("click", closeConfig);
+}
+
+// ============================================================================
+// --- GESTO DE ARRASTAR DA ESQUERDA PARA A DIREITA (SWIPE-TO-BACK)
+// ============================================================================
+function enableSwipeToDismiss(overlayEl, dismissCallback) {
+  if (!overlayEl) return;
+
+  let startX = 0;
+  let startY = 0;
+  let isTracking = false;
+
+  overlayEl.addEventListener(
+    "touchstart",
+    (e) => {
+      // Ignora se o toque começar em um slider ou botão para não conflitar com ajustes finos
+      if (e.target.closest("input[type='range'], .ruler-slider, button")) return;
+
+      const touch = e.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+      isTracking = true;
+    },
+    { passive: true },
+  );
+
+  overlayEl.addEventListener(
+    "touchmove",
+    (e) => {
+      if (!isTracking) return;
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - startX;
+      const deltaY = touch.clientY - startY;
+
+      // Se o movimento for predominantemente vertical (scroll da página), cancela o swipe
+      if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 15) {
+        isTracking = false;
+      }
+    },
+    { passive: true },
+  );
+
+  overlayEl.addEventListener(
+    "touchend",
+    (e) => {
+      if (!isTracking) return;
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - startX;
+      const deltaY = touch.clientY - startY;
+      isTracking = false;
+
+      // Arraste mínimo de 65px para a direita com predominância horizontal
+      if (deltaX > 65 && Math.abs(deltaX) > Math.abs(deltaY) * 1.4) {
+        dismissCallback();
+      }
+    },
+    { passive: true },
+  );
+}
+
+// Ativação do gesto em ambos os overlays
+enableSwipeToDismiss(UIConfig.screen, closeConfig);
+enableSwipeToDismiss(UIStats.screen, () => {
+  if (UIStats.screen) UIStats.screen.classList.remove("is-visible");
+});
+
+// Fechar tela de stats clicando em qualquer ponto do cabeçalho
+if (UIStats.btnClose) {
+  UIStats.btnClose.addEventListener("click", () => {
+    if (UIStats.screen) UIStats.screen.classList.remove("is-visible");
+  });
+}
+
 // --- CONFIGURAÇÕES DO GRÁFICO ---
 const MAX_FLOW_SCALE = 10;
 const TIME_WINDOW = 20;
@@ -209,7 +393,7 @@ function resetExtraction() {
 }
 
 function initGraph() {
-  canvas.style.touchAction = "none";
+  if (canvas) canvas.style.touchAction = "none";
   if (FLOW_HISTORY.length === 0) resetExtraction();
 }
 
@@ -217,29 +401,32 @@ document.fonts.ready.then(() => {
   brewState._isDirty = true;
 });
 
-canvas.addEventListener("pointerdown", (e) => {
-  if (currentTimerState === TIMER_STATE.RUNNING) return;
-  isDragging = true;
-  lastClientX = e.clientX;
-});
+if (canvas) {
+  canvas.addEventListener("pointerdown", (e) => {
+    if (currentTimerState === TIMER_STATE.RUNNING) return;
+    isDragging = true;
+    lastClientX = e.clientX;
+  });
+
+  canvas.addEventListener("pointermove", (e) => {
+    if (!isDragging || currentTimerState === TIMER_STATE.RUNNING) return;
+    const deltaPx = e.clientX - lastClientX;
+    const pxPerSec = (canvas.clientWidth - 25) / TIME_WINDOW;
+    scrollTime += deltaPx / pxPerSec;
+    lastClientX = e.clientX;
+    brewState._isDirty = true;
+  });
+}
 
 window.addEventListener("pointerup", () => {
   isDragging = false;
-});
-
-canvas.addEventListener("pointermove", (e) => {
-  if (!isDragging || currentTimerState === TIMER_STATE.RUNNING) return;
-  const deltaPx = e.clientX - lastClientX;
-  const pxPerSec = (canvas.clientWidth - 25) / TIME_WINDOW;
-  scrollTime += deltaPx / pxPerSec;
-  lastClientX = e.clientX;
-  brewState._isDirty = true;
 });
 
 window.addEventListener("resize", initGraph);
 document.addEventListener("DOMContentLoaded", initGraph);
 
 function renderFlowGraph(currentFlow, currentTime) {
+  if (!canvas || !ctx) return;
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
 
@@ -375,8 +562,8 @@ function updateFlowVisuals(flowRate) {
   let ratio = flowRate / MAX_FLOW_SCALE;
   if (ratio > 1.0) ratio = 1.0;
   if (ratio < 0.0) ratio = 0.0;
-  UI.documentElement.style.setProperty("--flow-ratio", ratio.toFixed(3));
-  UI.valFlowNum.textContent = flowRate.toFixed(1) + " g/s";
+  if (UI.documentElement) UI.documentElement.style.setProperty("--flow-ratio", ratio.toFixed(3));
+  if (UI.valFlowNum) UI.valFlowNum.textContent = flowRate.toFixed(1) + " g/s";
 }
 
 // --- MOTOR ADAPTATIVO 4:6 (GERAÇÃO DE TICKS) ---
@@ -415,66 +602,101 @@ function renderAdaptiveTicks() {
   }
 }
 
-// --- FUNÇÃO DE RECALCULO DE FLUXO (SMART ADJUSTMENT) ---
-// --- FUNÇÃO DE RECALCULO DE FLUXO (MOTOR TETSU SEQUENCIAL) ---
+// --- FUNÇÃO DE RECALCULO DE FLUXO (4:6 ESTREITO COM FUSÃO) ---
 function handlePourStop(activeWeight) {
-  // Ignora se não for Tetsu, se a extração já bateu o alvo total ou se já acabaram os pours
   if (
     !advancedState.tetsuMode ||
     activeWeight >= advancedState.targetYield ||
     currentPourIndex >= liveTicksData.length
-  )
+  ) {
     return;
+  }
 
-  let targetTick = liveTicksData[currentPourIndex];
+  const totalTarget = advancedState.targetYield;
+  const phase1Target = totalTarget * 0.4;
 
-  // 1. ATRAÇÃO MAGNÉTICA (Snap): Valida o pour real onde a água parou
-  targetTick.weight = activeWeight;
-  targetTick.passed = true;
-  const newPct = (activeWeight / advancedState.targetYield) * 100;
-  targetTick.dom.style.left = `${Math.min(newPct, 100)}%`;
+  // 1. ATRAÇÃO MAGNÉTICA (Snap): Valida o despejo onde o fluxo cessou
+  let currentTick = liveTicksData[currentPourIndex];
+  currentTick.weight = activeWeight;
+  currentTick.passed = true;
+  const currentPct = (activeWeight / totalTarget) * 100;
+  currentTick.dom.style.left = `${Math.min(currentPct, 100)}%`;
 
-  // Feedback Visual (Acende e depois esmaece)
-  targetTick.dom.classList.add("is-passed");
-  setTimeout(() => targetTick.dom.classList.replace("is-passed", "is-settled"), 600);
+  currentTick.dom.classList.add("is-passed");
+  setTimeout(() => currentTick.dom.classList.replace("is-passed", "is-settled"), 600);
 
-  // 2. RECÁLCULO KASUYA 4:6 (A Regra dos 40/60)
-  let totalTarget = advancedState.targetYield;
-  let phase1Target = totalTarget * 0.4;
-
+  // 2. FASE 1 (PRIMEIROS 40% — EQUILÍBRIO ACIDEZ / DOÇURA)
   if (currentPourIndex === 0) {
-    // FIM DO BLOOM: O Pour 2 ajusta o balanço de Doçura/Acidez garantindo os 40% da Fase 1
-    // Se o usuário exagerou e passou de 40%, o Pour 2 é empurrado para a frente.
-    let p2Target = Math.max(activeWeight, phase1Target);
-    if (liveTicksData[1]) liveTicksData[1].weight = p2Target;
-
-    // Distribui a Fase 2 (os 60% que trazem o corpo/força) igualmente nos 3 pours finais
-    let remainingPours = liveTicksData.length - 2;
-    if (remainingPours > 0) {
-      let step = (totalTarget - p2Target) / remainingPours;
-      for (let i = 2; i < liveTicksData.length; i++) {
-        liveTicksData[i].weight = p2Target + step * (i - 1);
+    // Se o Bloom cobriu ou passou de toda a Fase 1 (>= 40%), funde o Pour 2
+    if (activeWeight >= phase1Target) {
+      if (liveTicksData[1]) {
+        liveTicksData[1].dom.classList.add("is-hidden");
+        liveTicksData.splice(1, 1);
+      }
+      redistributePhase2(activeWeight);
+    } else {
+      // REGRA 4:6: O Pour 2 trava estritamente nos 40% totais.
+      // O que passou no Pour 1 é descontado no Pour 2, sem tocar na Fase 2.
+      if (liveTicksData[1]) {
+        liveTicksData[1].weight = phase1Target;
+        const p2Pct = (phase1Target / totalTarget) * 100;
+        liveTicksData[1].dom.style.left = `${Math.min(p2Pct, 100)}%`;
       }
     }
-  } else {
-    // FIM DE POURS SUBSEQUENTES: Distribui a água restante para garantir o Target Yield
+  }
+  // 3. TRANSIÇÃO: FIM DA FASE 1 (POUR 2 CONCLUÍDO)
+  else if (currentPourIndex === 1 && liveTicksData.length > 2) {
+    // Fase 1 finalizada: recalcula a base da Fase 2 com a sobra real
+    redistributePhase2(activeWeight);
+  }
+  // 4. FASE 2 (60% RESTANTES — FORÇA E CORPO)
+  else {
+    // Fusão dinâmica na Fase 2: se atingir 50%+ do próximo pour, funde os passos
+    let nextIndex = currentPourIndex + 1;
+    while (nextIndex < liveTicksData.length - 1) {
+      let plannedNext = liveTicksData[nextIndex].weight;
+      let prevWeight = liveTicksData[nextIndex - 1]?.weight || activeWeight;
+      let nextInterval = plannedNext - prevWeight;
+
+      if (activeWeight >= plannedNext - nextInterval * 0.5) {
+        liveTicksData[nextIndex].dom.classList.add("is-hidden");
+        liveTicksData.splice(nextIndex, 1);
+      } else {
+        break;
+      }
+    }
+
+    // Redistribui o volume restante entre os despejos remanescentes da Fase 2
     let remainingPours = liveTicksData.length - 1 - currentPourIndex;
     if (remainingPours > 0) {
       let step = (totalTarget - activeWeight) / remainingPours;
       for (let i = currentPourIndex + 1; i < liveTicksData.length; i++) {
-        liveTicksData[i].weight = activeWeight + step * (i - currentPourIndex);
+        let calcWeight = activeWeight + step * (i - currentPourIndex);
+        liveTicksData[i].weight = calcWeight;
+        const pct = (calcWeight / totalTarget) * 100;
+        liveTicksData[i].dom.style.left = `${Math.min(pct, 100)}%`;
       }
     }
   }
 
-  // 3. REPOSICIONAMENTO SUAVE (DOM/CSS GPU)
-  for (let i = currentPourIndex + 1; i < liveTicksData.length; i++) {
-    const pct = (liveTicksData[i].weight / totalTarget) * 100;
-    liveTicksData[i].dom.style.left = `${Math.min(pct, 100)}%`;
-  }
-
-  // 4. AVANÇA O ESTADO SEQUENCIAL
   currentPourIndex++;
+}
+
+// Auxiliar: Distribui a água restante igualmente entre os passos da Fase 2
+function redistributePhase2(currentWeight) {
+  const totalTarget = advancedState.targetYield;
+  const remainingWater = totalTarget - currentWeight;
+  const remainingPours = liveTicksData.length - 1 - currentPourIndex;
+
+  if (remainingPours > 0 && remainingWater > 0) {
+    const step = remainingWater / remainingPours;
+    for (let i = currentPourIndex + 1; i < liveTicksData.length; i++) {
+      const calcWeight = currentWeight + step * (i - currentPourIndex);
+      liveTicksData[i].weight = calcWeight;
+      const pct = (calcWeight / totalTarget) * 100;
+      liveTicksData[i].dom.style.left = `${Math.min(pct, 100)}%`;
+    }
+  }
 }
 
 let lastKnownWeight = 0;
@@ -498,7 +720,7 @@ function renderFrame() {
       renderAdaptiveTicks();
 
       currentTimerState = TIMER_STATE.RUNNING;
-      UI.timerIcon.src = "/icons/scale/stop.svg";
+      if (UI.timerIcon) UI.timerIcon.src = "/icons/scale/stop.svg";
       if (UI.actionFooter) UI.actionFooter.classList.add("is-running");
       resetIdleTimer();
     }
@@ -507,17 +729,16 @@ function renderFrame() {
     if (!isSimulating && now - lastHardwareTimeChange > 2000) {
       console.log("Pause físico detectado na balança. Entrando em Review Mode.");
       currentTimerState = TIMER_STATE.DONE;
-      UI.timerIcon.src = "/icons/scale/restart.svg";
+      if (UI.timerIcon) UI.timerIcon.src = "/icons/scale/restart.svg";
 
-      // --- INTELIGÊNCIA PÓS-EXTRAÇÃO: Calcula o Ratio Real ---
       let finalWaterHW = brewState.weight - brewBaselineWeight;
       if (finalWaterHW < 0) finalWaterHW = 0;
       let finalRatioHW =
         advancedState.dose > 0 ? (finalWaterHW / advancedState.dose).toFixed(1) : "0.0";
 
-      UI.btnDose.textContent = `${advancedState.dose}g`;
-      UI.btnRatio.textContent = `1:${finalRatioHW}`;
-      UI.btnMethod.textContent = `↓`;
+      if (UI.btnDose) UI.btnDose.textContent = `${advancedState.dose}g`;
+      if (UI.btnRatio) UI.btnRatio.textContent = `1:${finalRatioHW}`;
+      if (UI.btnMethod) UI.btnMethod.textContent = `↓`;
 
       if (UI.actionFooter) {
         UI.actionFooter.classList.remove("is-running");
@@ -552,16 +773,29 @@ function renderFrame() {
       brewBaselineWeight = 0;
     }
 
-    const rawPct = (activeWeight / advancedState.targetYield) * 100;
-    const fillPct = Math.max(0, Math.min(rawPct, 100));
-    UI.liveProgress.style.width = `${fillPct}%`;
-
     if (activeWeight > advancedState.targetYield && UI.overpourProgress) {
+      // OVERPOUR: Cresce para dentro a partir da direita, compactando a receita
       const overWeight = activeWeight - advancedState.targetYield;
+      // Reserva até 20% da largura total da barra para a zona vermelha
       const overPct = Math.min((overWeight / advancedState.targetYield) * 100, 20);
+      const scaleFactor = (100 - overPct) / 100;
+
+      // A barra branca encolhe para dar espaço ao vermelho (ex: 85% branca + 15% vermelha = 100%)
+      UI.liveProgress.style.width = `${100 - overPct}%`;
       UI.overpourProgress.style.width = `${overPct}%`;
-    } else if (UI.overpourProgress) {
-      UI.overpourProgress.style.width = `0%`;
+
+      // Compacta os ticks (sanfona) para acompanharem o encolhimento da barra branca
+      const totalWater = advancedState.targetYield;
+      liveTicksData.forEach((tick) => {
+        const pct = (tick.weight / totalWater) * 100 * scaleFactor;
+        tick.dom.style.left = `${Math.min(pct, 100 - overPct)}%`;
+      });
+    } else {
+      // FLUXO NORMAL (<= Target Yield)
+      const rawPct = (activeWeight / advancedState.targetYield) * 100;
+      const fillPct = Math.max(0, Math.min(rawPct, 100));
+      UI.liveProgress.style.width = `${fillPct}%`;
+      if (UI.overpourProgress) UI.overpourProgress.style.width = `0%`;
     }
 
     if (activeWeight >= advancedState.targetYield) {
@@ -573,28 +807,21 @@ function renderFrame() {
     } else {
       UI.liveProgress.classList.remove("is-drawdown");
     }
-
-    // --- ANÁLISE DE FLUXO COM HISTERESE (DEBOUNCE FÍSICO) ---
     if (brewState.flowRateEMA > 1.5) {
-      // Começou a jogar água pesado
       isCurrentlyPouring = true;
       isPourDebouncing = false;
     } else if (brewState.flowRateEMA < 0.5 && isCurrentlyPouring) {
-      // Água parou. Inicia a janela de confirmação de 1.2 segundos
       if (!isPourDebouncing) {
         isPourDebouncing = true;
         stopPourTimeout = brewState.time + 1.2;
       } else if (brewState.time >= stopPourTimeout) {
-        // Confirmado: A chaleira foi afastada
         isCurrentlyPouring = false;
         isPourDebouncing = false;
-        handlePourStop(activeWeight); // Dispara a Inteligência do Tetsu
+        handlePourStop(activeWeight);
       }
     } else if (brewState.flowRateEMA >= 0.5 && isPourDebouncing) {
-      // Falso positivo (A pessoa só levantou a mão rapidinho e já voltou a jogar)
       isPourDebouncing = false;
     }
-    // NOTA: O loop forEach espacial antigo foi completamente apagado!
 
     liveTicksData.forEach((tick) => {
       if (!tick.passed && activeWeight >= tick.weight) {
@@ -614,7 +841,7 @@ function renderFrame() {
 
   lastHardwareTime = brewState.time;
   const displayWeight = Math.min(brewState.weight, 999.9);
-  UI.valWeight.textContent = displayWeight.toFixed(1);
+  if (UI.valWeight) UI.valWeight.textContent = displayWeight.toFixed(1);
 
   updateFlowVisuals(brewState.flowRateEMA);
   renderFlowGraph(brewState.flowRateEMA, brewState.time);
@@ -623,12 +850,11 @@ function renderFrame() {
   const m = Math.floor(timeInt / 60);
   const s = timeInt % 60;
   const minStr = m < 10 ? " " + m : m.toString();
-  UI.valTime.textContent = minStr + ":" + timeStrs[s];
+  if (UI.valTime) UI.valTime.textContent = minStr + ":" + timeStrs[s];
 
-  if (brewState.isStable) {
-    UI.stableDot.classList.add("is-stable");
-  } else {
-    UI.stableDot.classList.remove("is-stable");
+  if (UI.stableDot) {
+    if (brewState.isStable) UI.stableDot.classList.add("is-stable");
+    else UI.stableDot.classList.remove("is-stable");
   }
 
   brewState._isDirty = false;
@@ -694,93 +920,96 @@ function processAndSaveExtraction(isEmergencySave = false) {
     method: advancedState.method,
   };
 
-  saveExtraction(extractionData);
+  if (typeof saveExtraction === "function") saveExtraction(extractionData);
 }
 
-UI.btnConnect.addEventListener("click", () => {
-  UI.btnConnect.textContent = "connecting";
-  UI.btnConnect.classList.add("pulse-cursor");
+if (UI.btnConnect) {
+  UI.btnConnect.addEventListener("click", () => {
+    UI.btnConnect.textContent = "connecting";
+    UI.btnConnect.classList.add("pulse-cursor");
 
-  bleManager
-    .connect()
-    .then(() => {
-      requestWakeLock();
-    })
-    .catch((error) => {
-      UI.btnConnect.textContent = "connect";
-      UI.btnConnect.classList.remove("pulse-cursor");
-      if (error.name !== "NotFoundError") alert("Falha: " + (error.message || error));
-    });
-});
+    bleManager
+      .connect()
+      .then(() => {
+        requestWakeLock();
+      })
+      .catch((error) => {
+        UI.btnConnect.textContent = "connect";
+        UI.btnConnect.classList.remove("pulse-cursor");
+        if (error.name !== "NotFoundError") alert("Falha: " + (error.message || error));
+      });
+  });
+}
 
-UI.btnTare.addEventListener("click", () => {
-  if (isSimulating) {
-    simWeight = 0;
-    brewState.weight = 0;
-    brewState._isDirty = true;
-  } else {
-    bleManager.sendCommand("TARE");
-  }
-});
-
-UI.btnTimer.addEventListener("click", () => {
-  switch (currentTimerState) {
-    case TIMER_STATE.IDLE:
-      if (!isSimulating) bleManager.sendCommand("TIMER_START");
-      brewBaselineWeight = brewState.weight;
-
-      renderAdaptiveTicks();
-
-      currentTimerState = TIMER_STATE.RUNNING;
-      UI.timerIcon.src = "/icons/scale/stop.svg";
-      if (UI.actionFooter) UI.actionFooter.classList.add("is-running");
-
-      brewState._isDirty = true; // FIX: Força render imediato ao clicar
-      break;
-
-    case TIMER_STATE.RUNNING:
-      if (!isSimulating) bleManager.sendCommand("TIMER_PAUSE");
-      currentTimerState = TIMER_STATE.DONE;
-      UI.timerIcon.src = "/icons/scale/restart.svg";
-
-      // --- INTELIGÊNCIA PÓS-EXTRAÇÃO: Calcula o Ratio Real ---
-      let finalWaterApp = brewState.weight - brewBaselineWeight;
-      if (finalWaterApp < 0) finalWaterApp = 0;
-      let finalRatioApp =
-        advancedState.dose > 0 ? (finalWaterApp / advancedState.dose).toFixed(1) : "0.0";
-
-      // Atualiza os botões com os dados finais
-      UI.btnDose.textContent = `${advancedState.dose}g`;
-      UI.btnRatio.textContent = `1:${finalRatioApp}`;
-      UI.btnMethod.textContent = `↓`; // Indica que o cilindro pode rolar
-
-      if (UI.actionFooter) {
-        UI.actionFooter.classList.remove("is-running");
-        UI.actionFooter.classList.add("is-done"); // Nova flag
-      }
+if (UI.btnTare) {
+  UI.btnTare.addEventListener("click", () => {
+    if (isSimulating) {
+      simWeight = 0;
+      brewState.weight = 0;
       brewState._isDirty = true;
-      break;
+    } else {
+      bleManager.sendCommand("TARE");
+    }
+  });
+}
 
-    case TIMER_STATE.DONE:
-      if (!isSimulating) bleManager.sendCommand("TIMER_RESET");
-      processAndSaveExtraction();
-      resetExtraction();
+if (UI.btnTimer) {
+  UI.btnTimer.addEventListener("click", () => {
+    switch (currentTimerState) {
+      case TIMER_STATE.IDLE:
+        if (!isSimulating) bleManager.sendCommand("TIMER_START");
+        brewBaselineWeight = brewState.weight;
 
-      // --- RESET DA ILHA: Volta aos parâmetros da receita ---
-      UI.btnDose.textContent = `${advancedState.dose}g`;
-      UI.btnRatio.textContent = `1:${advancedState.ratio}`;
-      UI.btnMethod.textContent = advancedState.method; // Ex: '4:6'
+        renderAdaptiveTicks();
 
-      currentTimerState = TIMER_STATE.IDLE;
-      UI.timerIcon.src = "/icons/scale/play.svg";
-      if (UI.actionFooter) {
-        UI.actionFooter.classList.remove("is-running", "is-done", "is-reviewing");
-      }
-      brewState._isDirty = true;
-      break;
-  }
-  resetIdleTimer();
-});
+        currentTimerState = TIMER_STATE.RUNNING;
+        if (UI.timerIcon) UI.timerIcon.src = "/icons/scale/stop.svg";
+        if (UI.actionFooter) UI.actionFooter.classList.add("is-running");
+
+        brewState._isDirty = true;
+        break;
+
+      case TIMER_STATE.RUNNING:
+        if (!isSimulating) bleManager.sendCommand("TIMER_PAUSE");
+        currentTimerState = TIMER_STATE.DONE;
+        if (UI.timerIcon) UI.timerIcon.src = "/icons/scale/restart.svg";
+
+        let finalWaterApp = brewState.weight - brewBaselineWeight;
+        if (finalWaterApp < 0) finalWaterApp = 0;
+        let finalRatioApp =
+          advancedState.dose > 0 ? (finalWaterApp / advancedState.dose).toFixed(1) : "0.0";
+
+        if (UI.btnDose) UI.btnDose.textContent = `${advancedState.dose}g`;
+        if (UI.btnRatio) UI.btnRatio.textContent = `1:${finalRatioApp}`;
+        if (UI.btnMethod) UI.btnMethod.textContent = `↓`;
+
+        if (UI.actionFooter) {
+          UI.actionFooter.classList.remove("is-running");
+          UI.actionFooter.classList.add("is-done");
+        }
+        brewState._isDirty = true;
+        break;
+
+      case TIMER_STATE.DONE:
+        if (!isSimulating) bleManager.sendCommand("TIMER_RESET");
+        processAndSaveExtraction();
+        resetExtraction();
+
+        if (UI.btnDose) UI.btnDose.textContent = `${advancedState.dose}g`;
+        if (UI.btnRatio) UI.btnRatio.textContent = `1:${advancedState.ratio}`;
+        if (UI.btnMethod) UI.btnMethod.textContent = advancedState.method;
+
+        currentTimerState = TIMER_STATE.IDLE;
+        if (UI.timerIcon) UI.timerIcon.src = "/icons/scale/play.svg";
+        if (UI.actionFooter) {
+          UI.actionFooter.classList.remove("is-running", "is-done", "is-reviewing");
+        }
+        brewState._isDirty = true;
+        break;
+    }
+    resetIdleTimer();
+  });
+}
 
 if (UI.btnDose) {
   UI.btnDose.addEventListener("click", () => {
@@ -802,31 +1031,36 @@ if (UI.btnDose) {
       brewState._isDirty = true;
       UI.btnDose.classList.remove("ct-active");
       UI.btnDose.textContent = `${advancedState.dose}g`;
+    } else {
+      openConfig();
     }
   });
+}
+
+if (UI.btnRatio) {
+  UI.btnRatio.addEventListener("click", openConfig);
 }
 
 // --- INTERAÇÃO PÓS-EXTRAÇÃO (REVIEW TOGGLE) ---
 const islandSlider = document.getElementById("island-slider");
 if (islandSlider) {
   islandSlider.addEventListener("click", () => {
-    // Se a extração acabou, tocar na ilha rotaciona o painel
+    // No estado DONE, qualquer toque na ilha rotaciona o painel
     if (currentTimerState === TIMER_STATE.DONE && UI.actionFooter) {
       UI.actionFooter.classList.toggle("is-reviewing");
 
-      // Atualiza o ícone tipográfico brutalista
-      if (UI.actionFooter.classList.contains("is-reviewing")) {
-        UI.btnMethod.textContent = `↑`; // Mostrando a barra, clica pra voltar aos números
-      } else {
-        UI.btnMethod.textContent = `↓`; // Mostrando os números, clica pra ver a barra
+      if (UI.btnMethod) {
+        UI.btnMethod.textContent = UI.actionFooter.classList.contains("is-reviewing") ? "↑" : "↓";
       }
     }
   });
 }
 
-UI.stableDot.addEventListener("click", async () => {
-  await renderStatsScreen();
-});
+if (UI.stableDot) {
+  UI.stableDot.addEventListener("click", async () => {
+    await renderStatsScreen();
+  });
+}
 
 async function renderStatsScreen() {
   const extractions = await getAllExtractions();
@@ -836,14 +1070,14 @@ async function renderStatsScreen() {
   if (historyList) historyList.innerHTML = "";
 
   if (extractions.length === 0) {
-    UIStats.valBrews.textContent = "0";
-    UIStats.valAvgTime.textContent = "0:00";
-    UIStats.valAvgYield.textContent = "0";
-    UIStats.valAvgPours.textContent = "0";
-    UIStats.valTotalCoffee.textContent = "0";
+    if (UIStats.valBrews) UIStats.valBrews.textContent = "0";
+    if (UIStats.valAvgTime) UIStats.valAvgTime.textContent = "0:00";
+    if (UIStats.valAvgYield) UIStats.valAvgYield.textContent = "0";
+    if (UIStats.valAvgPours) UIStats.valAvgPours.textContent = "0";
+    if (UIStats.valTotalCoffee) UIStats.valTotalCoffee.textContent = "0";
     if (historyList)
       historyList.innerHTML = `<li style="color: var(--fg-dim); opacity: 0.5;">no data yet.</li>`;
-    UIStats.screen.classList.add("is-visible");
+    if (UIStats.screen) UIStats.screen.classList.add("is-visible");
     return;
   }
 
@@ -895,7 +1129,7 @@ async function renderStatsScreen() {
 
   if (historyList) historyList.appendChild(fragment);
 
-  UIStats.valBrews.textContent = extractions.length.toString();
+  if (UIStats.valBrews) UIStats.valBrews.textContent = extractions.length.toString();
 
   if (pouroverCount > 0) {
     const avgTime = sumTime / pouroverCount;
@@ -904,18 +1138,20 @@ async function renderStatsScreen() {
       .toString()
       .padStart(2, "0");
 
-    UIStats.valAvgTime.textContent = `${m}:${s}`;
-    UIStats.valAvgYield.textContent = (sumYield / pouroverCount).toFixed(0);
-    UIStats.valAvgPours.textContent = (sumPours / pouroverCount).toFixed(1);
-    UIStats.valTotalCoffee.textContent = (sumYield / 15).toFixed(0);
+    if (UIStats.valAvgTime) UIStats.valAvgTime.textContent = `${m}:${s}`;
+    if (UIStats.valAvgYield)
+      UIStats.valAvgYield.textContent = (sumYield / pouroverCount).toFixed(0);
+    if (UIStats.valAvgPours)
+      UIStats.valAvgPours.textContent = (sumPours / pouroverCount).toFixed(1);
+    if (UIStats.valTotalCoffee) UIStats.valTotalCoffee.textContent = (sumYield / 15).toFixed(0);
   } else {
-    UIStats.valAvgTime.textContent = "0:00";
-    UIStats.valAvgYield.textContent = "0";
-    UIStats.valAvgPours.textContent = "0";
-    UIStats.valTotalCoffee.textContent = "0";
+    if (UIStats.valAvgTime) UIStats.valAvgTime.textContent = "0:00";
+    if (UIStats.valAvgYield) UIStats.valAvgYield.textContent = "0";
+    if (UIStats.valAvgPours) UIStats.valAvgPours.textContent = "0";
+    if (UIStats.valTotalCoffee) UIStats.valTotalCoffee.textContent = "0";
   }
 
-  UIStats.screen.classList.add("is-visible");
+  if (UIStats.screen) UIStats.screen.classList.add("is-visible");
 }
 
 const historyListElement = document.getElementById("history-list");
@@ -932,11 +1168,15 @@ if (historyListElement) {
   });
 }
 
-UIStats.btnClose.addEventListener("click", () => {
-  UIStats.screen.classList.remove("is-visible");
-});
+if (UIStats.btnClose) {
+  UIStats.btnClose.addEventListener("click", () => {
+    UIStats.screen.classList.remove("is-visible");
+  });
+}
 
-UIStats.btnExport.addEventListener("click", () => exportData());
+if (UIStats.btnExport) {
+  UIStats.btnExport.addEventListener("click", () => exportData());
+}
 
 requestAnimationFrame(renderFrame);
 
@@ -944,73 +1184,73 @@ requestAnimationFrame(renderFrame);
 const btnSimulate = document.getElementById("btn-simulate");
 let simInterval = null;
 
-btnSimulate.addEventListener("click", () => {
-  requestWakeLock();
-  document.body.classList.remove("state-disconnected");
-  document.getElementById("status-indicator").textContent = "sim";
+if (btnSimulate) {
+  btnSimulate.addEventListener("click", () => {
+    requestWakeLock();
+    document.body.classList.remove("state-disconnected");
+    const indicator = document.getElementById("status-indicator");
+    if (indicator) indicator.textContent = "sim";
 
-  isSimulating = true;
-  resetExtraction();
+    isSimulating = true;
+    resetExtraction();
 
-  if (simInterval) clearInterval(simInterval);
+    if (simInterval) clearInterval(simInterval);
 
-  let simPoursCompleted = 0;
-  let simIsPouring = false;
-  let simPourTarget = 0;
-  let simPauseTimeOut = 0;
-  let coffeeAdded = false;
+    let simPoursCompleted = 0;
+    let simIsPouring = false;
+    let simPourTarget = 0;
+    let simPauseTimeOut = 0;
+    let coffeeAdded = false;
 
-  const setNextPour = () => {
-    if (simPoursCompleted < 5) {
-      const randomPourWeight = 30 + Math.random() * 30;
-      simPourTarget = simWeight + randomPourWeight;
-      simIsPouring = true;
-    }
-  };
-
-  simInterval = setInterval(() => {
-    let flow = 0;
-
-    if (currentTimerState === TIMER_STATE.IDLE) {
-      // Fase 1: Simula o usuário jogando o pó na V60
-      if (!coffeeAdded) {
-        if (simWeight < 18.5) {
-          flow = 5.0;
-          simWeight += flow * 0.05;
-        } else {
-          simWeight = 18.5; // Travou o peso do pó
-          flow = 0;
-          coffeeAdded = true; // Pronto para o Smart CT!
-        }
-      }
-    } else if (currentTimerState === TIMER_STATE.RUNNING) {
-      // Fase 2: O preparo dinâmico
-      simTime += 0.05;
-      if (simPourTarget === 0) setNextPour();
-
+    const setNextPour = () => {
       if (simPoursCompleted < 5) {
-        if (simIsPouring) {
-          flow = 6 + (Math.random() * 0.5 - 0.25);
-          simWeight += flow * 0.05;
+        const randomPourWeight = 30 + Math.random() * 30;
+        simPourTarget = simWeight + randomPourWeight;
+        simIsPouring = true;
+      }
+    };
 
-          if (simWeight >= simPourTarget) {
-            simWeight = simPourTarget;
-            simIsPouring = false;
-            simPoursCompleted++;
-            simPauseTimeOut = simTime + 15.0; // Pausa a chaleira
+    simInterval = setInterval(() => {
+      let flow = 0;
+
+      if (currentTimerState === TIMER_STATE.IDLE) {
+        if (!coffeeAdded) {
+          if (simWeight < 18.5) {
+            flow = 5.0;
+            simWeight += flow * 0.05;
+          } else {
+            simWeight = 18.5;
+            flow = 0;
+            coffeeAdded = true;
           }
-        } else {
-          flow = Math.random() * 0.1; // Ruído leve
-          if (simTime >= simPauseTimeOut) setNextPour();
+        }
+      } else if (currentTimerState === TIMER_STATE.RUNNING) {
+        simTime += 0.05;
+        if (simPourTarget === 0) setNextPour();
+
+        if (simPoursCompleted < 5) {
+          if (simIsPouring) {
+            flow = 6 + (Math.random() * 0.5 - 0.25);
+            simWeight += flow * 0.05;
+
+            if (simWeight >= simPourTarget) {
+              simWeight = simPourTarget;
+              simIsPouring = false;
+              simPoursCompleted++;
+              simPauseTimeOut = simTime + 15.0;
+            }
+          } else {
+            flow = Math.random() * 0.1;
+            if (simTime >= simPauseTimeOut) setNextPour();
+          }
         }
       }
-    }
 
-    // CRÍTICO: Atualiza o estado da balança em todos os frames (IDLE e RUNNING)
-    brewState.weight = simWeight;
-    if (currentTimerState === TIMER_STATE.RUNNING) brewState.time = simTime;
-    brewState.flowRateEMA = flow;
-    brewState.isStable = flow < 0.5; // O CT exige que isso seja true
-    brewState._isDirty = true;
-  }, 50);
-});
+      brewState.weight = simWeight;
+      if (currentTimerState === TIMER_STATE.RUNNING) brewState.time = simTime;
+      brewState.flowRateEMA = flow;
+      brewState.isStable = flow < 0.5;
+      brewState._isDirty = true;
+    }, 50);
+  });
+}

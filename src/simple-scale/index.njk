@@ -37,9 +37,9 @@
         <div id="stats-screen" class="stats-overlay">
             
             <header id="btn-close-stats" class="stats-nav">
-                <button class="stats-nav-btn">< stats</button>
+                <button class="stats-nav-btn">&lt;</button>
             
-                <button class="stats-nav-btn">pourover</button>
+                <button class="stats-nav-btn">statistics</button>
             </header>
 
             <div class="stats-modules-grid">
@@ -101,6 +101,53 @@
                 </button>
             </div>
         </div>
+
+        <!-- OVERLAY DE CONFIGURAÇÃO DE RECEITA -->
+    <div id="config-screen" class="stats-overlay">
+        <header class="stats-nav">
+            <button id="btn-close-config" class="stats-nav-btn">&lt;</button>
+
+            <button class="stats-nav-btn">parameters</button>
+        </header>
+
+        <div class="config-body">
+            <!-- Card Unificado de Parâmetros -->
+            <div class="stat-module module-dark config-card">
+
+<!-- Output de Rendimento Total -->
+            <div class="config-row config-yield-row">
+                <span class="config-row-label">target</span>
+                <div class="config-badge">
+                    <span id="cfg-val-yield">225</span><small>g</small>
+                </div>
+            </div>
+
+
+                <!-- Linha 1: Dose -->
+                <div class="config-row">
+                    <span class="config-row-label">dose</span>
+                    <input type="range" id="cfg-slider-dose" class="ruler-slider" min="5" max="40" step="0.5" value="15">
+                    <div class="config-badge">
+                        <span id="cfg-val-dose">15.0</span><small>g</small>
+                    </div>
+                </div>
+
+                <!-- Linha 2: Ratio -->
+                <div class="config-row">
+                    <span class="config-row-label">ratio</span>
+                    <input type="range" id="cfg-slider-ratio" class="ruler-slider" min="10" max="22" step="0.5" value="15">
+                    <div class="config-badge">
+                        <small>1:</small><span id="cfg-val-ratio">15.0</span><small>g</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slot Vazio para Pours (Futuro Equalizador) -->
+            <div id="pours-config-slot" class="pours-config-slot">
+                <span>pours equalizer slot</span>
+            </div>
+        </div>
+    </div>
 
     <!-- O PAINEL DE EXTRAÇÃO (Stack Vertical) -->
     <main class="app-layout">
