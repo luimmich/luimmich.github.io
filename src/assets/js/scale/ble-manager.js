@@ -21,6 +21,7 @@ export class BLEManager {
     this.onDisconnectStatus = onDisconnectStatus;
 
     this.reconnectAttempts = 0;
+    this.reconnectTimer = null;
     this.intentionalDisconnect = false;
 
     this.commandQueue = Promise.resolve();
@@ -36,7 +37,6 @@ export class BLEManager {
     }
 
     try {
-      // Payload simplificado: o parser nativo do Bluefy/WebBLE aceita a injeção do serviço diretamente no filtro
       this.device = await navigator.bluetooth.requestDevice({
         filters: [{ services: [TIMEMORE_SERVICE_UUID] }],
       });
@@ -69,6 +69,10 @@ export class BLEManager {
     await this.characteristic.startNotifications();
 
     this.reconnectAttempts = 0;
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
     if (this.onDisconnectStatus) this.onDisconnectStatus(true);
   }
 
@@ -102,7 +106,9 @@ export class BLEManager {
     const backoffDelay = Math.pow(2, this.reconnectAttempts) * BASE_DELAY;
     this.reconnectAttempts++;
 
-    setTimeout(async () => {
+    if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+
+    this.reconnectTimer = setTimeout(async () => {
       try {
         console.info(`Tentativa de reconexão #${this.reconnectAttempts}...`);
         await this._establishGATT(device);
@@ -135,6 +141,12 @@ export class BLEManager {
   }
 
   disconnect() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    this.reconnectAttempts = 0;
+
     if (this.device && this.device.gatt && this.device.gatt.connected) {
       this.intentionalDisconnect = true;
 

@@ -546,6 +546,7 @@ body.theme-bluefy .footer-bottom-row {
   font-size: clamp(1rem, 4vw, 1.2rem);
   cursor: pointer;
   user-select: none;
+  padding: 0.5rem 0.5rem 1.5rem;
 }
 
 .stats-nav-btn {
@@ -887,24 +888,25 @@ body.theme-bluefy .footer-bottom-row {
 }
 
 /* Caixa de Valor à Direita */
+/* Caixa de Valor à Direita */
 .config-badge {
   flex: 0 0 74px;
   min-width: 74px;
   height: 40px;
   display: flex;
-  align-items: baseline;
-  justify-content: end;
+  align-items: center;
+  justify-content: flex-end;
   gap: 3px;
   font-variant-numeric: tabular-nums;
   font-size: 1rem;
   color: var(--fg-root);
-  align-items: flex-end;
-  margin-top: -20px;
+  margin-top: 0;
 }
 
 .config-badge small {
   font-size: 0.78rem;
   color: var(--fg-dim);
+  align-self: center;
 }
 
 /* Linha específica do Target Yield */

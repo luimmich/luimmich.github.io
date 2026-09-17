@@ -4,14 +4,16 @@ const DB_VERSION = 1;
 const STORE_NAME = "extractions";
 
 let dbInstance = null;
+let dbPromise = null;
 
 /**
- * Retorna ou inicializa a conexão Singleton com o IndexedDB.
+ * Retorna ou inicializa a conexão Singleton com o IndexedDB protegida contra concorrência.
  */
 async function getDB() {
   if (dbInstance) return dbInstance;
+  if (dbPromise) return dbPromise;
 
-  return new Promise((resolve, reject) => {
+  dbPromise = new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
     request.onupgradeneeded = (event) => {
@@ -23,6 +25,7 @@ async function getDB() {
 
     request.onsuccess = (event) => {
       dbInstance = event.target.result;
+      dbPromise = null;
 
       dbInstance.onclose = () => {
         dbInstance = null;
@@ -35,9 +38,18 @@ async function getDB() {
       resolve(dbInstance);
     };
 
-    request.onerror = (event) => reject(event.target.error);
-    request.onblocked = () => console.warn("Abertura do IndexedDB bloqueada por outra aba.");
+    request.onerror = (event) => {
+      dbPromise = null;
+      reject(event.target.error);
+    };
+
+    request.onblocked = () => {
+      dbPromise = null;
+      console.warn("Abertura do IndexedDB bloqueada por outra aba.");
+    };
   });
+
+  return dbPromise;
 }
 
 /**

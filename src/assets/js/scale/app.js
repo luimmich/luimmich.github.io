@@ -82,6 +82,7 @@ try {
     advancedState.targetYield = advancedState.dose * advancedState.ratio;
     if (UI.btnDose) UI.btnDose.textContent = `${advancedState.dose}g`;
     if (UI.btnRatio) UI.btnRatio.textContent = `1:${advancedState.ratio}`;
+    renderAdaptiveTicks();
   }
 } catch (e) {
   console.warn("Falha ao recuperar perfil local:", e);
@@ -91,7 +92,7 @@ let liveTicksData = [];
 let currentPourIndex = 0;
 let isCurrentlyPouring = false;
 let isPourDebouncing = false;
-let stopPourTimeout = 0;
+let stopPourTimeout = 0; // Armazena tempo em segundos via performance.now()
 
 let isSimulating = false;
 let simTime = 0;
@@ -124,7 +125,7 @@ async function requestWakeLock() {
       });
     }
   } catch (err) {
-    console.warn(`Wake Lock bloqueado pelo OS. Armadilhado para o próximo toque.`);
+    console.warn("Wake Lock bloqueado pelo OS. Armadilhado para o próximo toque.");
     wakeLockRecoveryPending = true;
   }
 }
@@ -202,7 +203,7 @@ window.addEventListener("pagehide", () => {
 // ============================================================================
 const UIConfig = {
   screen: document.getElementById("config-screen"),
-  navHeader: document.querySelector("#config-screen .stats-nav"), // Busca a barra mesmo sem ID
+  navHeader: document.querySelector("#config-screen .stats-nav"),
   btnClose: document.getElementById("btn-close-config"),
   sliderDose: document.getElementById("cfg-slider-dose"),
   sliderRatio: document.getElementById("cfg-slider-ratio"),
@@ -216,13 +217,11 @@ function autoSaveRecipe(newDose, newRatio) {
   advancedState.ratio = newRatio;
   advancedState.targetYield = newDose * newRatio;
 
-  // Atualiza modal de configuração
   if (UIConfig.valDose) UIConfig.valDose.textContent = newDose.toFixed(1);
   if (UIConfig.valRatio) UIConfig.valRatio.textContent = newRatio.toFixed(1);
   if (UIConfig.valYield)
     UIConfig.valYield.textContent = Math.round(advancedState.targetYield).toString();
 
-  // Reflete na Home imediatamente
   if (UI.btnDose && UI.btnDose.textContent !== "CT") {
     UI.btnDose.textContent = `${newDose}g`;
   }
@@ -230,10 +229,8 @@ function autoSaveRecipe(newDose, newRatio) {
     UI.btnRatio.textContent = `1:${newRatio}`;
   }
 
-  // Recalcula régua visual da ilha
   renderAdaptiveTicks();
 
-  // Persistência local silenciosa
   try {
     localStorage.setItem(
       "simple_scale_profile",
@@ -265,7 +262,6 @@ function closeConfig() {
   if (UIConfig.screen) UIConfig.screen.classList.remove("is-visible");
 }
 
-// Auto-save em tempo real no evento input dos sliders
 if (UIConfig.sliderDose) {
   UIConfig.sliderDose.addEventListener("input", (e) => {
     const dose = parseFloat(e.target.value);
@@ -282,8 +278,6 @@ if (UIConfig.sliderRatio) {
   });
 }
 
-// Fechar ao clicar na barra superior inteira ou no botão de voltar
-// Fecha ao clicar no botão "< brew config"
 if (UIConfig.btnClose) {
   UIConfig.btnClose.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -291,7 +285,6 @@ if (UIConfig.btnClose) {
   });
 }
 
-// Fecha ao clicar em qualquer ponto vazio da barra superior
 if (UIConfig.navHeader) {
   UIConfig.navHeader.addEventListener("click", closeConfig);
 }
@@ -309,7 +302,6 @@ function enableSwipeToDismiss(overlayEl, dismissCallback) {
   overlayEl.addEventListener(
     "touchstart",
     (e) => {
-      // Ignora se o toque começar em um slider ou botão para não conflitar com ajustes finos
       if (e.target.closest("input[type='range'], .ruler-slider, button")) return;
 
       const touch = e.touches[0];
@@ -328,7 +320,6 @@ function enableSwipeToDismiss(overlayEl, dismissCallback) {
       const deltaX = touch.clientX - startX;
       const deltaY = touch.clientY - startY;
 
-      // Se o movimento for predominantemente vertical (scroll da página), cancela o swipe
       if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 15) {
         isTracking = false;
       }
@@ -345,7 +336,6 @@ function enableSwipeToDismiss(overlayEl, dismissCallback) {
       const deltaY = touch.clientY - startY;
       isTracking = false;
 
-      // Arraste mínimo de 65px para a direita com predominância horizontal
       if (deltaX > 65 && Math.abs(deltaX) > Math.abs(deltaY) * 1.4) {
         dismissCallback();
       }
@@ -354,13 +344,11 @@ function enableSwipeToDismiss(overlayEl, dismissCallback) {
   );
 }
 
-// Ativação do gesto em ambos os overlays
 enableSwipeToDismiss(UIConfig.screen, closeConfig);
 enableSwipeToDismiss(UIStats.screen, () => {
   if (UIStats.screen) UIStats.screen.classList.remove("is-visible");
 });
 
-// Fechar tela de stats clicando em qualquer ponto do cabeçalho
 if (UIStats.btnClose) {
   UIStats.btnClose.addEventListener("click", () => {
     if (UIStats.screen) UIStats.screen.classList.remove("is-visible");
@@ -519,12 +507,22 @@ function renderFlowGraph(currentFlow, currentTime) {
   let prevX = 0,
     prevY = 0;
 
+  // CULLING DE VIEWPORT: Identifica o primeiro ponto visível na janela
+  let startIndex = 0;
   for (let i = 0; i < FLOW_HISTORY.length; i++) {
-    let val = FLOW_HISTORY[i].flow;
-    let ptTime = FLOW_HISTORY[i].time;
+    if (FLOW_HISTORY[i].time >= viewStartTime - 1) {
+      startIndex = Math.max(0, i - 1);
+      break;
+    }
+  }
 
+  // Itera exclusivamente sobre pontos dentro da janela visual
+  for (let i = startIndex; i < FLOW_HISTORY.length; i++) {
+    const ptTime = FLOW_HISTORY[i].time;
     if (ptTime < 0) continue;
+    if (ptTime > viewEndTime + 1) break;
 
+    const val = FLOW_HISTORY[i].flow;
     let currentX = X_PADDING_LEFT + ((ptTime - viewStartTime) / TIME_WINDOW) * drawWidth;
     let currentY = canvasHeight - Y_PADDING_BOTTOM - (val / MAX_FLOW_SCALE) * drawHeight;
     currentY = Math.max(Y_PADDING_TOP, Math.min(currentY, canvasHeight - Y_PADDING_BOTTOM));
@@ -615,7 +613,6 @@ function handlePourStop(activeWeight) {
   const totalTarget = advancedState.targetYield;
   const phase1Target = totalTarget * 0.4;
 
-  // 1. ATRAÇÃO MAGNÉTICA (Snap): Valida o despejo onde o fluxo cessou
   let currentTick = liveTicksData[currentPourIndex];
   currentTick.weight = activeWeight;
   currentTick.passed = true;
@@ -625,9 +622,7 @@ function handlePourStop(activeWeight) {
   currentTick.dom.classList.add("is-passed");
   setTimeout(() => currentTick.dom.classList.replace("is-passed", "is-settled"), 600);
 
-  // 2. FASE 1 (PRIMEIROS 40% — EQUILÍBRIO ACIDEZ / DOÇURA)
   if (currentPourIndex === 0) {
-    // Se o Bloom cobriu ou passou de toda a Fase 1 (>= 40%), funde o Pour 2
     if (activeWeight >= phase1Target) {
       if (liveTicksData[1]) {
         liveTicksData[1].dom.classList.add("is-hidden");
@@ -635,23 +630,15 @@ function handlePourStop(activeWeight) {
       }
       redistributePhase2(activeWeight);
     } else {
-      // REGRA 4:6: O Pour 2 trava estritamente nos 40% totais.
-      // O que passou no Pour 1 é descontado no Pour 2, sem tocar na Fase 2.
       if (liveTicksData[1]) {
         liveTicksData[1].weight = phase1Target;
         const p2Pct = (phase1Target / totalTarget) * 100;
         liveTicksData[1].dom.style.left = `${Math.min(p2Pct, 100)}%`;
       }
     }
-  }
-  // 3. TRANSIÇÃO: FIM DA FASE 1 (POUR 2 CONCLUÍDO)
-  else if (currentPourIndex === 1 && liveTicksData.length > 2) {
-    // Fase 1 finalizada: recalcula a base da Fase 2 com a sobra real
+  } else if (currentPourIndex === 1 && liveTicksData.length > 2) {
     redistributePhase2(activeWeight);
-  }
-  // 4. FASE 2 (60% RESTANTES — FORÇA E CORPO)
-  else {
-    // Fusão dinâmica na Fase 2: se atingir 50%+ do próximo pour, funde os passos
+  } else {
     let nextIndex = currentPourIndex + 1;
     while (nextIndex < liveTicksData.length - 1) {
       let plannedNext = liveTicksData[nextIndex].weight;
@@ -666,7 +653,6 @@ function handlePourStop(activeWeight) {
       }
     }
 
-    // Redistribui o volume restante entre os despejos remanescentes da Fase 2
     let remainingPours = liveTicksData.length - 1 - currentPourIndex;
     if (remainingPours > 0) {
       let step = (totalTarget - activeWeight) / remainingPours;
@@ -682,7 +668,6 @@ function handlePourStop(activeWeight) {
   currentPourIndex++;
 }
 
-// Auxiliar: Distribui a água restante igualmente entre os passos da Fase 2
 function redistributePhase2(currentWeight) {
   const totalTarget = advancedState.targetYield;
   const remainingWater = totalTarget - currentWeight;
@@ -774,24 +759,19 @@ function renderFrame() {
     }
 
     if (activeWeight > advancedState.targetYield && UI.overpourProgress) {
-      // OVERPOUR: Cresce para dentro a partir da direita, compactando a receita
       const overWeight = activeWeight - advancedState.targetYield;
-      // Reserva até 20% da largura total da barra para a zona vermelha
       const overPct = Math.min((overWeight / advancedState.targetYield) * 100, 20);
       const scaleFactor = (100 - overPct) / 100;
 
-      // A barra branca encolhe para dar espaço ao vermelho (ex: 85% branca + 15% vermelha = 100%)
       UI.liveProgress.style.width = `${100 - overPct}%`;
       UI.overpourProgress.style.width = `${overPct}%`;
 
-      // Compacta os ticks (sanfona) para acompanharem o encolhimento da barra branca
       const totalWater = advancedState.targetYield;
       liveTicksData.forEach((tick) => {
         const pct = (tick.weight / totalWater) * 100 * scaleFactor;
         tick.dom.style.left = `${Math.min(pct, 100 - overPct)}%`;
       });
     } else {
-      // FLUXO NORMAL (<= Target Yield)
       const rawPct = (activeWeight / advancedState.targetYield) * 100;
       const fillPct = Math.max(0, Math.min(rawPct, 100));
       UI.liveProgress.style.width = `${fillPct}%`;
@@ -807,14 +787,17 @@ function renderFrame() {
     } else {
       UI.liveProgress.classList.remove("is-drawdown");
     }
+
+    // DEBOUNCE DE FLUXO BASEADO NO CLOCK DE ALTA RESOLUÇÃO (ms)
     if (brewState.flowRateEMA > 1.5) {
       isCurrentlyPouring = true;
       isPourDebouncing = false;
     } else if (brewState.flowRateEMA < 0.5 && isCurrentlyPouring) {
+      const nowSec = performance.now() / 1000;
       if (!isPourDebouncing) {
         isPourDebouncing = true;
-        stopPourTimeout = brewState.time + 1.2;
-      } else if (brewState.time >= stopPourTimeout) {
+        stopPourTimeout = nowSec + 1.2;
+      } else if (nowSec >= stopPourTimeout) {
         isCurrentlyPouring = false;
         isPourDebouncing = false;
         handlePourStop(activeWeight);
@@ -995,9 +978,12 @@ if (UI.btnTimer) {
         processAndSaveExtraction();
         resetExtraction();
 
-        if (UI.btnDose) UI.btnDose.textContent = `${advancedState.dose}g`;
-        if (UI.btnRatio) UI.btnRatio.textContent = `1:${advancedState.ratio}`;
-        if (UI.btnMethod) UI.btnMethod.textContent = advancedState.method;
+        UI.btnDose.textContent = `${advancedState.dose}g`;
+        UI.btnRatio.textContent = `1:${advancedState.ratio}`;
+        UI.btnMethod.textContent = advancedState.method;
+
+        // RESTAURAÇÃO DOS TICKS NO DOM AO SAIR DO MODO DE REVISÃO
+        renderAdaptiveTicks();
 
         currentTimerState = TIMER_STATE.IDLE;
         if (UI.timerIcon) UI.timerIcon.src = "/icons/scale/play.svg";
@@ -1037,6 +1023,14 @@ if (UI.btnDose) {
   });
 }
 
+if (UI.btnMethod) {
+  UI.btnMethod.addEventListener("click", () => {
+    if (currentTimerState === TIMER_STATE.IDLE) {
+      openConfig();
+    }
+  });
+}
+
 if (UI.btnRatio) {
   UI.btnRatio.addEventListener("click", openConfig);
 }
@@ -1045,7 +1039,6 @@ if (UI.btnRatio) {
 const islandSlider = document.getElementById("island-slider");
 if (islandSlider) {
   islandSlider.addEventListener("click", () => {
-    // No estado DONE, qualquer toque na ilha rotaciona o painel
     if (currentTimerState === TIMER_STATE.DONE && UI.actionFooter) {
       UI.actionFooter.classList.toggle("is-reviewing");
 

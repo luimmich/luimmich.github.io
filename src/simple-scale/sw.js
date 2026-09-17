@@ -1,4 +1,5 @@
-const CACHE_NAME = "timemore-terminal-v4";
+// sw.js
+const CACHE_NAME = "timemore-terminal-v5";
 
 const ASSETS_TO_CACHE = [
   "/simple-scale/",
@@ -9,14 +10,13 @@ const ASSETS_TO_CACHE = [
   "/js/scale/ble-manager.js",
   "/js/scale/timemore-decoder.js",
   "/js/scale/db.js",
-  "/css/departure.css",
+  "/fonts/departuremono/departure.css",
   "/fonts/departuremono/DepartureMono-Regular.woff2",
 ];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
 
-  // Cache Tolerante a Falhas: Se um arquivo der 404, os outros continuam sendo cacheados
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return Promise.all(
@@ -39,7 +39,6 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Estratégia Stale-While-Revalidate com Fallback Seguro
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
@@ -47,7 +46,6 @@ self.addEventListener("fetch", (event) => {
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request)
         .then((networkResponse) => {
-          // Não faz cache de respostas parciais ou erros 404/500
           if (
             !networkResponse ||
             networkResponse.status !== 200 ||

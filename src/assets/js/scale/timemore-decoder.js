@@ -25,7 +25,7 @@ let isBufferFilled = false;
 let samplesCollected = 0;
 
 /**
- * Zera as barreiras de segurança do decodificador.
+ * Zera as barreiras de segurança do decodificador e limpa a memória do ring buffer.
  * DEVE ser chamado pelo app.js sempre que uma extração for resetada.
  */
 export function resetDecoderState() {
@@ -33,15 +33,28 @@ export function resetDecoderState() {
   samplesCollected = 0;
   brewState.lastPacketTime = 0;
   brewState.flowRateEMA = 0;
+  brewState.ringIndex = 0;
+  brewState.weightRing.fill(0);
+  brewState.timeRing.fill(0);
 }
 
 export function handleTimemoreData(dataView) {
-  for (let i = 0; i < dataView.byteLength; i++) {
-    if (rxLength >= rxBuffer.length) {
-      rxBuffer.copyWithin(0, 1);
-      rxLength--;
+  const incoming = new Uint8Array(dataView.buffer, dataView.byteOffset, dataView.byteLength);
+  const incomingLength = incoming.length;
+  if (incomingLength === 0) return;
+
+  // Ingestão em bloco contíguo na memória sem laços manuais byte-a-byte
+  if (incomingLength >= rxBuffer.length) {
+    rxBuffer.set(incoming.subarray(incomingLength - rxBuffer.length));
+    rxLength = rxBuffer.length;
+  } else {
+    if (rxLength + incomingLength > rxBuffer.length) {
+      const overflow = rxLength + incomingLength - rxBuffer.length;
+      rxBuffer.copyWithin(0, overflow, rxLength);
+      rxLength -= overflow;
     }
-    rxBuffer[rxLength++] = dataView.getUint8(i);
+    rxBuffer.set(incoming, rxLength);
+    rxLength += incomingLength;
   }
 
   let offset = 0;
@@ -106,11 +119,13 @@ function updateTelemetry(weight, time, isStable) {
   const deltaWeight = brewState.weightRing[ptr] - brewState.weightRing[oldPtr];
 
   // DETECTOR DE TARA (Descontinuidade):
-  // Se o peso caiu mais de 5g repentinamente, o usuário apertou Tare ou tirou a xícara.
-  // Limpamos o estado para não gerar cálculos bizarros de fluxo negativo.
+  // Se o peso caiu mais de 5g repentinamente, reinicia o ring buffer a partir da amostra atual
   if (deltaWeight < -5.0) {
     resetDecoderState();
-    brewState.ringIndex = oldPtr;
+    brewState.weightRing[0] = weight;
+    brewState.timeRing[0] = now;
+    brewState.ringIndex = 1;
+    samplesCollected = 1;
     brewState._isDirty = true;
     return;
   }
