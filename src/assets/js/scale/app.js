@@ -54,18 +54,20 @@ const UIStats = {
   valTotalCoffee: document.getElementById("stat-total-coffee"),
 };
 
+const sliderPatternCache = new Map();
+
 function revealAppShell() {
   document.body.classList.remove("state-disconnected");
   document.body.classList.remove("is-ready");
   document.body.classList.add("is-transitioning");
 
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       document.body.classList.add("is-ready");
       setTimeout(() => {
         document.body.classList.remove("is-transitioning");
-      }, 420);
-    });
+      }, 220);
+    }, 40);
   });
 }
 
@@ -243,6 +245,78 @@ const UIConfig = {
   valYield: document.getElementById("cfg-val-yield"),
 };
 
+function buildTrackPattern({ min, max, step, majorStep = 1 }) {
+  const cacheKey = `${min}:${max}:${step}:${majorStep}`;
+  const cached = sliderPatternCache.get(cacheKey);
+  if (cached) return cached;
+
+  const width = 1000;
+  const height = 40;
+  const inset = 30;
+  const innerWidth = width - inset * 2;
+  const lines = [];
+  const totalSteps = (max - min) / step;
+
+  for (let index = 0; index <= totalSteps; index++) {
+    const value = min + index * step;
+    const x = inset + (index / totalSteps) * innerWidth;
+    const isMajor = Math.abs((value - min) % majorStep) < 0.0001 || value >= max - 0.0001;
+    const length = isMajor ? 18 : 10;
+    const y = (height - length) / 2;
+    const alpha = isMajor ? 0.9 : 0.5;
+
+    lines.push(
+      `<line x1="${x.toFixed(2)}" y1="${y.toFixed(2)}" x2="${x.toFixed(2)}" y2="${(y + length).toFixed(2)}" stroke="rgba(255,255,255,${alpha})" stroke-width="1" />`,
+    );
+  }
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+      <rect width="${width}" height="${height}" fill="transparent" />
+      ${lines.join("")}
+    </svg>
+  `;
+
+  const pattern = `url("data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}")`;
+  sliderPatternCache.set(cacheKey, pattern);
+  return pattern;
+}
+
+function applySliderTrackPattern(slider, config) {
+  if (!slider) return;
+  slider.style.setProperty("--track-pattern", buildTrackPattern(config));
+}
+
+function snapSliderToTicks(slider) {
+  if (!slider) return;
+
+  const min = Number(slider.min || 0);
+  const max = Number(slider.max || 100);
+  const step = Number(slider.step || 1);
+  const value = Number(slider.value || min);
+  const snapped = Math.round((value - min) / step) * step + min;
+  const progress = (snapped - min) / (max - min || 1);
+  const shift = (progress - 0.5) * 20;
+
+  slider.value = snapped.toString();
+  slider.style.setProperty("--track-shift", `${shift}px`);
+}
+
+function updateSliderMotion(slider) {
+  if (!slider) return;
+
+  const min = Number(slider.min || 0);
+  const max = Number(slider.max || 100);
+  const step = Number(slider.step || 1);
+  const value = Number(slider.value || min);
+  const snapped = Math.round((value - min) / step) * step + min;
+  const progress = (snapped - min) / (max - min || 1);
+  const shift = (progress - 0.5) * 20;
+
+  slider.style.setProperty("--track-shift", `${shift}px`);
+  slider.value = snapped.toString();
+}
+
 function autoSaveRecipe(newDose, newRatio) {
   advancedState.dose = newDose;
   advancedState.ratio = newRatio;
@@ -260,6 +334,10 @@ function autoSaveRecipe(newDose, newRatio) {
     UI.btnRatio.textContent = `1:${newRatio}`;
   }
 
+  applySliderTrackPattern(UIConfig.sliderDose, { min: 5, max: 40, step: 0.5, majorStep: 5 });
+  applySliderTrackPattern(UIConfig.sliderRatio, { min: 10, max: 22, step: 0.5, majorStep: 1 });
+  updateSliderMotion(UIConfig.sliderDose);
+  updateSliderMotion(UIConfig.sliderRatio);
   renderAdaptiveTicks();
 
   try {
@@ -280,6 +358,11 @@ function openConfig() {
   if (currentTimerState !== TIMER_STATE.IDLE) return;
   if (UIConfig.sliderDose) UIConfig.sliderDose.value = advancedState.dose;
   if (UIConfig.sliderRatio) UIConfig.sliderRatio.value = advancedState.ratio;
+
+  applySliderTrackPattern(UIConfig.sliderDose, { min: 5, max: 40, step: 0.5, majorStep: 5 });
+  applySliderTrackPattern(UIConfig.sliderRatio, { min: 10, max: 22, step: 0.5, majorStep: 1 });
+  updateSliderMotion(UIConfig.sliderDose);
+  updateSliderMotion(UIConfig.sliderRatio);
 
   if (UIConfig.valDose) UIConfig.valDose.textContent = advancedState.dose.toFixed(1);
   if (UIConfig.valRatio) UIConfig.valRatio.textContent = advancedState.ratio.toFixed(1);
@@ -302,6 +385,10 @@ if (UIConfig.sliderDose) {
     const ratio = parseFloat(UIConfig.sliderRatio?.value || advancedState.ratio);
     autoSaveRecipe(dose, ratio);
   });
+
+  UIConfig.sliderDose.addEventListener("change", (e) => {
+    snapSliderToTicks(e.target);
+  });
 }
 
 if (UIConfig.sliderRatio) {
@@ -309,6 +396,10 @@ if (UIConfig.sliderRatio) {
     const ratio = parseFloat(e.target.value);
     const dose = parseFloat(UIConfig.sliderDose?.value || advancedState.dose);
     autoSaveRecipe(dose, ratio);
+  });
+
+  UIConfig.sliderRatio.addEventListener("change", (e) => {
+    snapSliderToTicks(e.target);
   });
 }
 
@@ -475,14 +566,15 @@ function renderFlowGraph(currentFlow, currentTime) {
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
 
-  if (
-    canvas.width !== Math.floor(rect.width * dpr) ||
-    canvas.height !== Math.floor(rect.height * dpr)
-  ) {
-    canvas.width = Math.floor(rect.width * dpr);
-    canvas.height = Math.floor(rect.height * dpr);
-    ctx.scale(dpr, dpr);
+  const nextWidth = Math.floor(rect.width * dpr);
+  const nextHeight = Math.floor(rect.height * dpr);
+
+  if (canvas.width !== nextWidth || canvas.height !== nextHeight) {
+    canvas.width = nextWidth;
+    canvas.height = nextHeight;
   }
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   const canvasWidth = rect.width;
   const canvasHeight = rect.height;

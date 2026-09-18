@@ -6,6 +6,29 @@ const STORE_NAME = "extractions";
 let dbInstance = null;
 let dbPromise = null;
 
+function getIndexedDB() {
+  if (!("indexedDB" in window)) {
+    throw new Error("IndexedDB não é suportado neste navegador.");
+  }
+  return window.indexedDB;
+}
+
+function isPersistAvailable() {
+  return !!(navigator.storage && typeof navigator.storage.persist === "function");
+}
+
+async function requestPersistence() {
+  if (!isPersistAvailable()) return false;
+
+  try {
+    const persisted = await navigator.storage.persist();
+    return persisted;
+  } catch (err) {
+    console.warn("Persistência do IndexedDB não foi ativada:", err);
+    return false;
+  }
+}
+
 /**
  * Retorna ou inicializa a conexão Singleton com o IndexedDB protegida contra concorrência.
  */
@@ -13,8 +36,10 @@ async function getDB() {
   if (dbInstance) return dbInstance;
   if (dbPromise) return dbPromise;
 
+  const indexedDBAPI = getIndexedDB();
+
   dbPromise = new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    const request = indexedDBAPI.open(DB_NAME, DB_VERSION);
 
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
@@ -31,16 +56,18 @@ async function getDB() {
         dbInstance = null;
       };
 
-      if (navigator.storage && navigator.storage.persist) {
-        navigator.storage.persist().catch(() => {});
-      }
+      dbInstance.onversionchange = () => {
+        dbInstance.close();
+        dbInstance = null;
+      };
 
+      requestPersistence();
       resolve(dbInstance);
     };
 
     request.onerror = (event) => {
       dbPromise = null;
-      reject(event.target.error);
+      reject(event.target.error || new Error("Falha ao abrir IndexedDB."));
     };
 
     request.onblocked = () => {
@@ -52,28 +79,32 @@ async function getDB() {
   return dbPromise;
 }
 
+async function runStoreOperation(mode, callback) {
+  const db = await getDB();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, mode);
+    const store = transaction.objectStore(STORE_NAME);
+
+    transaction.oncomplete = () => resolve(true);
+    transaction.onabort = () => reject(transaction.error || new Error("Transação abortada."));
+    transaction.onerror = (event) =>
+      reject(event.target.error || new Error("Erro na transação do IndexedDB."));
+
+    callback(store);
+  });
+}
+
 /**
  * Salva ou atualiza uma extração (Upsert).
  */
 export async function saveExtraction(extractionData) {
   try {
-    const db = await getDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, "readwrite");
-      const store = transaction.objectStore(STORE_NAME);
-
+    await runStoreOperation("readwrite", (store) => {
       store.put(extractionData);
-
-      transaction.oncomplete = () => {
-        console.log("Extração salva com sucesso no IndexedDB.");
-        resolve(true);
-      };
-
-      transaction.onerror = (event) => {
-        console.error("Falha ao salvar no banco:", event.target.error);
-        reject(event.target.error);
-      };
     });
+
+    return true;
   } catch (err) {
     console.error("Erro na transação de salvamento:", err);
     throw err;
@@ -92,7 +123,10 @@ export async function getAllExtractions() {
       const request = store.getAll();
 
       request.onsuccess = () => resolve(request.result || []);
-      request.onerror = (event) => reject(event.target.error);
+      request.onerror = (event) =>
+        reject(event.target.error || new Error("Erro ao consultar extrações."));
+      transaction.onerror = (event) =>
+        reject(event.target.error || new Error("Erro de transação ao consultar extrações."));
     });
   } catch (err) {
     console.error("Erro ao ler banco:", err);
@@ -114,9 +148,10 @@ export async function deleteExtraction(id) {
       store.delete(targetId);
 
       transaction.oncomplete = () => resolve(true);
+      transaction.onabort = () => reject(transaction.error || new Error("Delete abortado."));
       transaction.onerror = (event) => {
         console.error("Erro ao deletar extração:", event.target.error);
-        reject(event.target.error);
+        reject(event.target.error || new Error("Erro ao deletar extração."));
       };
     });
   } catch (err) {

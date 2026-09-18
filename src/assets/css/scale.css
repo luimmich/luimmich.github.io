@@ -5,6 +5,10 @@
   --accent-color: #ffffff;
   --font-mono: "Departure Mono", monospace, sans-serif;
   --safe-pad: clamp(1rem, 4vw, 2rem);
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-fast: 220ms;
+  --transition-base: 320ms;
+  --transition-slow: 460ms;
 }
 
 /* Modo Camaleão (Bluefy/iOS) */
@@ -40,8 +44,8 @@ body {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(18px) saturate(0.8);
-  -webkit-backdrop-filter: blur(18px) saturate(0.8);
+  backdrop-filter: blur(10px) saturate(0.9);
+  -webkit-backdrop-filter: blur(10px) saturate(0.9);
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -52,11 +56,10 @@ body {
   opacity: 1;
   visibility: visible;
   transition:
-    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-    visibility 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-    backdrop-filter 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 0.9s ease;
-  will-change: opacity, visibility, backdrop-filter, background-color;
+    opacity var(--transition-base) var(--ease-soft),
+    visibility var(--transition-base) var(--ease-soft),
+    backdrop-filter 260ms ease,
+    background-color 260ms ease;
 }
 
 body:not(.state-disconnected) #connection-overlay,
@@ -64,7 +67,7 @@ body.is-transitioning #connection-overlay {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  backdrop-filter: blur(0px) saturate(1);
+  backdrop-filter: blur(0) saturate(1);
   background: rgba(0, 0, 0, 0);
 }
 
@@ -78,13 +81,16 @@ body.is-transitioning #connection-overlay {
   padding: clamp(1rem, 4vw, 1.5rem);
   width: clamp(120px, 45%, 250px);
   cursor: pointer;
+  opacity: 1;
+  filter: blur(0);
   transition:
-    transform 0.05s ease,
-    filter 0.1s ease;
+    opacity 230ms ease,
+    filter 230ms ease,
+    transform 120ms ease;
 }
 
 .btn-overlay:active {
-  transform: scale(0.95);
+  transform: none;
 }
 
 .btn-overlay:last-child {
@@ -98,6 +104,12 @@ body.is-transitioning #connection-overlay {
   color: var(--bg-root);
 }
 
+body:not(.state-disconnected) #connection-overlay .btn-overlay {
+  opacity: 0;
+  filter: blur(6px);
+  pointer-events: none;
+}
+
 /* --- LAYOUT ESTRUTURAL --- */
 .app-layout {
   display: flex;
@@ -107,42 +119,41 @@ body.is-transitioning #connection-overlay {
   max-width: 900px;
   margin: 0 auto;
   opacity: 0;
-  filter: blur(14px) saturate(0.8);
-  transform: translateY(20px) scale(0.985);
+  filter: blur(6px) saturate(0.95);
+  transform: none;
   transition:
-    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 360ms var(--ease-soft),
+    filter 360ms var(--ease-soft);
 }
 
 body.is-ready .app-layout,
 body.is-transitioning .app-layout {
   opacity: 1;
   filter: blur(0) saturate(1);
-  transform: translateY(0) scale(1);
+  transform: none;
 }
 
 body.app-return-transition .app-layout {
-  animation: appReturnSlide 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: appReturnSlide 420ms var(--ease-soft) both;
 }
 
 @keyframes appReturnSlide {
   0% {
     opacity: 0;
-    filter: blur(10px) saturate(0.8);
-    transform: translateX(-24px) scale(0.985);
+    filter: blur(8px) saturate(0.9);
+    transform: translateX(-12px);
   }
   100% {
     opacity: 1;
     filter: blur(0) saturate(1);
-    transform: translateX(0) scale(1);
+    transform: translateX(0);
   }
 }
 
 body:not(.is-ready):not(.is-transitioning) .app-layout {
   opacity: 0;
-  filter: blur(14px) saturate(0.8);
-  transform: translateY(20px) scale(0.985);
+  filter: blur(10px) saturate(0.9);
+  transform: none;
 }
 
 .top-nav,
@@ -157,26 +168,8 @@ body:not(.is-ready):not(.is-transitioning) .app-layout {
 .signal-graph-container,
 .action-footer {
   opacity: 0;
-  transform: translateY(18px);
-  transition:
-    opacity 0.6s ease,
-    transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-body.is-ready .top-nav {
-  transition-delay: 0.06s;
-}
-
-body.is-ready .metrics-stack {
-  transition-delay: 0.12s;
-}
-
-body.is-ready .signal-graph-container {
-  transition-delay: 0.18s;
-}
-
-body.is-ready .action-footer {
-  transition-delay: 0.24s;
+  transform: none;
+  transition: opacity 0.38s ease;
 }
 
 body.is-ready .top-nav,
@@ -185,6 +178,7 @@ body.is-ready .signal-graph-container,
 body.is-ready .action-footer {
   opacity: 1;
   transform: translateY(0);
+  transition-delay: 0ms;
 }
 
 /* --- CABEÇALHO --- */
@@ -451,7 +445,7 @@ body.theme-bluefy .footer-bottom-row {
   font-size: clamp(0.9rem, 3.5vw, 1.1rem);
   padding: clamp(0.8rem, 2vh, 1.2rem) 0;
   cursor: pointer;
-  transition: all 0.1s ease;
+  transition: color 120ms ease;
 }
 
 .island-btn:active {
@@ -607,8 +601,18 @@ body.theme-bluefy .footer-bottom-row {
     transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform, opacity, visibility;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  overscroll-behavior-y: contain;
+  overscroll-behavior-x: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.stats-overlay::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 .stats-overlay.is-dragging {
@@ -884,6 +888,8 @@ body.theme-bluefy .footer-bottom-row {
 
 /* Trilho Cápsula */
 .ruler-slider {
+  --track-shift: 0px;
+  --track-pattern: none;
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
@@ -892,7 +898,8 @@ body.theme-bluefy .footer-bottom-row {
   background: transparent;
   min-width: 0;
   cursor: grab;
-  touch-action: none; /* Garante arraste fluído sem travar no mobile */
+  touch-action: none;
+  position: relative;
 }
 
 .ruler-slider:active {
@@ -903,14 +910,12 @@ body.theme-bluefy .footer-bottom-row {
   outline: none;
 }
 
-/* Fundo da Régua com Marcações Menores, Maiores e Fade nas Bordas */
 .ruler-slider::-webkit-slider-runnable-track {
   width: 100%;
   height: 40px;
   border-radius: 999px;
   background-color: #141414;
   background-image:
-    /* 1. Fade lateral suave (vignette) */
     linear-gradient(
       90deg,
       #141414 0%,
@@ -918,29 +923,15 @@ body.theme-bluefy .footer-bottom-row {
       rgba(20, 20, 20, 0) 82%,
       #141414 100%
     ),
-    /* 2. Marcadores principais (mais altos e visíveis) */
-    repeating-linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.5) 0,
-        rgba(255, 255, 255, 0.5) 1.5px,
-        transparent 1.5px,
-        transparent 40px
-      ),
-    /* 3. Marcadores intermediários (mais baixos e sutis) */
-    repeating-linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.16) 0,
-        rgba(255, 255, 255, 0.16) 1.5px,
-        transparent 1.5px,
-        transparent 8px
-      );
+    var(--track-pattern);
   background-size:
     100% 100%,
-    calc(100% - 32px) 18px,
-    calc(100% - 32px) 12px;
-  background-position: center, center, center;
-  background-repeat: no-repeat, repeat-x, repeat-x;
-  box-shadow: 5px 5px 10px rgba(255, 255, 255, 0.01);
+    calc(100% - 12px) 100%;
+  background-position:
+    center,
+    calc(50% + var(--track-shift)) center;
+  background-repeat: no-repeat, no-repeat;
+  transition: background-position 0.14s ease-out;
 }
 
 .ruler-slider::-moz-range-track {
@@ -956,45 +947,33 @@ body.theme-bluefy .footer-bottom-row {
       rgba(20, 20, 20, 0) 82%,
       #141414 100%
     ),
-    repeating-linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.5) 0,
-      rgba(255, 255, 255, 0.5) 1.5px,
-      transparent 1.5px,
-      transparent 40px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.16) 0,
-      rgba(255, 255, 255, 0.16) 1.5px,
-      transparent 1.5px,
-      transparent 8px
-    );
+    var(--track-pattern);
   background-size:
     100% 100%,
-    calc(100% - 32px) 18px,
-    calc(100% - 32px) 12px;
-  background-position: center, center, center;
-  background-repeat: no-repeat, repeat-x, repeat-x;
-  box-shadow: 5px 5px 10px rgba(255, 255, 255, 0.01);
+    calc(100% - 12px) 100%;
+  background-position:
+    center,
+    calc(50% + var(--track-shift)) center;
+  background-repeat: no-repeat, no-repeat;
+  transition: background-position 0.14s ease-out;
 }
 
 .ruler-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 3px;
-  height: 32px;
+  height: 28px;
   border-radius: 2px;
   background-color: var(--fg-root);
   border: none;
-  margin-top: 4px; /* Centraliza perfeitamente no trilho de 40px: (40 - 32) / 2 */
+  margin-top: 6px;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
   cursor: grab;
 }
 
 .ruler-slider::-moz-range-thumb {
   width: 3px;
-  height: 32px;
+  height: 28px;
   border-radius: 2px;
   background-color: var(--fg-root);
   border: none;

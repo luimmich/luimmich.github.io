@@ -2,6 +2,8 @@
 
 const ALPHA_SMOOTHING = 0.2; // Constante α para filtro passa-baixo do caudal
 const RING_SIZE = 5;
+const MIN_PACKET_GAP_MS = 30;
+const TARE_DELTA_THRESHOLD_G = 5.0;
 
 // Máquina de estado global
 export const brewState = {
@@ -34,12 +36,16 @@ export function resetDecoderState() {
   brewState.lastPacketTime = 0;
   brewState.flowRateEMA = 0;
   brewState.ringIndex = 0;
+  brewState._isDirty = false;
   brewState.weightRing.fill(0);
   brewState.timeRing.fill(0);
 }
 
 export function handleTimemoreData(dataView) {
-  const incoming = new Uint8Array(dataView.buffer, dataView.byteOffset, dataView.byteLength);
+  const incoming =
+    dataView instanceof Uint8Array
+      ? dataView
+      : new Uint8Array(dataView.buffer, dataView.byteOffset, dataView.byteLength);
   const incomingLength = incoming.length;
   if (incomingLength === 0) return;
 
@@ -91,13 +97,13 @@ export function handleTimemoreData(dataView) {
 function updateTelemetry(weight, time, isStable) {
   const now = performance.now();
 
-  // Rejeita pacotes aglomerados pelo OS (chegaram em menos de 30ms)
-  if (now - brewState.lastPacketTime < 30 && brewState.lastPacketTime !== 0) {
+  if (brewState.lastPacketTime !== 0 && now - brewState.lastPacketTime < MIN_PACKET_GAP_MS) {
     return;
   }
   brewState.lastPacketTime = now;
 
   const ptr = brewState.ringIndex;
+  const oldPtr = (ptr + 1) % RING_SIZE;
 
   brewState.weight = weight;
   brewState.time = time;
@@ -105,8 +111,6 @@ function updateTelemetry(weight, time, isStable) {
 
   brewState.weightRing[ptr] = weight;
   brewState.timeRing[ptr] = now;
-
-  const oldPtr = (ptr + 1) % RING_SIZE;
 
   if (!isBufferFilled) {
     samplesCollected++;
@@ -116,11 +120,10 @@ function updateTelemetry(weight, time, isStable) {
     return;
   }
 
-  const deltaWeight = brewState.weightRing[ptr] - brewState.weightRing[oldPtr];
+  const previousWeight = brewState.weightRing[oldPtr];
+  const deltaWeight = brewState.weightRing[ptr] - previousWeight;
 
-  // DETECTOR DE TARA (Descontinuidade):
-  // Se o peso caiu mais de 5g repentinamente, reinicia o ring buffer a partir da amostra atual
-  if (deltaWeight < -5.0) {
+  if (deltaWeight < -TARE_DELTA_THRESHOLD_G) {
     resetDecoderState();
     brewState.weightRing[0] = weight;
     brewState.timeRing[0] = now;

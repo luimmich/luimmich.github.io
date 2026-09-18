@@ -68,6 +68,7 @@ export class BLEManager {
 
     await this.characteristic.startNotifications();
 
+    this.device = device;
     this.reconnectAttempts = 0;
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
@@ -90,7 +91,12 @@ export class BLEManager {
       return;
     }
 
-    const device = event.target;
+    const device = event && event.target ? event.target : this.device;
+    if (!device || !device.gatt) {
+      console.warn("Dispositivo desconectado sem referência GATT válida. Ignorando reconexão.");
+      return;
+    }
+
     console.warn(
       `Conexão perdida com ${device ? device.name : "dispositivo"}. Iniciando recuperação...`,
     );
@@ -98,6 +104,11 @@ export class BLEManager {
   }
 
   _executeBackoffReconnection(device) {
+    if (!device || !device.gatt) {
+      console.warn("Reconexão abortada: dispositivo inválido.");
+      return;
+    }
+
     if (this.reconnectAttempts >= MAX_ATTEMPTS) {
       console.error("Limite de reconexões atingido. Ação manual necessária.");
       return;
@@ -121,7 +132,7 @@ export class BLEManager {
 
   sendCommand(commandKey) {
     const payload = COMMANDS[commandKey];
-    if (!this.characteristic || !payload) return;
+    if (!this.characteristic || !payload) return Promise.resolve();
 
     this.commandQueue = this.commandQueue.then(async () => {
       try {
@@ -132,8 +143,6 @@ export class BLEManager {
         }
       } catch (error) {
         console.error(`Erro ao enviar comando BLE (${commandKey}):`, error);
-      } finally {
-        await new Promise((resolve) => setTimeout(resolve, 150));
       }
     });
 
@@ -154,7 +163,12 @@ export class BLEManager {
       this.abortController = new AbortController();
 
       this.device.gatt.disconnect();
+      this.characteristic = null;
+      this.device = null;
       console.log("Conexão GATT encerrada intencionalmente.");
+    } else {
+      this.characteristic = null;
+      this.device = null;
     }
   }
 }
