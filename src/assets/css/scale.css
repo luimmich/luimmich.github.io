@@ -39,9 +39,9 @@ body {
 .overlay {
   position: absolute;
   inset: 0;
-  background-color: color-mix(in srgb, var(--bg-root) 70%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(18px) saturate(0.8);
+  -webkit-backdrop-filter: blur(18px) saturate(0.8);
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -49,16 +49,23 @@ body {
   align-items: center;
   gap: 24px;
   padding: var(--safe-pad);
+  opacity: 1;
+  visibility: visible;
   transition:
-    opacity 0.3s ease,
-    visibility 0.3s ease;
-  will-change: opacity, visibility; /* Aceleração de hardware */
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    backdrop-filter 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.9s ease;
+  will-change: opacity, visibility, backdrop-filter, background-color;
 }
 
-body:not(.state-disconnected) #connection-overlay {
+body:not(.state-disconnected) #connection-overlay,
+body.is-transitioning #connection-overlay {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  backdrop-filter: blur(0px) saturate(1);
+  background: rgba(0, 0, 0, 0);
 }
 
 .btn-overlay {
@@ -99,6 +106,43 @@ body:not(.state-disconnected) #connection-overlay {
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
+  opacity: 0;
+  filter: blur(14px) saturate(0.8);
+  transform: translateY(20px) scale(0.985);
+  transition:
+    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body.is-ready .app-layout,
+body.is-transitioning .app-layout {
+  opacity: 1;
+  filter: blur(0) saturate(1);
+  transform: translateY(0) scale(1);
+}
+
+body.app-return-transition .app-layout {
+  animation: appReturnSlide 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes appReturnSlide {
+  0% {
+    opacity: 0;
+    filter: blur(10px) saturate(0.8);
+    transform: translateX(-24px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0) saturate(1);
+    transform: translateX(0) scale(1);
+  }
+}
+
+body:not(.is-ready):not(.is-transitioning) .app-layout {
+  opacity: 0;
+  filter: blur(14px) saturate(0.8);
+  transform: translateY(20px) scale(0.985);
 }
 
 .top-nav,
@@ -106,6 +150,41 @@ body:not(.state-disconnected) #connection-overlay {
 .signal-graph-container {
   padding-left: var(--safe-pad);
   padding-right: var(--safe-pad);
+}
+
+.top-nav,
+.metrics-stack,
+.signal-graph-container,
+.action-footer {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.is-ready .top-nav {
+  transition-delay: 0.06s;
+}
+
+body.is-ready .metrics-stack {
+  transition-delay: 0.12s;
+}
+
+body.is-ready .signal-graph-container {
+  transition-delay: 0.18s;
+}
+
+body.is-ready .action-footer {
+  transition-delay: 0.24s;
+}
+
+body.is-ready .top-nav,
+body.is-ready .metrics-stack,
+body.is-ready .signal-graph-container,
+body.is-ready .action-footer {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* --- CABEÇALHO --- */
@@ -504,15 +583,13 @@ body.theme-bluefy .footer-bottom-row {
   .hero-metric {
     font-size: clamp(4rem, 15vmin, 12rem);
   }
-  .action-btn {
-    /* padding: 1rem 0; */
-  }
 }
 
 /* --- TELA DE ESTATÍSTICAS --- */
 .stats-overlay {
+  --drag-offset: 0px;
+  --drag-amount: 0;
   position: absolute;
-  /* position: fixed; também funciona muito bem aqui se houver bugs no scroll do iOS */
   inset: 0;
   max-width: 900px;
   margin: 0 auto;
@@ -523,18 +600,56 @@ body.theme-bluefy .footer-bottom-row {
   padding: var(--safe-pad);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(20px);
-  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  transform: translateX(26px) scale(0.985);
+  transition:
+    opacity 0.35s ease,
+    visibility 0.35s ease,
+    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform, opacity, visibility;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
 
+.stats-overlay.is-dragging {
+  opacity: 1;
+  visibility: visible;
+  transform: translate3d(calc(var(--drag-offset) * 0.32), 0, 0)
+    scale(calc(1 - (var(--drag-amount) * 0.015)));
+  box-shadow: -10px 0 18px rgba(0, 0, 0, 0.08);
+}
+
 .stats-overlay.is-visible {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translateX(0) scale(1);
+}
+
+.stats-overlay.is-visible .stat-module,
+.stats-overlay.is-visible .config-row,
+.stats-overlay.is-visible .pours-config-slot {
+  animation: overlayReveal 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.stats-overlay.is-visible .config-row:nth-child(2) {
+  animation-delay: 0.04s;
+}
+.stats-overlay.is-visible .config-row:nth-child(3) {
+  animation-delay: 0.08s;
+}
+.stats-overlay.is-visible .pours-config-slot {
+  animation-delay: 0.12s;
+}
+
+@keyframes overlayReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .stats-nav {

@@ -54,6 +54,37 @@ const UIStats = {
   valTotalCoffee: document.getElementById("stat-total-coffee"),
 };
 
+function revealAppShell() {
+  document.body.classList.remove("state-disconnected");
+  document.body.classList.remove("is-ready");
+  document.body.classList.add("is-transitioning");
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.body.classList.add("is-ready");
+      setTimeout(() => {
+        document.body.classList.remove("is-transitioning");
+      }, 420);
+    });
+  });
+}
+
+function triggerReturnTransition() {
+  document.body.classList.remove("app-return-transition");
+  void document.body.offsetWidth;
+  document.body.classList.add("app-return-transition");
+  setTimeout(() => document.body.classList.remove("app-return-transition"), 520);
+}
+
+function revealPageFrame(target) {
+  if (!target) return;
+
+  target.classList.remove("is-visible");
+  requestAnimationFrame(() => {
+    target.classList.add("is-visible");
+  });
+}
+
 // --- ESTADO GLOBAL DA APLICAÇÃO ---
 const TIMER_STATE = {
   IDLE: 0,
@@ -255,11 +286,14 @@ function openConfig() {
   if (UIConfig.valYield)
     UIConfig.valYield.textContent = Math.round(advancedState.targetYield).toString();
 
-  if (UIConfig.screen) UIConfig.screen.classList.add("is-visible");
+  if (UIConfig.screen) revealPageFrame(UIConfig.screen);
 }
 
 function closeConfig() {
-  if (UIConfig.screen) UIConfig.screen.classList.remove("is-visible");
+  if (UIConfig.screen) {
+    UIConfig.screen.classList.remove("is-visible");
+  }
+  triggerReturnTransition();
 }
 
 if (UIConfig.sliderDose) {
@@ -308,6 +342,9 @@ function enableSwipeToDismiss(overlayEl, dismissCallback) {
       startX = touch.clientX;
       startY = touch.clientY;
       isTracking = true;
+      overlayEl.classList.add("is-dragging");
+      overlayEl.style.setProperty("--drag-offset", "0px");
+      overlayEl.style.setProperty("--drag-amount", "0");
     },
     { passive: true },
   );
@@ -322,6 +359,19 @@ function enableSwipeToDismiss(overlayEl, dismissCallback) {
 
       if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 15) {
         isTracking = false;
+        overlayEl.classList.remove("is-dragging");
+        overlayEl.style.setProperty("--drag-offset", "0px");
+        overlayEl.style.setProperty("--drag-amount", "0");
+        return;
+      }
+
+      if (deltaX > 0) {
+        const clamped = Math.min(deltaX, 110);
+        const amount = Math.min(clamped / 110, 1);
+        const peekOffset = Math.min(clamped * 0.28, 18);
+        overlayEl.classList.add("is-dragging");
+        overlayEl.style.setProperty("--drag-offset", `${peekOffset}px`);
+        overlayEl.style.setProperty("--drag-amount", amount.toFixed(3));
       }
     },
     { passive: true },
@@ -335,6 +385,9 @@ function enableSwipeToDismiss(overlayEl, dismissCallback) {
       const deltaX = touch.clientX - startX;
       const deltaY = touch.clientY - startY;
       isTracking = false;
+      overlayEl.classList.remove("is-dragging");
+      overlayEl.style.setProperty("--drag-offset", "0px");
+      overlayEl.style.setProperty("--drag-amount", "0");
 
       if (deltaX > 65 && Math.abs(deltaX) > Math.abs(deltaY) * 1.4) {
         dismissCallback();
@@ -347,11 +400,13 @@ function enableSwipeToDismiss(overlayEl, dismissCallback) {
 enableSwipeToDismiss(UIConfig.screen, closeConfig);
 enableSwipeToDismiss(UIStats.screen, () => {
   if (UIStats.screen) UIStats.screen.classList.remove("is-visible");
+  triggerReturnTransition();
 });
 
 if (UIStats.btnClose) {
   UIStats.btnClose.addEventListener("click", () => {
     if (UIStats.screen) UIStats.screen.classList.remove("is-visible");
+    triggerReturnTransition();
   });
 }
 
@@ -411,7 +466,9 @@ window.addEventListener("pointerup", () => {
 });
 
 window.addEventListener("resize", initGraph);
-document.addEventListener("DOMContentLoaded", initGraph);
+document.addEventListener("DOMContentLoaded", () => {
+  initGraph();
+});
 
 function renderFlowGraph(currentFlow, currentTime) {
   if (!canvas || !ctx) return;
@@ -914,6 +971,7 @@ if (UI.btnConnect) {
     bleManager
       .connect()
       .then(() => {
+        revealAppShell();
         requestWakeLock();
       })
       .catch((error) => {
@@ -1070,7 +1128,7 @@ async function renderStatsScreen() {
     if (UIStats.valTotalCoffee) UIStats.valTotalCoffee.textContent = "0";
     if (historyList)
       historyList.innerHTML = `<li style="color: var(--fg-dim); opacity: 0.5;">no data yet.</li>`;
-    if (UIStats.screen) UIStats.screen.classList.add("is-visible");
+    if (UIStats.screen) revealPageFrame(UIStats.screen);
     return;
   }
 
@@ -1144,7 +1202,7 @@ async function renderStatsScreen() {
     if (UIStats.valTotalCoffee) UIStats.valTotalCoffee.textContent = "0";
   }
 
-  if (UIStats.screen) UIStats.screen.classList.add("is-visible");
+  if (UIStats.screen) revealPageFrame(UIStats.screen);
 }
 
 const historyListElement = document.getElementById("history-list");
@@ -1180,7 +1238,7 @@ let simInterval = null;
 if (btnSimulate) {
   btnSimulate.addEventListener("click", () => {
     requestWakeLock();
-    document.body.classList.remove("state-disconnected");
+    revealAppShell();
     const indicator = document.getElementById("status-indicator");
     if (indicator) indicator.textContent = "sim";
 
