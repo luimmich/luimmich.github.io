@@ -229,7 +229,7 @@ body.is-ready .action-footer {
 }
 
 .hero-metric {
-  font-size: clamp(4rem, 22vmin, 14rem);
+  font-size: clamp(4rem, 20vmin, 13rem);
   line-height: 0.85;
   letter-spacing: -0.05em;
   font-variant-numeric: tabular-nums;
