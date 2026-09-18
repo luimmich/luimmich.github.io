@@ -1,7 +1,7 @@
 // sw.js
-const CACHE_NAME = "timemore-terminal-v5";
+const CACHE_NAME = "timemore-terminal-v6";
 
-const ASSETS_TO_CACHE = [
+const APP_SHELL = [
   "/simple-scale/",
   "/simple-scale/index.html",
   "/simple-scale/manifest.json",
@@ -18,13 +18,15 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return Promise.all(
-        ASSETS_TO_CACHE.map((url) => {
-          return cache.add(url).catch((err) => console.warn(`PWA Cache falhou para ${url}:`, err));
-        }),
-      );
-    }),
+    caches
+      .open(CACHE_NAME)
+      .then((cache) =>
+        Promise.all(
+          APP_SHELL.map((url) =>
+            cache.add(url).catch((err) => console.warn(`PWA Cache falhou para ${url}:`, err)),
+          ),
+        ),
+      ),
   );
 });
 
@@ -40,27 +42,47 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
+  const { request } = event;
+
+  if (request.method !== "GET") return;
+
+  const isNavigationRequest = request.mode === "navigate";
+  const isSameOrigin = new URL(request.url).origin === self.location.origin;
+
+  if (!isSameOrigin) return;
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request)
-        .then((networkResponse) => {
-          if (
-            !networkResponse ||
-            networkResponse.status !== 200 ||
-            networkResponse.type !== "basic"
-          ) {
-            return networkResponse;
-          }
-
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+    (async () => {
+      if (isNavigationRequest) {
+        try {
+          const networkResponse = await fetch(request);
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(request, networkResponse.clone());
           return networkResponse;
-        })
-        .catch(() => {});
+        } catch (error) {
+          return (
+            (await caches.match(request)) ||
+            (await caches.match("/simple-scale/")) ||
+            Response.redirect("/simple-scale/")
+          );
+        }
+      }
 
-      return cachedResponse || fetchPromise;
-    }),
+      const cachedResponse = await caches.match(request);
+      if (cachedResponse) return cachedResponse;
+
+      try {
+        const networkResponse = await fetch(request);
+
+        if (networkResponse && networkResponse.ok && networkResponse.type === "basic") {
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(request, networkResponse.clone());
+        }
+
+        return networkResponse;
+      } catch (error) {
+        return Response.error();
+      }
+    })(),
   );
 });

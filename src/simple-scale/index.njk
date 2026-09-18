@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="mobile-web-app-capable" content="yes">
-    
-    <!-- Mantenha esta para compatibilidade com versões antigas do iOS -->
+    <meta name="description" content="Simple Scale — balança de café com extração em tempo real e histórico local.">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="theme-color" content="#000000">
     <title>Simple Scale</title>
+
+    <link rel="modulepreload" href="/js/scale/app.js">
     <link rel="preload" href="/fonts/departuremono/DepartureMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
-    
+
     <link rel="stylesheet" href="/css/scale.css">
     <link rel="stylesheet" href="/fonts/departuremono/departure.css">
     <link rel="manifest" href="/simple-scale/manifest.json">
@@ -19,17 +20,16 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/scale/favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/scale/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/scale/favicon/favicon-16x16.png">
-
 </head>
 <body class="state-disconnected">
 
     <!-- OVERLAY DE DESCONEXÃO -->
     <div id="connection-overlay" class="overlay">
-        <button id="btn-connect" class="btn-overlay">
+        <button id="btn-connect" class="btn-overlay" aria-label="Conectar à balança">
             connect
         </button>
-        <button id="btn-simulate" class="btn-overlay">
-            dev 
+        <button id="btn-simulate" class="btn-overlay" aria-label="Entrar em modo de desenvolvimento">
+            dev
         </button>
     </div>
 

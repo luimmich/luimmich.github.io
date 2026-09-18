@@ -2,11 +2,15 @@
   "id": "/simple-scale/",
   "name": "Simple Scale",
   "short_name": "Scale",
-  "start_url": "/simple-scale/",
+  "description": "Escala de café para monitorar extração em tempo real e registrar histórico local.",
+  "lang": "pt-BR",
+  "scope": "/simple-scale/",
+  "start_url": "/simple-scale/?source=pwa",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "portrait-primary",
+  "categories": ["utilities", "food"],
   "icons": [
     {
       "src": "/icons/scale/pwa-icon-192.png",
