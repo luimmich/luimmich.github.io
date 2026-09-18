@@ -1193,7 +1193,7 @@ if (islandSlider) {
       UI.actionFooter.classList.toggle("is-reviewing");
 
       if (UI.btnMethod) {
-        UI.btnMethod.textContent = UI.actionFooter.classList.contains("is-reviewing") ? "↑" : "↓";
+        UI.btnMethod.textContent = "↓";
       }
     }
   });

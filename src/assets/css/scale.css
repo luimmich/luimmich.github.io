@@ -448,8 +448,17 @@ body.theme-bluefy .footer-bottom-row {
   transition: color 120ms ease;
 }
 
+#btn-method {
+  color: var(--fg-dim);
+}
+
+#btn-method:active,
+#btn-method.ct-active {
+  color: var(--fg-dim);
+}
+
 .island-btn:active {
-  color: var(--accent-color);
+  color: var(--fg-dim);
 }
 
 /* Estado ativo do Smart CT */
