@@ -248,6 +248,9 @@ section:last-of-type {
   .nav div a {
     padding: 0.3rem;
   }
+  .nav--scrolled {
+    background-color: #fff;
+  }
 }
 
 footer {

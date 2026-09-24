@@ -71,6 +71,10 @@ body.is-transitioning #connection-overlay {
   background: rgba(0, 0, 0, 0);
 }
 
+body.theme-bluefy .connection-overlay {
+  background-color: var(--bg-root);
+}
+
 .btn-overlay {
   background-color: var(--fg-root);
   color: var(--bg-root);
