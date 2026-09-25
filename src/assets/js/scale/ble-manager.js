@@ -7,8 +7,10 @@ const SERVICE_UUID = "0000fff0-0000-1000-8000-00805f9b34fb";
 const NOTIFY_UUID = "0000fff1-0000-1000-8000-00805f9b34fb";
 const WRITE_UUID = "0000fff2-0000-1000-8000-00805f9b34fb";
 
+const OP_READ = 0x02;
 const OP_WRITE = 0x03;
 const CMD_TIMER = 0x02;
+const CMD_BATTERY = 0x05;
 const CMD_UNIT = 0x06;
 const CMD_MODE = 0x08;
 const CMD_TARE = 0x0d;
@@ -51,6 +53,7 @@ const COMMANDS = {
   UNIT_GRAM: buildFrame(OP_WRITE, CMD_UNIT, [0x00]),
   // Init padrão do Beanconqueror/lib oficial: grama (0x06) + modo standard (0x08).
   MODE: buildFrame(OP_WRITE, CMD_MODE, [0x01, 0x00]),
+  BATTERY_READ: buildFrame(OP_READ, CMD_BATTERY),
 };
 
 export class BLEManager {
@@ -113,6 +116,7 @@ export class BLEManager {
     await this._write(COMMANDS.UNIT_GRAM);
     await sleep(200);
     await this._write(COMMANDS.MODE);
+    await this._write(COMMANDS.BATTERY_READ);
 
     this.onDisconnectStatus?.(true);
   }

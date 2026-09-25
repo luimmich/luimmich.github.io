@@ -125,6 +125,11 @@ let isPourDebouncing = false;
 let stopPourTimeout = 0; // Armazena tempo em segundos via performance.now()
 
 let brewBaselineWeight = 0;
+// Piso do progresso: a barra só cresce durante a extração (não "esquece" o
+// acumulado se uma leitura instável cair). Reseta no start/clear.
+let progressFloor = 0;
+// Trava do CT: após aceitar, só volta a sugerir quando o peso cair a ~0.
+let ctLatched = false;
 let FLOW_HISTORY = [];
 const maxHistorySize = 5000;
 const canvas = document.getElementById("flow-canvas");
@@ -209,7 +214,8 @@ const bleManager = new BLEManager(handleTimemoreData, (isConnected) => {
     resetDecoderState();
     resetIdleTimer();
   } else {
-    UI.statusBadge.classList.remove("active");
+    UI.statusBadge.classList.remove("active", "low");
+    UI.statusBadge.textContent = "ble";
     brewState.flowRateEMA = 0;
     // ponytail: sem auto-reconnect; mostra o overlay pra reconectar na mão.
     UI.body.classList.add("state-disconnected");
@@ -488,6 +494,7 @@ function resetExtraction() {
   brewState.weight = 0;
   brewState.flowRateEMA = 0;
   brewState.isStable = true;
+  progressFloor = 0;
 
   const timeStep = 0.1;
   const pastPoints = 300;
@@ -814,12 +821,18 @@ function renderFrame() {
   // estado (sem auto-detecção de timer do hardware, que causava pulos de IDLE
   // pra DONE). O DOT não tem timer físico próprio.
 
-  if (
+  // Sugere CT quando um copo/dose (10-40 g) estabiliza. ctLatched evita que
+  // frames atrasados (peso antigo) reacendam o "CT" depois de aceitar — o
+  // latch só libera quando o peso volta a ~0 (tara efetivada).
+  const ctEligible =
     currentTimerState === TIMER_STATE.IDLE &&
     brewState.isStable &&
     brewState.weight >= 10.0 &&
-    brewState.weight <= 40.0
-  ) {
+    brewState.weight <= 40.0;
+
+  if (!ctEligible && brewState.weight < 5.0) ctLatched = false;
+
+  if (ctEligible && !ctLatched) {
     if (UI.btnDose && UI.btnDose.textContent !== "CT") {
       UI.btnDose.textContent = "CT";
       UI.btnDose.classList.add("ct-active");
@@ -832,18 +845,16 @@ function renderFrame() {
   }
 
   if (currentTimerState === TIMER_STATE.RUNNING && UI.liveProgress) {
-    let activeWeight = brewState.weight - brewBaselineWeight;
-
-    if (activeWeight < 0) {
-      activeWeight = brewState.weight;
-      brewBaselineWeight = 0;
-    }
+    // Leitura instável não pode derrubar o acumulado: clampa em 0 sem
+    // re-basear (o piso progressFloor garante que a barra nunca regride).
+    const activeWeight = Math.max(0, brewState.weight - brewBaselineWeight);
 
     if (activeWeight > advancedState.targetYield && UI.overpourProgress) {
       const overWeight = activeWeight - advancedState.targetYield;
       const overPct = Math.min((overWeight / advancedState.targetYield) * 100, 20);
       const scaleFactor = (100 - overPct) / 100;
 
+      progressFloor = 100;
       UI.liveProgress.style.width = `${100 - overPct}%`;
       UI.overpourProgress.style.width = `${overPct}%`;
 
@@ -853,8 +864,9 @@ function renderFrame() {
         tick.dom.style.left = `${Math.min(pct, 100 - overPct)}%`;
       });
     } else {
-      const rawPct = (activeWeight / advancedState.targetYield) * 100;
+      const rawPct = Math.max(progressFloor, (activeWeight / advancedState.targetYield) * 100);
       const fillPct = Math.max(0, Math.min(rawPct, 100));
+      progressFloor = fillPct;
       UI.liveProgress.style.width = `${fillPct}%`;
       if (UI.overpourProgress) UI.overpourProgress.style.width = `0%`;
     }
@@ -918,6 +930,11 @@ function renderFrame() {
   if (UI.stableDot) {
     if (brewState.isStable) UI.stableDot.classList.add("is-stable");
     else UI.stableDot.classList.remove("is-stable");
+  }
+
+  if (UI.statusBadge && brewState.battery != null) {
+    UI.statusBadge.textContent = `${brewState.battery}%`;
+    UI.statusBadge.classList.toggle("low", brewState.battery < 20);
   }
 
   brewState._isDirty = false;
@@ -1015,6 +1032,7 @@ if (UI.btnTimer) {
       case TIMER_STATE.IDLE:
         bleManager.sendCommand("TIMER_START");
         brewBaselineWeight = brewState.weight;
+        progressFloor = 0;
 
         renderAdaptiveTicks();
 
@@ -1081,6 +1099,7 @@ if (UI.btnDose) {
       bleManager.sendCommand("TARE");
       brewState.weight = 0;
       brewBaselineWeight = 0;
+      ctLatched = true;
 
       brewState._isDirty = true;
       UI.btnDose.classList.remove("ct-active");

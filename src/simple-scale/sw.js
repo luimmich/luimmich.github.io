@@ -1,5 +1,5 @@
 // sw.js
-const CACHE_NAME = "timemore-terminal-v7";
+const CACHE_NAME = "timemore-terminal-v8";
 
 const APP_SHELL = [
   "/simple-scale/",
@@ -41,43 +41,31 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// Network-first: garante que atualizações do app cheguem sem depender de
+// cache-bump manual; o cache fica só como fallback offline.
+// ponytail: a primeira carga offline espera o fetch falhar (rápido no mobile).
+// Upgrade: stale-while-revalidate se a latência offline incomodar.
 self.addEventListener("fetch", (event) => {
   const { request } = event;
 
   if (request.method !== "GET") return;
-
-  const isNavigationRequest = request.mode === "navigate";
-  const isSameOrigin = new URL(request.url).origin === self.location.origin;
-
-  if (!isSameOrigin) return;
+  if (new URL(request.url).origin !== self.location.origin) return;
 
   event.respondWith(
     (async () => {
-      if (isNavigationRequest) {
-        try {
-          const networkResponse = await fetch(request);
-          const cache = await caches.open(CACHE_NAME);
-          cache.put(request, networkResponse.clone());
-          return networkResponse;
-        } catch (error) {
-          return (await caches.match(request)) || (await caches.match("/simple-scale/"));
-        }
-      }
-
-      const cachedResponse = await caches.match(request);
-      if (cachedResponse) return cachedResponse;
-
       try {
         const networkResponse = await fetch(request);
-
         if (networkResponse && networkResponse.ok && networkResponse.type === "basic") {
           const cache = await caches.open(CACHE_NAME);
           cache.put(request, networkResponse.clone());
         }
-
         return networkResponse;
       } catch (error) {
-        return Response.error();
+        return (
+          (await caches.match(request)) ||
+          (await caches.match("/simple-scale/")) ||
+          Response.error()
+        );
       }
     })(),
   );

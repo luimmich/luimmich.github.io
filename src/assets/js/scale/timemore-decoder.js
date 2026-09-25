@@ -20,6 +20,7 @@ export const brewState = {
   time: 0,
   flowRateEMA: 0.0,
   isStable: false,
+  battery: null, // % (cmd 0x05); não é resetado junto com a extração
   _isDirty: false,
 };
 
@@ -65,9 +66,15 @@ export function handleTimemoreData(dataView) {
     const len = (rxBuffer[i + 4] << 8) | rxBuffer[i + 5];
     if (i + 8 + len > rxLength) break; // frame incompleto: fica no carry
 
-    // Mesmo filtro do Beanconqueror: notify (0x01) / read (0x02), cmd de peso.
-    if ((opcode === 0x01 || opcode === 0x02) && cmd === 0x01 && len >= 8) {
-      applyWeightFrame(i + 6, len);
+    // Mesmo filtro do Beanconqueror: notify (0x01) / read (0x02).
+    if (opcode === 0x01 || opcode === 0x02) {
+      if (cmd === 0x01 && len >= 8) {
+        applyWeightFrame(i + 6, len);
+      } else if (cmd === 0x05 && len >= 1) {
+        // Barras (data[0]) + porcentagem (data[1]); o app usa a porcentagem.
+        brewState.battery = len >= 2 ? rxBuffer[i + 7] : rxBuffer[i + 6];
+        brewState._isDirty = true;
+      }
     }
     i += 8 + len;
   }

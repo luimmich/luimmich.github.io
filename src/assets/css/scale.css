@@ -200,6 +200,12 @@ body.is-ready .action-footer {
   opacity: 0.3;
 }
 
+/* Bateria baixa (<20%): vermelho legível no lugar do dim. */
+.nav-item.low {
+  color: #ff4a4a;
+  opacity: 1;
+}
+
 /* --- METRICS --- */
 .metrics-stack {
   display: flex;
