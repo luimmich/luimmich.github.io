@@ -6,6 +6,9 @@
     {% set switchUrl = page.url | replace("/en/", "/") %}
   {% endif %}
 {% endif %}
+{% set seoTitle %}{% if page.url == '/' or page.url == '/en/' %}{{ site[locale].name }} | {{ site[locale].description }}{% elif title %}{{ site[locale].name }} | {{ title | replace('<br>', ' ') | striptags }}{% else %}{{ site[locale].name }}{% endif %}{% endset %}
+{% set ogTitle %}{% if page.url == '/' or page.url == '/en/' %}{{ site[locale].name }} | {{ site[locale].description }}{% elif title %}{{ title | replace('<br>', ' ') | striptags }} | {{ site[locale].name }}{% else %}{{ site[locale].name }}{% endif %}{% endset %}
+{% set seoDesc %}{{ description | default(site[locale].description) }}{% endset %}
 <!DOCTYPE html>
 <html lang="{{ 'en-US' if locale == 'en' else 'pt-BR' }}">
 <head>
@@ -17,8 +20,8 @@
   <meta name="google-site-verification" content="o2YMMty1BEuB8c6x55yYYqjvDjgNujVhYwkxwE9V5Gg" />
 
 <!-- SEO BÁSICO -->
-  <title>{% if page.url == '/' or page.url == '/en/' %}{{ site[locale].name }} | {{ site[locale].description }}{% elif title %}{{ site[locale].name }} | {{ title | replace('<br>', ' ') | striptags }}{% else %}{{ site[locale].name }}{% endif %}</title>
-  <meta name="description" content="{{ description | default(site[locale].description) }}">
+  <title>{{ seoTitle }}</title>
+  <meta name="description" content="{{ seoDesc }}">
   <meta name="author" content="{{ site[locale].author }}">
   <meta name="keywords" content="{{ keywords | default(locales.seo.keywords[locale]) }}">
   <meta name="theme-color" content="#ffffff" />
@@ -34,14 +37,14 @@
   <!-- OPEN GRAPH / REDES SOCIAIS -->
   <meta property="og:type" content="{% if isProject %}article{% else %}website{% endif %}">
   <meta property="og:url" content="{{ site[locale].url }}{{ page.url }}">
-  <meta property="og:title" content="{% if page.url == '/' or page.url == '/en/' %}{{ site[locale].name }} | {{ site[locale].description }}{% elif title %}{{ title | replace('<br>', ' ') | striptags }} | {{ site[locale].name }}{% else %}{{ site[locale].name }}{% endif %}">
-  <meta property="og:description" content="{{ description | default(site[locale].description) }}">
+  <meta property="og:title" content="{{ ogTitle }}">
+  <meta property="og:description" content="{{ seoDesc }}">
   <meta property="og:image" content="{{ site[locale].url }}{{ image | default('/icons/favicon/android-chrome-512x512.png') }}">
   
   <!-- TWITTER CARDS -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="{% if page.url == '/' or page.url == '/en/' %}{{ site[locale].name }} | {{ site[locale].description }}{% elif title %}{{ title | replace('<br>', ' ') | striptags }} | {{ site[locale].name }}{% else %}{{ site[locale].name }}{% endif %}">
-  <meta name="twitter:description" content="{{ description | default(site[locale].description) }}">
+  <meta name="twitter:title" content="{{ ogTitle }}">
+  <meta name="twitter:description" content="{{ seoDesc }}">
   <meta name="twitter:image" content="{{ site[locale].url }}{{ image | default('/icons/favicon/android-chrome-512x512.png') }}">
 
   <!-- JSON-LD GLOBAL -->

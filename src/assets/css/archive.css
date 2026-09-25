@@ -145,11 +145,6 @@ button.archive-tag-container {
   background: black;
 }
 
-.line-empty {
-  height: 1px;
-  margin-top: 3rem;
-}
-
 #archive-link-empty {
   margin-left: 14vw;
   z-index: 5;
@@ -347,8 +342,7 @@ button.archive-tag-container .archive-tag-year {
   }
 
   button.archive-tag-container .archive-tag-year,
-  .archive-tag-year,
-  .archive-tag-year .zero {
+  .archive-tag-year {
     left: 0.8rem; /* Alinhamento à esquerda com respiro para telas finas */
     right: auto;
     top: 0.5rem;
@@ -395,8 +389,7 @@ button.archive-tag-container .archive-tag-year {
     max-width: 30%;
   }
 
-  .archive-tag-year,
-  .archive-tag-year .zero {
+  .archive-tag-year {
     right: 0.6rem;
     font-size: var(--fs-0);
   }

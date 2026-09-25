@@ -28,9 +28,6 @@
         <button id="btn-connect" class="btn-overlay" aria-label="Conectar à balança">
             connect
         </button>
-        <button id="btn-simulate" class="btn-overlay" aria-label="Entrar em modo de desenvolvimento">
-            dev
-        </button>
     </div>
 
     <!-- TELA DE ESTATÍSTICAS (Modular Full Screen) -->
@@ -141,11 +138,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Slot Vazio para Pours (Futuro Equalizador) -->
-            <div id="pours-config-slot" class="pours-config-slot">
-                <span>pours equalizer slot</span>
-            </div>
         </div>
     </div>
 
@@ -230,5 +222,7 @@
         </footer>
     </main>
     <script type="module" src="/js/scale/app.js"></script>
+    <!-- ponytail: MODO DEV temporário — remova esta linha e src/assets/js/scale/dev-mode.js -->
+    <script type="module" src="/js/scale/dev-mode.js"></script>
 </body>
 </html>

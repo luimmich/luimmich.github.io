@@ -18,10 +18,6 @@ module.exports = {
     },
   },
   seo: {
-    homeTitle: {
-      pt: "Portfólio de Filosofia e Design",
-      en: "Philosophy and Design Portfolio",
-    },
     keywords: {
       pt: "Lu Immich, design, filosofia, ontologia social, desenho industrial, ui/ux",
       en: "Lu Immich, design, philosophy, social ontology, industrial design, ui/ux",

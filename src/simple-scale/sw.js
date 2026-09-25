@@ -1,5 +1,5 @@
 // sw.js
-const CACHE_NAME = "timemore-terminal-v6";
+const CACHE_NAME = "timemore-terminal-v7";
 
 const APP_SHELL = [
   "/simple-scale/",
@@ -60,11 +60,7 @@ self.addEventListener("fetch", (event) => {
           cache.put(request, networkResponse.clone());
           return networkResponse;
         } catch (error) {
-          return (
-            (await caches.match(request)) ||
-            (await caches.match("/simple-scale/")) ||
-            Response.redirect("/simple-scale/")
-          );
+          return (await caches.match(request)) || (await caches.match("/simple-scale/"));
         }
       }
 

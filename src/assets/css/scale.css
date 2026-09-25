@@ -515,17 +515,6 @@ body.theme-bluefy .footer-bottom-row {
 
 /* --- FEATURES AVANÇADAS DO LIVE TRACKER --- */
 
-/* FEATURE 5: Micro-Tipografia da Legenda */
-.live-legend {
-  position: absolute;
-  top: -8px; /* Flutua acima do trilho */
-  font-size: clamp(0.6rem, 2vw, 0.75rem);
-  color: var(--fg-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  transition: opacity 0.3s;
-}
-
 /* FEATURE 4: Overpour (O Excesso Suave que cresce para dentro) */
 .overpour-fill {
   position: absolute;
@@ -643,8 +632,7 @@ body.theme-bluefy .footer-bottom-row {
 }
 
 .stats-overlay.is-visible .stat-module,
-.stats-overlay.is-visible .config-row,
-.stats-overlay.is-visible .pours-config-slot {
+.stats-overlay.is-visible .config-row {
   animation: overlayReveal 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
@@ -653,9 +641,6 @@ body.theme-bluefy .footer-bottom-row {
 }
 .stats-overlay.is-visible .config-row:nth-child(3) {
   animation-delay: 0.08s;
-}
-.stats-overlay.is-visible .pours-config-slot {
-  animation-delay: 0.12s;
 }
 
 @keyframes overlayReveal {
@@ -691,9 +676,6 @@ body.theme-bluefy .footer-bottom-row {
 
 .stats-nav-btn:active {
   color: var(--fg-root);
-}
-.stats-nav-title {
-  letter-spacing: 0.05em;
 }
 
 .stats-modules-grid {
@@ -1023,16 +1005,4 @@ body.theme-bluefy .footer-bottom-row {
 
 .config-yield-row .config-row-label {
   color: var(--fg-root);
-}
-.pours-config-slot {
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  border-radius: clamp(14px, 3vw, 20px);
-  min-height: 190px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--fg-dim);
-  opacity: 0.4;
-  font-size: 0.8rem;
-  letter-spacing: 0.05em;
 }

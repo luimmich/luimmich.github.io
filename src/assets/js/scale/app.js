@@ -99,10 +99,7 @@ const advancedState = {
   dose: 15.0,
   ratio: 15.0,
   targetYield: 225.0,
-  tetsuMode: true,
-  poursCount: 5,
   method: "4:6",
-  pours: [],
 };
 
 // Carregamento de Perfil Persistido
@@ -127,9 +124,6 @@ let isCurrentlyPouring = false;
 let isPourDebouncing = false;
 let stopPourTimeout = 0; // Armazena tempo em segundos via performance.now()
 
-let isSimulating = false;
-let simTime = 0;
-let simWeight = 0;
 let brewBaselineWeight = 0;
 let FLOW_HISTORY = [];
 const maxHistorySize = 5000;
@@ -164,12 +158,10 @@ async function requestWakeLock() {
 }
 
 function dropConnection() {
-  if (isSimulating) return;
   bleManager.disconnect();
 
   UI.body.classList.add("state-disconnected");
   UI.btnConnect.textContent = "connect";
-  UI.btnConnect.classList.remove("pulse-cursor");
   currentTimerState = TIMER_STATE.IDLE;
   UI.timerIcon.src = "/icons/scale/play.svg";
   wakeLockRecoveryPending = false;
@@ -213,15 +205,15 @@ const bleManager = new BLEManager(handleTimemoreData, (isConnected) => {
   if (isConnected) {
     UI.body.classList.remove("state-disconnected", "state-reconnecting");
     UI.statusBadge.classList.add("active");
-    UI.btnConnect.classList.remove("pulse-cursor");
+    UI.btnConnect.textContent = "connect";
     resetDecoderState();
     resetIdleTimer();
   } else {
     UI.statusBadge.classList.remove("active");
-    if (currentTimerState === TIMER_STATE.RUNNING) {
-      brewState.flowRateEMA = 0;
-      UI.body.classList.add("state-reconnecting");
-    }
+    brewState.flowRateEMA = 0;
+    // ponytail: sem auto-reconnect; mostra o overlay pra reconectar na mão.
+    UI.body.classList.add("state-disconnected");
+    UI.body.classList.remove("state-reconnecting");
   }
 });
 
@@ -287,21 +279,6 @@ function applySliderTrackPattern(slider, config) {
   slider.style.setProperty("--track-pattern", buildTrackPattern(config));
 }
 
-function snapSliderToTicks(slider) {
-  if (!slider) return;
-
-  const min = Number(slider.min || 0);
-  const max = Number(slider.max || 100);
-  const step = Number(slider.step || 1);
-  const value = Number(slider.value || min);
-  const snapped = Math.round((value - min) / step) * step + min;
-  const progress = (snapped - min) / (max - min || 1);
-  const shift = (progress - 0.5) * 20;
-
-  slider.value = snapped.toString();
-  slider.style.setProperty("--track-shift", `${shift}px`);
-}
-
 function updateSliderMotion(slider) {
   if (!slider) return;
 
@@ -313,8 +290,8 @@ function updateSliderMotion(slider) {
   const progress = (snapped - min) / (max - min || 1);
   const shift = (progress - 0.5) * 20;
 
-  slider.style.setProperty("--track-shift", `${shift}px`);
   slider.value = snapped.toString();
+  slider.style.setProperty("--track-shift", `${shift}px`);
 }
 
 function autoSaveRecipe(newDose, newRatio) {
@@ -387,7 +364,7 @@ if (UIConfig.sliderDose) {
   });
 
   UIConfig.sliderDose.addEventListener("change", (e) => {
-    snapSliderToTicks(e.target);
+    updateSliderMotion(e.target);
   });
 }
 
@@ -399,7 +376,7 @@ if (UIConfig.sliderRatio) {
   });
 
   UIConfig.sliderRatio.addEventListener("change", (e) => {
-    snapSliderToTicks(e.target);
+    updateSliderMotion(e.target);
   });
 }
 
@@ -511,8 +488,6 @@ function resetExtraction() {
   brewState.weight = 0;
   brewState.flowRateEMA = 0;
   brewState.isStable = true;
-  simTime = 0;
-  simWeight = 0;
 
   lastHardwareTime = 0;
   lastHardwareTimeChange = performance.now();
@@ -724,38 +699,32 @@ function renderAdaptiveTicks() {
   const totalWater = advancedState.targetYield;
   if (totalWater <= 0) return;
 
-  if (advancedState.tetsuMode) {
-    const weights = [
-      totalWater * 0.2,
-      totalWater * 0.4,
-      totalWater * 0.6,
-      totalWater * 0.8,
-      totalWater * 1.0,
-    ];
+  const weights = [
+    totalWater * 0.2,
+    totalWater * 0.4,
+    totalWater * 0.6,
+    totalWater * 0.8,
+    totalWater * 1.0,
+  ];
 
-    weights.forEach((w, index) => {
-      const pct = (w / totalWater) * 100;
-      const tick = document.createElement("div");
-      tick.className = `pour-tick ${index === 0 ? "tick-bloom" : ""}`;
-      tick.style.left = `${Math.min(pct, 100)}%`;
-      UI.liveTicks.appendChild(tick);
+  weights.forEach((w, index) => {
+    const pct = (w / totalWater) * 100;
+    const tick = document.createElement("div");
+    tick.className = `pour-tick ${index === 0 ? "tick-bloom" : ""}`;
+    tick.style.left = `${Math.min(pct, 100)}%`;
+    UI.liveTicks.appendChild(tick);
 
-      liveTicksData.push({
-        weight: w,
-        dom: tick,
-        passed: false,
-      });
+    liveTicksData.push({
+      weight: w,
+      dom: tick,
+      passed: false,
     });
-  }
+  });
 }
 
 // --- FUNÇÃO DE RECALCULO DE FLUXO (4:6 ESTREITO COM FUSÃO) ---
 function handlePourStop(activeWeight) {
-  if (
-    !advancedState.tetsuMode ||
-    activeWeight >= advancedState.targetYield ||
-    currentPourIndex >= liveTicksData.length
-  ) {
+  if (activeWeight >= advancedState.targetYield || currentPourIndex >= liveTicksData.length) {
     return;
   }
 
@@ -860,7 +829,7 @@ function renderFrame() {
     }
     lastHardwareTimeChange = now;
   } else if (brewState.time === lastHardwareTime && currentTimerState === TIMER_STATE.RUNNING) {
-    if (!isSimulating && now - lastHardwareTimeChange > 2000) {
+    if (now - lastHardwareTimeChange > 2000) {
       console.log("Pause físico detectado na balança. Entrando em Review Mode.");
       currentTimerState = TIMER_STATE.DONE;
       if (UI.timerIcon) UI.timerIcon.src = "/icons/scale/restart.svg";
@@ -1058,7 +1027,6 @@ function processAndSaveExtraction(isEmergencySave = false) {
 if (UI.btnConnect) {
   UI.btnConnect.addEventListener("click", () => {
     UI.btnConnect.textContent = "connecting";
-    UI.btnConnect.classList.add("pulse-cursor");
 
     bleManager
       .connect()
@@ -1068,7 +1036,6 @@ if (UI.btnConnect) {
       })
       .catch((error) => {
         UI.btnConnect.textContent = "connect";
-        UI.btnConnect.classList.remove("pulse-cursor");
         if (error.name !== "NotFoundError") alert("Falha: " + (error.message || error));
       });
   });
@@ -1076,13 +1043,7 @@ if (UI.btnConnect) {
 
 if (UI.btnTare) {
   UI.btnTare.addEventListener("click", () => {
-    if (isSimulating) {
-      simWeight = 0;
-      brewState.weight = 0;
-      brewState._isDirty = true;
-    } else {
-      bleManager.sendCommand("TARE");
-    }
+    bleManager.sendCommand("TARE");
   });
 }
 
@@ -1090,7 +1051,7 @@ if (UI.btnTimer) {
   UI.btnTimer.addEventListener("click", () => {
     switch (currentTimerState) {
       case TIMER_STATE.IDLE:
-        if (!isSimulating) bleManager.sendCommand("TIMER_START");
+        bleManager.sendCommand("TIMER_START");
         brewBaselineWeight = brewState.weight;
 
         renderAdaptiveTicks();
@@ -1103,7 +1064,7 @@ if (UI.btnTimer) {
         break;
 
       case TIMER_STATE.RUNNING:
-        if (!isSimulating) bleManager.sendCommand("TIMER_PAUSE");
+        bleManager.sendCommand("TIMER_PAUSE");
         currentTimerState = TIMER_STATE.DONE;
         if (UI.timerIcon) UI.timerIcon.src = "/icons/scale/restart.svg";
 
@@ -1124,7 +1085,7 @@ if (UI.btnTimer) {
         break;
 
       case TIMER_STATE.DONE:
-        if (!isSimulating) bleManager.sendCommand("TIMER_RESET");
+        bleManager.sendCommand("TIMER_RESET");
         processAndSaveExtraction();
         resetExtraction();
 
@@ -1155,14 +1116,9 @@ if (UI.btnDose) {
       advancedState.targetYield = advancedState.dose * advancedState.ratio;
       renderAdaptiveTicks();
 
-      if (!isSimulating) {
-        bleManager.sendCommand("TARE");
-        brewState.weight = 0;
-        brewBaselineWeight = 0;
-      } else {
-        simWeight = 0;
-        brewState.weight = 0;
-      }
+      bleManager.sendCommand("TARE");
+      brewState.weight = 0;
+      brewBaselineWeight = 0;
 
       brewState._isDirty = true;
       UI.btnDose.classList.remove("ct-active");
@@ -1318,82 +1274,9 @@ if (UIStats.btnClose) {
 }
 
 if (UIStats.btnExport) {
-  UIStats.btnExport.addEventListener("click", () => exportData());
+  UIStats.btnExport.addEventListener("click", async () => {
+    if (!(await exportData())) alert("Nenhum dado para exportar.");
+  });
 }
 
 requestAnimationFrame(renderFrame);
-
-// --- DEV MODE (MOCK DE DADOS INTELIGENTE PARA TETSU E CT) ---
-const btnSimulate = document.getElementById("btn-simulate");
-let simInterval = null;
-
-if (btnSimulate) {
-  btnSimulate.addEventListener("click", () => {
-    requestWakeLock();
-    revealAppShell();
-    const indicator = document.getElementById("status-indicator");
-    if (indicator) indicator.textContent = "sim";
-
-    isSimulating = true;
-    resetExtraction();
-
-    if (simInterval) clearInterval(simInterval);
-
-    let simPoursCompleted = 0;
-    let simIsPouring = false;
-    let simPourTarget = 0;
-    let simPauseTimeOut = 0;
-    let coffeeAdded = false;
-
-    const setNextPour = () => {
-      if (simPoursCompleted < 5) {
-        const randomPourWeight = 30 + Math.random() * 30;
-        simPourTarget = simWeight + randomPourWeight;
-        simIsPouring = true;
-      }
-    };
-
-    simInterval = setInterval(() => {
-      let flow = 0;
-
-      if (currentTimerState === TIMER_STATE.IDLE) {
-        if (!coffeeAdded) {
-          if (simWeight < 18.5) {
-            flow = 5.0;
-            simWeight += flow * 0.05;
-          } else {
-            simWeight = 18.5;
-            flow = 0;
-            coffeeAdded = true;
-          }
-        }
-      } else if (currentTimerState === TIMER_STATE.RUNNING) {
-        simTime += 0.05;
-        if (simPourTarget === 0) setNextPour();
-
-        if (simPoursCompleted < 5) {
-          if (simIsPouring) {
-            flow = 6 + (Math.random() * 0.5 - 0.25);
-            simWeight += flow * 0.05;
-
-            if (simWeight >= simPourTarget) {
-              simWeight = simPourTarget;
-              simIsPouring = false;
-              simPoursCompleted++;
-              simPauseTimeOut = simTime + 15.0;
-            }
-          } else {
-            flow = Math.random() * 0.1;
-            if (simTime >= simPauseTimeOut) setNextPour();
-          }
-        }
-      }
-
-      brewState.weight = simWeight;
-      if (currentTimerState === TIMER_STATE.RUNNING) brewState.time = simTime;
-      brewState.flowRateEMA = flow;
-      brewState.isStable = flow < 0.5;
-      brewState._isDirty = true;
-    }, 50);
-  });
-}

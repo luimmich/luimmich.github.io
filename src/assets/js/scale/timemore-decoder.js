@@ -1,44 +1,35 @@
-// timemore-decoder.js
+// timemore-decoder.js — parser dos frames do Timemore DOT (TES017).
+// Frame: A5 5A | opcode | cmd | len(2, BE) | data | crc(2, BE)
+//   cmd 0x01: weight(int32, /10 g) | flow(uint16, /10 g/s) | timer(uint16, s) | overload(u8)
+// O DOT não valida CRC no que envia, então o parse ignora o CRC.
 
-const ALPHA_SMOOTHING = 0.2; // Constante α para filtro passa-baixo do caudal
-const RING_SIZE = 5;
-const MIN_PACKET_GAP_MS = 30;
-const TARE_DELTA_THRESHOLD_G = 5.0;
+const ALPHA_SMOOTHING = 0.2;
+const STABLE_DELTA_G = 0.2;
+const STABLE_MS = 500;
 
-// Máquina de estado global
+// Carry entre notificações: um frame partido entre pacotes continua válido.
+// ponytail: 64 B cobre com folga os frames de ~10 B; rajadas maiores descartam
+// o excedente mais antigo. Upgrade: fila dinâmica se o firmware mudar.
+const rxBuffer = new Uint8Array(64);
+let rxLength = 0;
+let lastWeight = 0;
+let stableSince = 0;
+
 export const brewState = {
   weight: 0.0,
   time: 0,
   flowRateEMA: 0.0,
   isStable: false,
   _isDirty: false,
-  lastPacketTime: 0,
-
-  weightRing: new Float32Array(RING_SIZE),
-  timeRing: new Float32Array(RING_SIZE),
-  ringIndex: 0,
 };
 
-const rxBuffer = new Uint8Array(64);
-let rxLength = 0;
-
-// Variáveis de controle de fluxo
-let isBufferFilled = false;
-let samplesCollected = 0;
-
-/**
- * Zera as barreiras de segurança do decodificador e limpa a memória do ring buffer.
- * DEVE ser chamado pelo app.js sempre que uma extração for resetada.
- */
 export function resetDecoderState() {
-  isBufferFilled = false;
-  samplesCollected = 0;
-  brewState.lastPacketTime = 0;
+  rxLength = 0;
+  lastWeight = 0;
+  stableSince = performance.now();
   brewState.flowRateEMA = 0;
-  brewState.ringIndex = 0;
+  brewState.isStable = false;
   brewState._isDirty = false;
-  brewState.weightRing.fill(0);
-  brewState.timeRing.fill(0);
 }
 
 export function handleTimemoreData(dataView) {
@@ -46,105 +37,64 @@ export function handleTimemoreData(dataView) {
     dataView instanceof Uint8Array
       ? dataView
       : new Uint8Array(dataView.buffer, dataView.byteOffset, dataView.byteLength);
-  const incomingLength = incoming.length;
-  if (incomingLength === 0) return;
+  if (incoming.length === 0) return;
 
-  // Ingestão em bloco contíguo na memória sem laços manuais byte-a-byte
-  if (incomingLength >= rxBuffer.length) {
-    rxBuffer.set(incoming.subarray(incomingLength - rxBuffer.length));
+  if (incoming.length >= rxBuffer.length) {
+    rxBuffer.set(incoming.subarray(incoming.length - rxBuffer.length));
     rxLength = rxBuffer.length;
   } else {
-    if (rxLength + incomingLength > rxBuffer.length) {
-      const overflow = rxLength + incomingLength - rxBuffer.length;
-      rxBuffer.copyWithin(0, overflow, rxLength);
-      rxLength -= overflow;
+    if (rxLength + incoming.length > rxBuffer.length) {
+      const keep = rxBuffer.length - incoming.length;
+      rxBuffer.copyWithin(0, rxLength - keep, rxLength);
+      rxLength = keep;
     }
     rxBuffer.set(incoming, rxLength);
-    rxLength += incomingLength;
+    rxLength += incoming.length;
   }
 
-  let offset = 0;
-
-  while (rxLength - offset >= 8) {
-    const header = rxBuffer[offset];
-
-    if (header !== 0xfd && header !== 0x0a && header !== 0x23) {
-      offset++;
+  // Notificações podem trazer vários frames; varre procurando o header A5 5A.
+  let i = 0;
+  while (i + 8 <= rxLength) {
+    if (rxBuffer[i] !== 0xa5 || rxBuffer[i + 1] !== 0x5a) {
+      i++;
       continue;
     }
 
-    const statusFlags = rxBuffer[offset + 3];
-    const isNegative = (statusFlags & 0x01) === 0x01;
-    const isStable = (statusFlags & 0x02) === 0x02;
+    const cmd = rxBuffer[i + 3];
+    const len = (rxBuffer[i + 4] << 8) | rxBuffer[i + 5];
+    if (i + 8 + len > rxLength) break; // frame incompleto: fica no carry
 
-    const rawWeight = (rxBuffer[offset + 4] << 8) | rxBuffer[offset + 5];
-    let currentWeight = rawWeight / 10.0;
-
-    if (isNegative) currentWeight *= -1.0;
-
-    const currentTime = (rxBuffer[offset + 6] << 8) | rxBuffer[offset + 7];
-
-    updateTelemetry(currentWeight, currentTime, isStable);
-    offset += 8;
+    if (cmd === 0x01 && len >= 8) applyWeightFrame(i + 6, len);
+    i += 8 + len;
   }
 
-  if (offset > 0) {
-    rxLength -= offset;
-    rxBuffer.copyWithin(0, offset, offset + rxLength);
+  if (i > 0) {
+    rxBuffer.copyWithin(0, i, rxLength);
+    rxLength -= i;
   }
 }
 
-function updateTelemetry(weight, time, isStable) {
-  const now = performance.now();
-
-  if (brewState.lastPacketTime !== 0 && now - brewState.lastPacketTime < MIN_PACKET_GAP_MS) {
-    return;
-  }
-  brewState.lastPacketTime = now;
-
-  const ptr = brewState.ringIndex;
-  const oldPtr = (ptr + 1) % RING_SIZE;
+function applyWeightFrame(d, len) {
+  const weight =
+    (((rxBuffer[d] << 24) | (rxBuffer[d + 1] << 16) | (rxBuffer[d + 2] << 8) | rxBuffer[d + 3]) |
+      0) /
+    10;
+  const rawFlow = ((rxBuffer[d + 4] << 8) | rxBuffer[d + 5]) / 10;
+  const overload = len >= 9 ? rxBuffer[d + 8] : 0;
 
   brewState.weight = weight;
-  brewState.time = time;
-  brewState.isStable = isStable;
+  brewState.time = (rxBuffer[d + 6] << 8) | rxBuffer[d + 7];
+  brewState.flowRateEMA =
+    ALPHA_SMOOTHING * rawFlow + (1 - ALPHA_SMOOTHING) * brewState.flowRateEMA;
 
-  brewState.weightRing[ptr] = weight;
-  brewState.timeRing[ptr] = now;
-
-  if (!isBufferFilled) {
-    samplesCollected++;
-    if (samplesCollected >= RING_SIZE) isBufferFilled = true;
-    brewState.ringIndex = oldPtr;
-    brewState._isDirty = true;
-    return;
+  // ponytail: o DOT não manda flag de estabilidade; derivamos da variação de
+  // peso. Ceiling: ~500ms de atraso após parar de mexer. Upgrade: usar o bit de
+  // estável se o firmware passar a expor.
+  const now = performance.now();
+  if (Math.abs(weight - lastWeight) > STABLE_DELTA_G) {
+    lastWeight = weight;
+    stableSince = now;
   }
-
-  const previousWeight = brewState.weightRing[oldPtr];
-  const deltaWeight = brewState.weightRing[ptr] - previousWeight;
-
-  if (deltaWeight < -TARE_DELTA_THRESHOLD_G) {
-    resetDecoderState();
-    brewState.weightRing[0] = weight;
-    brewState.timeRing[0] = now;
-    brewState.ringIndex = 1;
-    samplesCollected = 1;
-    brewState._isDirty = true;
-    return;
-  }
-
-  const deltaTimeSeconds = (brewState.timeRing[ptr] - brewState.timeRing[oldPtr]) / 1000.0;
-
-  if (deltaTimeSeconds > 0 && deltaTimeSeconds < 1.0) {
-    let rawFlow = deltaWeight / deltaTimeSeconds;
-    rawFlow = rawFlow < 0 ? 0 : rawFlow;
-
-    brewState.flowRateEMA =
-      ALPHA_SMOOTHING * rawFlow + (1 - ALPHA_SMOOTHING) * brewState.flowRateEMA;
-  } else if (deltaTimeSeconds >= 1.0) {
-    brewState.flowRateEMA = 0;
-  }
-
-  brewState.ringIndex = oldPtr;
+  brewState.isStable = overload === 0 && now - stableSince >= STABLE_MS;
   brewState._isDirty = true;
 }

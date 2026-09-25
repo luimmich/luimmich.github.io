@@ -160,10 +160,6 @@ ul li {
   font-variant: all-small-caps;
   letter-spacing: 1px;
 }
-.anchor {
-  position: absolute;
-  transform: translateY(-5svh);
-}
 .heart-cursor {
   cursor: url("/icons/heart.svg"), pointer;
 }
@@ -412,15 +408,6 @@ footer a {
   position: relative;
 }
 
-.funnel-title {
-  grid-column: 5 / 9; /* Colunas 5 a 8 (Ajustado para não estourar a tela) */
-  font-size: var(--fs-3);
-  line-height: 1;
-  text-transform: uppercase;
-  margin-left: -0.2rem;
-  margin-top: -0.5rem;
-}
-
 .funnel-sub-title {
   grid-column: 1 / 5;
   grid-row-start: 1;
@@ -469,27 +456,6 @@ footer a {
 
 .philosophy-card {
   grid-column: 9 / span 4;
-}
-
-.cards-title {
-  display: none;
-  font-size: var(--fs-3);
-  line-height: 1;
-  height: fit-content;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  text-align: end;
-}
-
-.cards-desc {
-  display: none;
-  /* display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  overflow: hidden;
-  text-wrap: balance; */
-  text-align: end;
 }
 
 .funnel-card {
@@ -588,43 +554,8 @@ footer a {
     margin: 26svh auto;
   }
 
-  .cards-intro {
-    margin-bottom: 2svh;
-  }
-
   .funnel-card {
     margin-bottom: 5svh;
-  }
-}
-
-/* ==========================================================================
-   6. PÁGINA SOBRE
-   ========================================================================== */
-.about {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  height: 100%;
-  justify-content: end;
-  margin-left: 10vw;
-}
-
-.about-text {
-  max-width: 40vw;
-}
-
-@media (max-width: 1024px) {
-  .about-container {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    padding-bottom: 12svh;
-  }
-  .about-title {
-    line-height: 1;
-  }
-  .about-text {
-    max-width: 100%;
   }
 }
 

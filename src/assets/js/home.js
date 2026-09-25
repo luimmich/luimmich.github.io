@@ -1,16 +1,3 @@
-// Debounce protege a performance do celular
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
-
 function ajustarHeroDinamicamente() {
   const hero = document.querySelector(".hero");
   const nav = document.querySelector(".nav");
@@ -80,17 +67,12 @@ window.addEventListener("load", ajustarHeroDinamicamente);
 // A BLINDAGEM MOBILE (Ignora a barra do navegador)
 // ==========================================================================
 let larguraAnterior = window.innerWidth;
+let resizeFrame = 0;
 
-window.addEventListener(
-  "resize",
-  debounce(() => {
-    const larguraAtual = window.innerWidth;
+window.addEventListener("resize", () => {
+  if (window.innerWidth === larguraAnterior) return;
+  larguraAnterior = window.innerWidth;
 
-    // Só recalcula o Hero se a LARGURA da tela mudar (ex: girar o celular).
-    // Se apenas a altura mudar (barra do navegador sumindo no scroll), ele ignora silenciosamente.
-    if (larguraAtual !== larguraAnterior) {
-      larguraAnterior = larguraAtual;
-      ajustarHeroDinamicamente();
-    }
-  }, 150),
-);
+  cancelAnimationFrame(resizeFrame);
+  resizeFrame = requestAnimationFrame(ajustarHeroDinamicamente);
+});

@@ -6,29 +6,6 @@ const STORE_NAME = "extractions";
 let dbInstance = null;
 let dbPromise = null;
 
-function getIndexedDB() {
-  if (!("indexedDB" in window)) {
-    throw new Error("IndexedDB não é suportado neste navegador.");
-  }
-  return window.indexedDB;
-}
-
-function isPersistAvailable() {
-  return !!(navigator.storage && typeof navigator.storage.persist === "function");
-}
-
-async function requestPersistence() {
-  if (!isPersistAvailable()) return false;
-
-  try {
-    const persisted = await navigator.storage.persist();
-    return persisted;
-  } catch (err) {
-    console.warn("Persistência do IndexedDB não foi ativada:", err);
-    return false;
-  }
-}
-
 /**
  * Retorna ou inicializa a conexão Singleton com o IndexedDB protegida contra concorrência.
  */
@@ -36,10 +13,12 @@ async function getDB() {
   if (dbInstance) return dbInstance;
   if (dbPromise) return dbPromise;
 
-  const indexedDBAPI = getIndexedDB();
+  if (!("indexedDB" in window)) {
+    throw new Error("IndexedDB não é suportado neste navegador.");
+  }
 
   dbPromise = new Promise((resolve, reject) => {
-    const request = indexedDBAPI.open(DB_NAME, DB_VERSION);
+    const request = window.indexedDB.open(DB_NAME, DB_VERSION);
 
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
@@ -61,7 +40,7 @@ async function getDB() {
         dbInstance = null;
       };
 
-      requestPersistence();
+      navigator.storage?.persist?.()?.catch(() => {});
       resolve(dbInstance);
     };
 
@@ -79,28 +58,22 @@ async function getDB() {
   return dbPromise;
 }
 
-async function runStoreOperation(mode, callback) {
-  const db = await getDB();
-
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, mode);
-    const store = transaction.objectStore(STORE_NAME);
-
-    transaction.oncomplete = () => resolve(true);
-    transaction.onabort = () => reject(transaction.error || new Error("Transação abortada."));
-    transaction.onerror = (event) =>
-      reject(event.target.error || new Error("Erro na transação do IndexedDB."));
-
-    callback(store);
-  });
-}
-
 /**
  * Salva ou atualiza uma extração (Upsert).
  */
 export async function saveExtraction(extractionData) {
   try {
-    await runStoreOperation("readwrite", (store) => {
+    const db = await getDB();
+
+    await new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, "readwrite");
+      const store = transaction.objectStore(STORE_NAME);
+
+      transaction.oncomplete = () => resolve(true);
+      transaction.onabort = () => reject(transaction.error || new Error("Transação abortada."));
+      transaction.onerror = (event) =>
+        reject(event.target.error || new Error("Erro na transação do IndexedDB."));
+
       store.put(extractionData);
     });
 
@@ -144,8 +117,7 @@ export async function deleteExtraction(id) {
       const transaction = db.transaction(STORE_NAME, "readwrite");
       const store = transaction.objectStore(STORE_NAME);
 
-      const targetId = typeof id === "string" && !isNaN(Number(id)) ? Number(id) : id;
-      store.delete(targetId);
+      store.delete(id);
 
       transaction.oncomplete = () => resolve(true);
       transaction.onabort = () => reject(transaction.error || new Error("Delete abortado."));
@@ -166,10 +138,7 @@ export async function deleteExtraction(id) {
 export async function exportData() {
   try {
     const allExtractions = await getAllExtractions();
-    if (!allExtractions || allExtractions.length === 0) {
-      alert("Nenhum dado para exportar.");
-      return false;
-    }
+    if (!allExtractions || allExtractions.length === 0) return false;
 
     const jsonString = JSON.stringify(allExtractions, null, 2);
     const blob = new Blob([jsonString], { type: "application/json" });

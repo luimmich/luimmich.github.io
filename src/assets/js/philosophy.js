@@ -14,35 +14,28 @@ document.addEventListener("DOMContentLoaded", () => {
       ).matches;
 
       if (isVerticalLayout) {
-        // Delay elevado para 400ms para aguardar o CSS calcular o início do crescimento do livro
         setTimeout(() => {
           this.scrollIntoView({ behavior: "smooth", block: "center" });
         }, 400);
       }
     });
   });
+
   // ==========================================================================
   // 1.5 SISTEMA DE DEEP LINK (ABRE O LIVRO VINDO DA HOME)
   // ==========================================================================
   const openBookFromHash = () => {
-    const hash = window.location.hash;
-
     const releaseScreen = () => {
       document.documentElement.classList.remove("hash-loading");
       document.documentElement.classList.add("hash-loading-done");
     };
 
-    if (!hash) {
-      releaseScreen();
-      return;
-    }
-
-    let targetBook;
+    const hash = window.location.hash;
+    let targetBook = null;
     try {
-      targetBook = document.querySelector(hash);
+      targetBook = hash ? document.querySelector(hash) : null;
     } catch (e) {
-      releaseScreen();
-      return;
+      targetBook = null;
     }
 
     if (!targetBook || !targetBook.classList.contains("book-item")) {
@@ -50,131 +43,96 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const executePerfectJump = () => {
-      try {
-        const styleBlock = document.createElement("style");
-        styleBlock.innerHTML =
-          "* { transition: none !important; animation: none !important; scroll-behavior: auto !important; }";
-        document.head.appendChild(styleBlock);
+    // Congela transições/animações só durante o salto para o livro não
+    // "escorregar" enquanto o layout assenta. Removido no próximo frame.
+    const freezeStyle = document.createElement("style");
+    freezeStyle.textContent =
+      "*, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }";
+    document.head.appendChild(freezeStyle);
 
-        books.forEach((b) => b.classList.remove("is-open"));
-        targetBook.classList.add("is-open");
+    books.forEach((b) => b.classList.remove("is-open"));
+    targetBook.classList.add("is-open");
+    void targetBook.offsetHeight;
+    window.isLanguageSwitchJump = true;
+    targetBook.scrollIntoView({ behavior: "auto", block: "center" });
 
-        void targetBook.offsetHeight;
-
-        setTimeout(() => {
-          window.isLanguageSwitchJump = true;
-          targetBook.scrollIntoView({ behavior: "auto", block: "center" });
-
-          const nav = document.querySelector(".nav");
-          if (nav) {
-            nav.classList.remove("nav--hidden");
-            nav.classList.add("nav--scrolled");
-          }
-
-          setTimeout(() => {
-            styleBlock.remove();
-            releaseScreen(); // Revela a página HTML
-
-            // Aumentamos o tempo da trava do nav para cobrir o ajuste magnético
-            setTimeout(() => {
-              window.isLanguageSwitchJump = false;
-            }, 600);
-
-            // 2. A COREOGRAFIA (O livro surge suavemente)
-            targetBook.animate(
-              [
-                { opacity: 0.3, transform: "translateY(0px)" },
-                { opacity: 1, transform: "translateY(0)" },
-              ],
-              {
-                duration: 700,
-                easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
-                fill: "both",
-              },
-            );
-
-            setTimeout(() => {
-              targetBook.scrollIntoView({ behavior: "smooth", block: "center" });
-            }, 400);
-          }, 50);
-        }, 50);
-      } catch (e) {
-        releaseScreen();
-      }
-    };
-
-    let hasFired = false;
-    const safeExecute = () => {
-      if (hasFired) return;
-      hasFired = true;
-      executePerfectJump();
-    };
-
-    const fallbackTimer = setTimeout(safeExecute, 800);
-
-    if (document.readyState === "complete") {
-      clearTimeout(fallbackTimer);
-      safeExecute();
-    } else {
-      window.addEventListener("load", () => {
-        clearTimeout(fallbackTimer);
-        safeExecute();
-      });
+    const nav = document.querySelector(".nav");
+    if (nav) {
+      nav.classList.remove("nav--hidden");
+      nav.classList.add("nav--scrolled");
     }
+
+    requestAnimationFrame(() => {
+      freezeStyle.remove();
+      releaseScreen();
+      targetBook.animate(
+        [
+          { opacity: 0.3, transform: "translateY(0px)" },
+          { opacity: 1, transform: "translateY(0)" },
+        ],
+        { duration: 700, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)", fill: "both" },
+      );
+      setTimeout(() => {
+        targetBook.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => {
+          window.isLanguageSwitchJump = false;
+        }, 600);
+      }, 400);
+    });
   };
 
-  openBookFromHash();
+  // Roda no load, com fallback para não deixar a tela presa em hash-loading.
+  let hashFired = false;
+  const runHashLink = () => {
+    if (hashFired) return;
+    hashFired = true;
+    openBookFromHash();
+  };
+  const hashFallback = setTimeout(runHashLink, 800);
+  if (document.readyState === "complete") runHashLink();
+  else
+    window.addEventListener(
+      "load",
+      () => {
+        clearTimeout(hashFallback);
+        runHashLink();
+      },
+      { once: true },
+    );
 
   // ==========================================================================
-  // 2. MOTOR MATEMÁTICO DE CORTE DE TEXTO (AGORA BLINDADO CONTRA ZUMBIS)
+  // 2. MOTOR MATEMÁTICO DE CORTE DE TEXTO (MANTÉM A CLASSE PAI COMO ALVO)
   // ==========================================================================
 
   const clampObserver = new ResizeObserver((entries) => {
-    for (let entry of entries) {
-      // 1. Agora o alvo é o contêiner PAI (a página inteira do livro)
-      const bookContent = entry.target;
-      const excerpt = bookContent.querySelector(".book-excerpt");
-
+    for (const entry of entries) {
+      const excerpt = entry.target.querySelector(".book-excerpt");
       if (!excerpt) continue;
 
-      // 2. Resetamos a tesoura temporariamente
+      // Estica só o instante da medição para saber o espaço físico real.
       excerpt.style.webkitLineClamp = "unset";
-
-      // 3. O Truque: Forçamos o texto a esticar apenas neste milissegundo
-      // para o JavaScript conseguir medir qual é o espaço físico disponível
       excerpt.style.flexGrow = "1";
       const availableHeight = excerpt.clientHeight;
-
-      // 4. Removemos o estiramento IMEDIATAMENTE.
-      // Isso encolhe a caixa de volta e extermina as "Linhas Zumbis"
       excerpt.style.flexGrow = "0";
 
-      // 5. Executamos a matemática com o espaço que medimos
-      const computedStyle = window.getComputedStyle(excerpt);
-      const lineHeight = parseFloat(computedStyle.lineHeight);
-
+      const lineHeight = parseFloat(window.getComputedStyle(excerpt).lineHeight);
       if (lineHeight > 0) {
-        const maxLines = Math.floor(availableHeight / lineHeight);
-        excerpt.style.webkitLineClamp = maxLines > 0 ? maxLines : 1;
+        excerpt.style.webkitLineClamp = Math.max(1, Math.floor(availableHeight / lineHeight));
       }
     }
   });
 
-  // 🚨 ATENÇÃO AQUI: Nós engatamos o observador na classe .book-content (O Pai),
-  // e não mais no .book-excerpt. Isso impede que o JS entre em loop infinito.
-  const bookContents = document.querySelectorAll(".book-content");
-  bookContents.forEach((content) => clampObserver.observe(content));
+  // Alvo é o contêiner PAI (.book-content) para não entrar em loop com o clamp.
+  document.querySelectorAll(".book-content").forEach((content) => clampObserver.observe(content));
 
   // ==========================================================================
   // 3. O EASTER EGG (Leitura limpa via JSON isolado)
   // ==========================================================================
 
   const rows = document.querySelectorAll(".bookshelf-row");
-  const dataTag = document.getElementById("tilted-books-data"); // Captura a ponte de dados
+  const dataTag = document.getElementById("tilted-books-data");
 
   if (rows.length > 0 && dataTag) {
-    // 1. Converte o texto da tag invisível de volta para um Array JSON perfeito
     const tiltedBooksPool = JSON.parse(dataTag.textContent);
 
     const lastRow = rows[rows.length - 1];

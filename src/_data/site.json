@@ -3,14 +3,12 @@
     "name": "Lu Immich",
     "description": "Portfólio de Filosofia e Design",
     "url": "https://luimmich.github.io",
-    "author": "Lu Immich",
-    "language": "pt-BR"
+    "author": "Lu Immich"
   },
   "en": {
     "name": "Lu Immich",
     "description": "Philosophy and Design Portfolio",
     "url": "https://luimmich.github.io",
-    "author": "Lu Immich",
-    "language": "en"
+    "author": "Lu Immich"
   }
 }

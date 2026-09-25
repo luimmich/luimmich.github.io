@@ -30,16 +30,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Cache das imagens otimizadas
-        uses: actions/cache@v4
-        with:
-          # Caminho exato onde o eleventy-img cospe os arquivos otimizados
-          path: _site/img/opt
-          # O cache agora é atrelado aos arquivos originais. Se eles não mudarem, o cache é mantido!
-          key: ${{ runner.os }}-eleventy-img-${{ hashFiles('src/img/**/*', 'src/project-files/**/*') }}
-          restore-keys: |
-            ${{ runner.os }}-eleventy-img-
-
       - name: Build site
         run: npm run build
 
