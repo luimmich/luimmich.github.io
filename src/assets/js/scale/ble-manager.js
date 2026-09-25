@@ -14,13 +14,18 @@ const CMD_MODE = 0x08;
 const CMD_TARE = 0x0d;
 const TIMER = { TIMER_START: 0x01, TIMER_PAUSE: 0x02, TIMER_RESET: 0x03 };
 
-// O DOT anuncia o serviço FFF0 (confirmado pelo lib de referência), então o
-// filtro por serviço é o caminho confiável; o nome fica como fallback.
+// Beanconqueror identifica o DOT pelo nome conter "dot"/"tes017"; Web Bluetooth
+// não tem substring, então casamos por prefixo + o serviço FFF0 (caminho
+// confiável confirmado pelo lib de referência).
 const FILTERS = [
   { services: [SERVICE_UUID] },
   { namePrefix: "TIMEMORE" },
   { namePrefix: "Timemore" },
+  { namePrefix: "DOT" },
+  { namePrefix: "TES017" },
 ];
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function crc16(bytes) {
   let crc = 0xffff;
@@ -44,8 +49,7 @@ const COMMANDS = {
   TIMER_PAUSE: buildFrame(OP_WRITE, CMD_TIMER, [TIMER.TIMER_PAUSE]),
   TIMER_RESET: buildFrame(OP_WRITE, CMD_TIMER, [TIMER.TIMER_RESET]),
   UNIT_GRAM: buildFrame(OP_WRITE, CMD_UNIT, [0x00]),
-  // ponytail: 0x08 (modo) não está no doc oficial, mas é o que o lib de
-  // referência envia; o DOT ignora se não existir. Upgrade: remover se sobrar.
+  // Init padrão do Beanconqueror/lib oficial: grama (0x06) + modo standard (0x08).
   MODE: buildFrame(OP_WRITE, CMD_MODE, [0x01, 0x00]),
 };
 
@@ -103,9 +107,11 @@ export class BLEManager {
     this.notify = notify;
     this.device = device;
 
-    // Deixa o GATT assentar e força gramas (o DOT guarda a última unidade).
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    // Sequência de init do Beanconqueror: deixa assentar, força grama, espera,
+    // então modo standard (o DOT guarda a última unidade/modo).
+    await sleep(500);
     await this._write(COMMANDS.UNIT_GRAM);
+    await sleep(200);
     await this._write(COMMANDS.MODE);
 
     this.onDisconnectStatus?.(true);

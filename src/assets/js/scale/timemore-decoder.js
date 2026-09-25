@@ -60,11 +60,15 @@ export function handleTimemoreData(dataView) {
       continue;
     }
 
+    const opcode = rxBuffer[i + 2];
     const cmd = rxBuffer[i + 3];
     const len = (rxBuffer[i + 4] << 8) | rxBuffer[i + 5];
     if (i + 8 + len > rxLength) break; // frame incompleto: fica no carry
 
-    if (cmd === 0x01 && len >= 8) applyWeightFrame(i + 6, len);
+    // Mesmo filtro do Beanconqueror: notify (0x01) / read (0x02), cmd de peso.
+    if ((opcode === 0x01 || opcode === 0x02) && cmd === 0x01 && len >= 8) {
+      applyWeightFrame(i + 6, len);
+    }
     i += 8 + len;
   }
 

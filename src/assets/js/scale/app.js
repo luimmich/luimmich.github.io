@@ -489,9 +489,6 @@ function resetExtraction() {
   brewState.flowRateEMA = 0;
   brewState.isStable = true;
 
-  lastHardwareTime = 0;
-  lastHardwareTimeChange = performance.now();
-
   const timeStep = 0.1;
   const pastPoints = 300;
   FLOW_HISTORY = Array.from({ length: pastPoints }, (_, i) => {
@@ -803,53 +800,19 @@ function redistributePhase2(currentWeight) {
 }
 
 let lastKnownWeight = 0;
-let lastHardwareTime = 0;
-let lastHardwareTimeChange = 0;
 
 function renderFrame() {
   requestAnimationFrame(renderFrame);
   if (!brewState._isDirty) return;
-
-  const now = performance.now();
 
   if (Math.abs(brewState.weight - lastKnownWeight) > 0.5) {
     resetIdleTimer();
     lastKnownWeight = brewState.weight;
   }
 
-  if (brewState.time > lastHardwareTime) {
-    if (currentTimerState === TIMER_STATE.IDLE) {
-      brewBaselineWeight = brewState.weight;
-      renderAdaptiveTicks();
-
-      currentTimerState = TIMER_STATE.RUNNING;
-      if (UI.timerIcon) UI.timerIcon.src = "/icons/scale/stop.svg";
-      if (UI.actionFooter) UI.actionFooter.classList.add("is-running");
-      resetIdleTimer();
-    }
-    lastHardwareTimeChange = now;
-  } else if (brewState.time === lastHardwareTime && currentTimerState === TIMER_STATE.RUNNING) {
-    if (now - lastHardwareTimeChange > 2000) {
-      console.log("Pause físico detectado na balança. Entrando em Review Mode.");
-      currentTimerState = TIMER_STATE.DONE;
-      if (UI.timerIcon) UI.timerIcon.src = "/icons/scale/restart.svg";
-
-      let finalWaterHW = brewState.weight - brewBaselineWeight;
-      if (finalWaterHW < 0) finalWaterHW = 0;
-      let finalRatioHW =
-        advancedState.dose > 0 ? (finalWaterHW / advancedState.dose).toFixed(1) : "0.0";
-
-      if (UI.btnDose) UI.btnDose.textContent = `${advancedState.dose}g`;
-      if (UI.btnRatio) UI.btnRatio.textContent = `1:${finalRatioHW}`;
-      if (UI.btnMethod) UI.btnMethod.textContent = `↓`;
-
-      if (UI.actionFooter) {
-        UI.actionFooter.classList.remove("is-running");
-        UI.actionFooter.classList.add("is-done");
-      }
-      resetIdleTimer();
-    }
-  }
+  // ponytail: o app manda START/PAUSE/RESET, então o botão é a única fonte do
+  // estado (sem auto-detecção de timer do hardware, que causava pulos de IDLE
+  // pra DONE). O DOT não tem timer físico próprio.
 
   if (
     currentTimerState === TIMER_STATE.IDLE &&
@@ -940,7 +903,6 @@ function renderFrame() {
     UI.liveProgress.classList.remove("is-drawdown");
   }
 
-  lastHardwareTime = brewState.time;
   const displayWeight = Math.min(brewState.weight, 999.9);
   if (UI.valWeight) UI.valWeight.textContent = displayWeight.toFixed(1);
 
